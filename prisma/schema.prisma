@@ -1,0 +1,288 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Define all models below
+
+model User {
+  id                    String                @id @default(uuid())
+  name                  String
+  email                 String                @unique
+  password              String
+  roles                 Role[]                @relation("UserRoles")
+  additionalPermissions UserPermission[]      @relation("UserPermissions")
+  avatar                String?
+  active                Boolean               @default(true)
+  created_at            DateTime              @default(now()) @map("created_at")
+  updated_at            DateTime              @updatedAt @map("updated_at")
+  sales                 Sale[]                @relation("UserSales")
+  transactions          RegisterTransaction[] @relation("UserTransactions")
+  registers             Register[]            @relation("UserRegisters")
+
+  @@map("users")
+}
+
+model Role {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  permissions Permission[] @relation("RolePermissions")
+  users       User[]       @relation("UserRoles")
+  created_at  DateTime     @default(now()) @map("created_at")
+  updated_at  DateTime     @updatedAt @map("updated_at")
+
+  @@map("roles")
+}
+
+model Permission {
+  id         String           @id @default(uuid())
+  name       String           @unique
+  roles      Role[]           @relation("RolePermissions")
+  users      UserPermission[] @relation("PermissionUsers")
+  created_at DateTime         @default(now()) @map("created_at")
+  updated_at DateTime         @updatedAt @map("updated_at")
+
+  @@map("permissions")
+}
+
+model UserPermission {
+  id           String     @id @default(uuid())
+  userId       String     @map("user_id")
+  permissionId String     @map("permission_id")
+  user         User       @relation("UserPermissions", fields: [userId], references: [id], onDelete: Cascade)
+  permission   Permission @relation("PermissionUsers", fields: [permissionId], references: [id], onDelete: Cascade)
+  created_at   DateTime   @default(now()) @map("created_at")
+  updated_at   DateTime   @updatedAt @map("updated_at")
+
+  @@unique([userId, permissionId])
+  @@map("user_permissions")
+}
+
+model Product {
+  id                  String     @id @default(uuid())
+  name                String
+  description         String     @db.Text
+  sku                 String     @unique
+  barcode             String?    @unique
+  price               Decimal    @db.Decimal(10, 2)
+  cost                Decimal    @db.Decimal(10, 2)
+  category            String
+  taxRate             Decimal    @map("tax_rate") @db.Decimal(5, 2)
+  stock               Int
+  low_stock_threshold Int        @map("low_stock_threshold")
+  image_url           String?    @map("image_url") @db.Text
+  active              Boolean    @default(true)
+  created_at          DateTime   @default(now()) @map("created_at")
+  updated_at          DateTime   @updatedAt @map("updated_at")
+  saleItems           SaleItem[]
+  discountProducts    Discount[] @relation("DiscountProducts")
+  cartItem            CartItem[]
+
+  @@map("products")
+}
+
+model Customer {
+  id          String   @id @default(uuid())
+  name        String
+  email       String?  @unique
+  phone       String?
+  address     String?
+  city        String?
+  state       String?
+  postal_code String?  @map("postal_code")
+  country     String?
+  tax_exempt  Boolean  @default(false) @map("tax_exempt")
+  notes       String?  @db.Text
+  created_at  DateTime @default(now()) @map("created_at")
+  updated_at  DateTime @updatedAt @map("updated_at")
+  sales       Sale[]
+
+  @@map("customers")
+}
+
+model Sale {
+  id               String         @id @default(uuid())
+  saleNumber       String?        @unique @map("sale_number")
+  customerId       String?        @map("customer_id")
+  customer         Customer?      @relation(fields: [customerId], references: [id])
+  cashierId        String         @map("cashier_id")
+  cashier          User           @relation("UserSales", fields: [cashierId], references: [id])
+  subtotal         Decimal        @db.Decimal(10, 2)
+  taxTotal         Decimal        @map("tax_total") @db.Decimal(10, 2)
+  discountTotal    Decimal        @map("discount_total") @db.Decimal(10, 2)
+  totalAmount      Decimal        @map("total_amount") @db.Decimal(10, 2)
+  paymentMethod    String         @map("payment_method")
+  paymentStatus    String         @map("payment_status")
+  notes            String?        @db.Text
+  created_at       DateTime?      @default(now()) @map("created_at")
+  updated_at       DateTime?      @updatedAt @map("updated_at")
+  items            SaleItem[]
+  discountsApplied SaleDiscount[] @relation("SaleDiscounts")
+  register         Register?      @relation(fields: [registerId], references: [id])
+  registerId       String?        @map("register_id")
+
+  @@map("sales")
+}
+
+model SaleItem {
+  id             String   @id @default(uuid())
+  saleId         String   @map("sale_id")
+  sale           Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  productId      String   @map("product_id")
+  product        Product  @relation(fields: [productId], references: [id])
+  productName    String   @map("product_name")
+  quantity       Int
+  unitPrice      Decimal  @map("unit_price") @db.Decimal(10, 2)
+  discountAmount Decimal  @map("discount_amount") @db.Decimal(10, 2)
+  taxAmount      Decimal  @map("tax_amount") @db.Decimal(10, 2)
+  subtotal       Decimal  @db.Decimal(10, 2)
+  created_at     DateTime @default(now()) @map("created_at")
+  updated_at     DateTime @updatedAt @map("updated_at")
+
+  @@map("sale_items")
+}
+
+model Register {
+  id               String                @id @default(uuid())
+  name             String
+  status           RegisterStatus        @default(CLOSED)
+  currentCashierId String?               @map("current_cashier_id")
+  cashier          User?                 @relation("UserRegisters", fields: [currentCashierId], references: [id])
+  openingBalance   Decimal               @map("opening_balance") @db.Decimal(10, 2)
+  closingBalance   Decimal?              @map("closing_balance") @db.Decimal(10, 2)
+  openedAt         DateTime?             @map("opened_at")
+  closedAt         DateTime?             @map("closed_at")
+  created_at       DateTime              @default(now()) @map("created_at")
+  updated_at       DateTime              @updatedAt @map("updated_at")
+  transactions     RegisterTransaction[]
+  sales            Sale[]
+
+  @@map("registers")
+}
+
+model RegisterTransaction {
+  id            String          @id @default(uuid())
+  registerId    String          @map("register_id")
+  register      Register        @relation(fields: [registerId], references: [id], onDelete: Cascade)
+  type          TransactionType
+  referenceId   String?         @map("reference_id")
+  amount        Decimal         @db.Decimal(10, 2)
+  paymentMethod String          @map("payment_method")
+  description   String
+  cashierId     String          @map("cashier_id")
+  cashier       User            @relation("UserTransactions", fields: [cashierId], references: [id])
+  created_at    DateTime        @default(now()) @map("created_at")
+
+  @@map("register_transactions")
+}
+
+model Discount {
+  id                String            @id @default(uuid())
+  name              String
+  code              String?           @unique
+  type              DiscountType
+  value             Decimal           @db.Decimal(10, 2)
+  minPurchaseAmount Decimal?          @map("min_purchase_amount") @db.Decimal(10, 2)
+  appliesTo         DiscountAppliesTo @map("applies_to")
+  products          Product[]         @relation("DiscountProducts")
+  categoryIds       String?           @map("category_ids") @db.Text
+  buyXQuantity      Int?              @map("buy_x_quantity")
+  getYQuantity      Int?              @map("get_y_quantity")
+  startDate         DateTime          @map("start_date")
+  endDate           DateTime?         @map("end_date")
+  maxUses           Int?              @map("max_uses")
+  currentUses       Int               @default(0) @map("current_uses")
+  isActive          Boolean           @default(true) @map("is_active")
+  created_at        DateTime          @default(now()) @map("created_at")
+  updated_at        DateTime          @updatedAt @map("updated_at")
+  sales             SaleDiscount[]    @relation("DiscountSales")
+
+  @@map("discounts")
+}
+
+model SaleDiscount {
+  id         String   @id @default(uuid())
+  saleId     String   @map("sale_id")
+  sale       Sale     @relation("SaleDiscounts", fields: [saleId], references: [id], onDelete: Cascade)
+  discountId String   @map("discount_id")
+  discount   Discount @relation("DiscountSales", fields: [discountId], references: [id])
+  amount     Decimal  @db.Decimal(10, 2)
+  created_at DateTime @default(now()) @map("created_at")
+
+  @@unique([saleId, discountId])
+  @@map("sale_discounts")
+}
+
+model Settings {
+  id         String   @id @default(uuid())
+  key        String   @unique
+  value      String   @db.Text
+  category   String
+  created_at DateTime @default(now()) @map("created_at")
+  updated_at DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
+}
+
+model Cart {
+  id         String     @id @default(uuid())
+  userId     String     @map("user_id")
+  name       String     @default("Default Cart")
+  isActive   Boolean    @default(true) @map("is_active")
+  items      CartItem[]
+  customerId String?    @map("customer_id")
+  discountId String?    @map("discount_id")
+  createdAt  DateTime   @default(now()) @map("created_at")
+  updatedAt  DateTime   @updatedAt @map("updated_at")
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  cartId    String   @map("cart_id")
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId String   @map("product_id")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name      String
+  price     Decimal  @db.Decimal(10, 2)
+  quantity  Int
+  taxRate   Decimal  @map("tax_rate") @db.Decimal(5, 2)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("cart_items")
+}
+
+// Enums
+enum RegisterStatus {
+  OPEN
+  CLOSED
+}
+
+enum TransactionType {
+  SALE
+  REFUND
+  EXPENSE
+  CASH_IN
+  CASH_OUT
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+  BUY_X_GET_Y
+}
+
+enum DiscountAppliesTo {
+  ENTIRE_ORDER
+  SPECIFIC_PRODUCTS
+  SPECIFIC_CATEGORIES
+}

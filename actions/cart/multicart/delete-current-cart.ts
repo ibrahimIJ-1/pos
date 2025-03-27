@@ -1,0 +1,64 @@
+"use server";
+
+import { checkUser } from "@/actions/Authorization";
+import { prisma } from "@/lib/prisma";
+
+export const deleteCurrentCart = async (cartId: string) => {
+  try {
+    const userId = (await checkUser()).id;
+    // Check if the cart exists and belongs to the user
+    const cart = await prisma.cart.findFirst({
+      where: {
+        id: cartId,
+        userId,
+      },
+    });
+    console.log("@CART",cartId);
+    
+    if (!cart) {
+      throw new Error("Cart not found");
+    }
+
+    const wasActive = cart.isActive;
+
+    // Delete the cart and all its items (cascade delete)
+    await prisma.cart.delete({
+      where: { id: cartId },
+    });
+
+    // If the deleted cart was active, make another cart active
+    if (wasActive) {
+      const anotherCart = await prisma.cart.findFirst({
+        where: {
+          userId,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+
+      if (anotherCart) {
+        await prisma.cart.update({
+          where: { id: anotherCart.id },
+          data: {
+            isActive: true,
+          },
+        });
+      } else {
+        // Create a new default cart if none exists
+        await prisma.cart.create({
+          data: {
+            userId,
+            name: "Default Cart",
+            isActive: true,
+          },
+        });
+      }
+    }
+
+    return "Cart removed";
+  } catch (error) {
+    console.error("Error removing cart:", error);
+    throw new Error("Failed to remove cart");
+  }
+};
