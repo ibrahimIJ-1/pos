@@ -134,7 +134,6 @@ export function ProductForm({ product, onSuccess, mode }: ProductFormProps) {
         }
       );
     } else if (mode === "edit" && product) {
-      console.log(data);
       
       updateProductMutation.mutate(
         {

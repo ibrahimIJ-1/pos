@@ -29,18 +29,6 @@ export const createNewProduct = async ({
   image_url?: string | null;
 }) => {
   try {
-    console.log(
-      name,
-      description,
-      sku,
-      barcode,
-      price,
-      cost,
-      category,
-      taxRate,
-      stock,
-      low_stock_threshold,
-    );
 
     // Validate required fields
     if (!name || !sku || price === undefined || cost === undefined) {

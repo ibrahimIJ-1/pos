@@ -20,22 +20,6 @@ export const createNewDiscount = async ({
   maxUses,
   isActive,
 }: Discount & { productIds?: string[] }) => {
-  console.log({
-    name,
-    code,
-    type,
-    value,
-    minPurchaseAmount,
-    appliesTo,
-    productIds,
-    categoryIds,
-    buyXQuantity,
-    getYQuantity,
-    startDate,
-    endDate,
-    maxUses,
-    isActive,
-  });
 
   try {
     

@@ -23,7 +23,6 @@ export function ProtectedRoute({
       </div>
     );
   }
-  console.log(user);
 
   if (!isAuthenticated) {
     // Redirect to login if not authenticated

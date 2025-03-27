@@ -145,7 +145,6 @@ export async function middleware(request: NextRequest) {
       throw new Error('Network response was not ok');
     }
     const macAddress = await response.text();
-    console.log('MAC Address:', macAddress);
     // return macAddress;
   } catch (error) {
     console.error('Error fetching MAC address:', error);

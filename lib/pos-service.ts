@@ -315,7 +315,6 @@ export const useAccountingSummary = (period: "day" | "week" | "month") => {
     queryKey: ["accounting", "summary", period],
     queryFn: async () => {
       const response = await accountingSummary(period);
-      console.log(response);
 
       return response;
     },

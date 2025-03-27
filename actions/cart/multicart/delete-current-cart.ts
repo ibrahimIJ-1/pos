@@ -13,7 +13,6 @@ export const deleteCurrentCart = async (cartId: string) => {
         userId,
       },
     });
-    console.log("@CART",cartId);
     
     if (!cart) {
       throw new Error("Cart not found");

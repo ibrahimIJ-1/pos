@@ -9,7 +9,6 @@ import { prisma } from "@/lib/prisma";
  */
 export async function initializePermissions() {
   try {
-    console.log("Initializing permissions and roles...");
     
     // Create permissions
     for (const permission of Object.values(Permission)) {
@@ -49,7 +48,6 @@ export async function initializePermissions() {
       });
     }
     
-    console.log("Permissions and roles initialized successfully.");
   } catch (error) {
     console.error("Failed to initialize permissions and roles:", error);
     throw error;

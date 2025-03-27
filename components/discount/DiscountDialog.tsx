@@ -117,7 +117,6 @@ export function DiscountDialog({
 
   useEffect(() => {
     if (open && mode === "edit" && discount) {
-      console.log(discount);
 
       form.reset({
         name: discount.name,

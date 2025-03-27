@@ -83,7 +83,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if(!mac) throw new Error('you are not eligibal to use this software')
       const response = await login(email, password,mac);
       const { user, token } = response;
-      console.log(token);
 
       // ✅ Store auth token in cookies instead of localStorage
       Cookies.set("authToken", token, {
