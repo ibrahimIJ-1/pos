@@ -5,7 +5,7 @@ import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { decimalToNumber } from "@/lib/utils";
 
-export const createRegister = async (macAddress:string,name: string, openingBalance = 0) => {
+export const updateRegister = async (macAddress:string,name: string, openingBalance = 0) => {
   //   if (!req.user?.roles.some((role) => ["admin", "manager"].includes(role))) {
   //     return res
   //       .status(403)
@@ -19,11 +19,13 @@ export const createRegister = async (macAddress:string,name: string, openingBala
       throw new Error("Register name is required");
     }
 
-    const register = await prisma.register.create({
+    const register = await prisma.register.update({
+      where:{
+        id:macAddress
+      },
       data: {
         id:macAddress,
         name,
-        status: "CLOSED",
         openingBalance: openingBalance || 0,
       },
       include: {

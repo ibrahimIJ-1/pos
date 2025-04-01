@@ -45,6 +45,8 @@ import { getRegisterTransactionById } from "@/actions/accounting/transactions/ge
 import { createRegisterTransaction } from "@/actions/accounting/transactions/create-register-transaction";
 import { useAuth } from "@/contexts/AuthContext";
 import { deleteRegister } from "@/actions/accounting/registers/delete-register";
+import { createRegister } from "@/actions/accounting/registers/create-register";
+import { updateRegister } from "@/actions/accounting/registers/update-register";
 
 // Helper function to simulate API delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -234,6 +236,58 @@ export const useDeleteRegister = () => {
 
   return useMutation({
     mutationFn: deleteRegister,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["registers"] });
+      toast.success("Register deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(
+        `Failed to delete register: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    },
+  });
+};
+export const useCreateRegister = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      macAddress,
+      name,
+      openBalance,
+    }: {
+      macAddress: string;
+      name: string;
+      openBalance: number;
+    }) => createRegister(macAddress, name, openBalance),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["registers"] });
+      toast.success("Register deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(
+        `Failed to delete register: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    },
+  });
+};
+export const useUpdateRegister = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      macAddress,
+      name,
+      openBalance,
+    }: {
+      macAddress: string;
+      name: string;
+      openBalance: number;
+    }) => updateRegister(macAddress, name, openBalance),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["registers"] });
       toast.success("Register deleted successfully");

@@ -132,7 +132,7 @@ model Sale {
   updated_at       DateTime?      @updatedAt @map("updated_at")
   items            SaleItem[]
   discountsApplied SaleDiscount[] @relation("SaleDiscounts")
-  register         Register?      @relation(fields: [registerId], references: [id])
+  register         Register?      @relation(fields: [registerId], references: [id],onUpdate: Cascade,onDelete: Cascade)
   registerId       String?        @map("register_id")
   // Optionally, if you filter by date range:
   // @@index([created_at])
@@ -183,7 +183,7 @@ model Register {
 model RegisterTransaction {
   id            String          @id @default(uuid())
   registerId    String          @map("register_id")
-  register      Register        @relation(fields: [registerId], references: [id], onDelete: Cascade)
+  register      Register        @relation(fields: [registerId], references: [id], onDelete: Cascade,onUpdate: Cascade)
   type          TransactionType
   referenceId   String?         @map("reference_id")
   amount        Decimal         @db.Decimal(10, 2)

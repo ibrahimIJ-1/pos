@@ -3,6 +3,7 @@
 import { checkUserPermissions } from "@/actions/users/check-permissions";
 import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
+import { decimalToNumber } from "@/lib/utils";
 
 export const getAllRegisters = async () => {
   try {
@@ -20,7 +21,7 @@ export const getAllRegisters = async () => {
       orderBy: { name: "asc" },
     });
 
-    return registers;
+    return decimalToNumber(registers);
   } catch (error) {
     console.error("Error fetching registers:", error);
     throw new Error("Failed to fetch registers");
