@@ -604,43 +604,43 @@ export function useCartOperations() {
           taxRate: product.tax_rate || 0,
         });
       },
-      onMutate: async ({ product, cartId }) => {
-        await queryClient.cancelQueries({ queryKey: ["cart"] });
+      // onMutate: async ({ product, cartId }) => {
+      //   await queryClient.cancelQueries({ queryKey: ["cart"] });
 
-        const previousCart = queryClient.getQueryData(["cart"]);
-        console.log(previousCart);
+      //   const previousCart = queryClient.getQueryData(["cart"]);
+      //   console.log(previousCart);
 
-        queryClient.setQueryData(["cart"], (oldCart: any) => {
-          if (!oldCart) return { items: [] }; // Handle null case
+      //   queryClient.setQueryData(["cart"], (oldCart: any) => {
+      //     if (!oldCart) return { items: [] }; // Handle null case
 
-          // Check if product already exists
-          const existingItem = (oldCart.items as any[]).findIndex(
-            (item: any) => item.productId === product.id
-          );
-          
-          if (existingItem != -1) {
-            // Increment quantity if exists
-            oldCart.items[existingItem].quantity++;
-            return oldCart;
-          } else {
-            // Add new item if not exists
-            oldCart.items.push({
-              id: `temp-${Math.random() * Math.random() * 100}`,
-              ...product,
-              quantity: 1,
-              cartId: oldCart.id,
-            });
-            return oldCart;
-          }
-        });
+      //     // Check if product already exists
+      //     const existingItem = (oldCart.items as any[]).findIndex(
+      //       (item: any) => item.productId === product.id
+      //     );
 
-        return { previousCart };
-      },
+      //     if (existingItem != -1) {
+      //       // Increment quantity if exists
+      //       oldCart.items[existingItem].quantity++;
+      //       return oldCart;
+      //     } else {
+      //       // Add new item if not exists
+      //       oldCart.items.push({
+      //         id: `temp-${Math.random() * Math.random() * 100}`,
+      //         ...product,
+      //         quantity: 1,
+      //         cartId: oldCart.id,
+      //       });
+      //       return oldCart;
+      //     }
+      //   });
+
+      //   return { previousCart };
+      // },
       onSuccess: (data, { product }) => {
         queryClient.setQueryData(["cart"], data);
       },
       onError: (_error, _variables, context) => {
-        queryClient.setQueryData(["cart"], context?.previousCart);
+        // queryClient.setQueryData(["cart"], context?.previousCart);
       },
     }),
 
@@ -652,11 +652,27 @@ export function useCartOperations() {
         itemId: string;
         cartId: string;
       }) => {
-        const response = await deleteCartItem(cartId, itemId);
-        return response;
+        return deleteCartItem(cartId, itemId);
       },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["cart"] });
+      // onMutate: async ({ itemId }) => {
+      //   await queryClient.cancelQueries({ queryKey: ["cart"] });
+
+      //   const previousCart = queryClient.getQueryData(["cart"]);
+
+      //   queryClient.setQueryData(["cart"], (oldCart: any) => {
+      //     const old = oldCart.items.filter(
+      //       (item: any) => item.productId !== itemId
+      //     );
+      //     return old;
+      //   });
+
+      //   return { previousCart };
+      // },
+      onSuccess: (data) => {
+        queryClient.setQueryData(["cart"], data);
+      },
+      onError: (_error, _variables, context) => {
+        // queryClient.setQueryData(["cart"], context?.previousCart);
       },
     }),
 
@@ -670,11 +686,37 @@ export function useCartOperations() {
         quantity: number;
         cartId: string;
       }) => {
-        const response = await updateCartItemQuantity(cartId, itemId, quantity);
-        return response;
+        return updateCartItemQuantity(cartId, itemId, quantity);
       },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["cart"] });
+      onMutate: async ({ itemId, quantity }) => {
+        await queryClient.cancelQueries({ queryKey: ["cart"] });
+
+        const previousCart = queryClient.getQueryData(["cart"]);
+
+        queryClient.setQueryData(["cart"], (oldCart: any) => {
+          if (!oldCart) return { items: [] };
+          if (quantity <= 0) {
+            return {
+              ...oldCart,
+              items: oldCart.items.filter((item: any) => item.id !== itemId),
+            };
+          } else {
+            return {
+              ...oldCart,
+              items: oldCart.items.map((item: any) =>
+                item.id === itemId ? { ...item, quantity } : item
+              ),
+            };
+          }
+        });
+
+        return { previousCart };
+      },
+      onSuccess: (data) => {
+        queryClient.setQueryData(["cart"], data);
+      },
+      onError: (_error, _variables, context) => {
+        queryClient.setQueryData(["cart"], context?.previousCart);
       },
     }),
     clearCart: useMutation({

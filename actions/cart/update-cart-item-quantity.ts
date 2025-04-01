@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { checkUser } from "../Authorization";
 import { rolePermissions, UserRole } from "@/lib/permissions";
 import { checkUserPermissions } from "../users/check-permissions";
+import { getMyActiveUserCart } from "./get-my-active-cart";
 
 export const updateCartItemQuantity = async (
   cartId: string,
@@ -53,7 +54,8 @@ export const updateCartItemQuantity = async (
       });
     }
 
-    return "Cart updated";
+    const myCart = await getMyActiveUserCart(userId);
+    return myCart;
   } catch (error) {
     console.error("Error updating cart:", error);
     throw new Error("Failed to update cart");

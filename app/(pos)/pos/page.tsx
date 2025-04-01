@@ -615,6 +615,7 @@ function POS() {
                                 variant="ghost"
                                 size="icon"
                                 className="h-6 w-6"
+                                disabled={cartOps.updateQuantity.isPending}
                                 onClick={() =>
                                   updateCartItemQuantity(
                                     item.id,
@@ -631,6 +632,7 @@ function POS() {
                                 variant="ghost"
                                 size="icon"
                                 className="h-6 w-6"
+                                disabled={cartOps.updateQuantity.isPending}
                                 onClick={() =>
                                   updateCartItemQuantity(
                                     item.id,
@@ -654,6 +656,7 @@ function POS() {
                                 variant="ghost"
                                 size="icon"
                                 className="h-6 w-6"
+                                disabled={cartOps.updateQuantity.isPending}
                                 onClick={() =>
                                   updateCartItemQuantity(item.id, 0)
                                 }

@@ -32,9 +32,9 @@ export const addCartItem = async ({
       update: { quantity: { increment: quantity } },
       create: { cartId, productId, name, price, quantity, taxRate },
     });
-    const myCart = getMyActiveUserCart(userId);
+    const myCart = await getMyActiveUserCart(userId);
     return myCart;
-    
+
   } catch (error) {
     console.error("Error adding to cart:", error);
     throw new Error("Failed to add item to cart");
