@@ -36,7 +36,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function LoginPage() {
-  const { userLogin, isLoading } = useAuth();
+  const { userLogin, isLoading, user } = useAuth();
   const navigate = useRouter();
 
   const form = useForm<FormValues>({

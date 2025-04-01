@@ -102,6 +102,7 @@ export enum Permission {
 // Define role-specific permissions
 export const rolePermissions: Record<string, Permission[]> = {
   [UserRole.ADMIN]: Object.values(Permission),
+  [UserRole.OWNER]: Object.values(Permission),
   [UserRole.MANAGER]: [
     Permission.VIEW_ANALYTICS,
     Permission.VIEW_USERS,

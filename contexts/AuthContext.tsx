@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import login from "@/actions/auth/login";
 import { userRegister } from "@/actions/auth/register";
 import Cookies from "js-cookie";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { getAllUserPermissions } from "@/actions/users/get-all-permissions";
 
 interface User {
   id: string;
@@ -24,6 +26,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  permissions: Set<string>;
   userLogin: (email: string, password: string) => Promise<void>;
   register: (
     name: string,
@@ -37,12 +40,28 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
+  const getPermissionMutation = useMutation({
+    mutationFn: getAllUserPermissions,
+    onSettled: (data) => {
+      if (data) setPermissions(data);
+    },
+    onError: (error) => {
+      console.error("Error fetching permissions", error);
+    },
+  });
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [permissions, setPermissions] = useState<Set<string>>(new Set());
   const removeCredentials = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("authToken");
   };
+
+  const getPermissions = () => {
+    getPermissionMutation.mutate();
+  };
+
   useEffect(() => {
     // Check for existing session on mount
 
@@ -52,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (token && savedUser) {
         try {
           setUser(JSON.parse(savedUser));
+          getPermissions();
         } catch (error) {
           console.error("Failed to parse user data", error);
           removeCredentials();
@@ -59,6 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       setIsLoading(false);
     };
+
     checkAuth();
   }, []);
 
@@ -69,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error("Network response was not ok");
       }
       const macAddress = await response.text();
-      return macAddress
+      return macAddress;
     } catch (error) {
       console.error("Error fetching MAC address:", error);
       return null;
@@ -80,33 +101,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoading(true);
       const mac = await getMacAddress();
-      if(!mac) throw new Error('you are not eligibal to use this software')
-      const response = await login(email, password,mac);
+      if (!mac) throw new Error("You are not eligible to use this software");
+      const response = await login(email, password, mac);
       const { user, token } = response;
 
-      // ✅ Store auth token in cookies instead of localStorage
       Cookies.set("authToken", token, {
         expires: 7,
         secure: false,
         sameSite: "Strict",
       });
-
-      // ✅ Store user info in cookies (optional, or you can use context)
       Cookies.set("user", JSON.stringify(user), {
         expires: 7,
         secure: false,
         sameSite: "Strict",
       });
-
-      // Store auth data
-      // localStorage.setItem("authToken", token);
-      // localStorage.setItem("user", JSON.stringify(user));
       setUser(user);
 
       toast.success("Successfully logged in");
-    } catch (error) {
-      // Error handling is done in the apaAAGHGHHi interceptor
-      throw error;
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to log in");
     } finally {
       setIsLoading(false);
     }
@@ -135,7 +148,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
+    Cookies.remove("authToken");
+    Cookies.remove("user");
     setUser(null);
+
     toast.info("You have been logged out");
   };
 
@@ -148,6 +164,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         userLogin,
         register,
         logout,
+        permissions,
       }}
     >
       {children}

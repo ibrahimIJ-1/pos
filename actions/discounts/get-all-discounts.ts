@@ -1,9 +1,12 @@
 "use server";
 
+import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
+import { checkUserPermissions } from "../users/check-permissions";
 
 export const getAllDiscounts = async () => {
   try {
+    await checkUserPermissions([...rolePermissions[UserRole.ACCOUNTANT],...rolePermissions[UserRole.CASHIER]]);
     const discounts = await prisma.discount.findMany({
       include: {
         products: {

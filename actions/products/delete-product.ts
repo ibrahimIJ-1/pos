@@ -1,6 +1,8 @@
 "use server";
 
+import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
+import { checkUserPermissions } from "../users/check-permissions";
 
 export const deleteProduct = async (id: string) => {
   // Check if user has permission to delete products
@@ -14,6 +16,7 @@ export const deleteProduct = async (id: string) => {
   //   }
 
   try {
+    await checkUserPermissions([...rolePermissions[UserRole.MANAGER]]);
     await prisma.product.delete({
       where: { id },
     });

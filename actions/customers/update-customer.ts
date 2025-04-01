@@ -1,6 +1,8 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { checkUserPermissions } from "../users/check-permissions";
+import { rolePermissions, UserRole } from "@/lib/permissions";
 
 export const updateCustomer = async ({
   id,
@@ -38,6 +40,8 @@ export const updateCustomer = async ({
   //   }
 
   try {
+    await checkUserPermissions([...rolePermissions[UserRole.MANAGER]]);
+
     if (!name) {
       throw new Error("Customer name is required");
     }

@@ -44,6 +44,7 @@ import { getAllRegisterTransactions } from "@/actions/accounting/transactions/ge
 import { getRegisterTransactionById } from "@/actions/accounting/transactions/get-registere-transaction-by-id";
 import { createRegisterTransaction } from "@/actions/accounting/transactions/create-register-transaction";
 import { useAuth } from "@/contexts/AuthContext";
+import { deleteRegister } from "@/actions/accounting/registers/delete-register";
 
 // Helper function to simulate API delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -96,7 +97,7 @@ export const useUpdateProduct = () => {
 
   return useMutation({
     mutationFn: updateProduct,
-    onSuccess: (data:any) => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["products", data.id] });
       toast.success("Product updated successfully");
@@ -225,6 +226,25 @@ export const useRegister = () => {
   return useQuery({
     queryKey: ["register"],
     queryFn: getAllRegisters,
+  });
+};
+
+export const useDeleteRegister = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteRegister,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["registers"] });
+      toast.success("Register deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(
+        `Failed to delete register: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    },
   });
 };
 
@@ -363,7 +383,7 @@ export const useUpdateDiscount = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (discount: any& { productIds: any }) => {
+    mutationFn: async (discount: any & { productIds: any }) => {
       const updatedDiscount = await updateDiscount(discount);
       return updatedDiscount;
     },
@@ -398,6 +418,13 @@ export const useDeleteDiscount = () => {
         }`
       );
     },
+  });
+};
+
+export const useRegisters = () => {
+  return useQuery({
+    queryKey: ["registers"],
+    queryFn: getAllRegisters,
   });
 };
 
@@ -547,10 +574,10 @@ const generateCartId = (): string => {
 export function useCart() {
   return useQuery({
     queryKey: ["cart"],
-    queryFn: async () => {
-      const response = await getActiveUserCart();
-      return response;
-    },
+    queryFn: async () => await getActiveUserCart(),
+    staleTime: 1000 * 60 * 5, // Cache cart for 5 minutes
+    refetchOnWindowFocus: false, // Avoid unnecessary refetching
+    refetchOnReconnect: "always", // Fetch only if the connection is lost & restored
   });
 }
 
@@ -568,20 +595,52 @@ export function useCartOperations() {
         product: any;
         cartId: string;
       }) => {
-        const item = {
-          cartId: cartId,
+        return addCartItem({
+          cartId,
           productId: product.id,
           name: product.name,
           price: product.price,
           quantity: 1,
           taxRate: product.tax_rate || 0,
-        };
-
-        const response = await addCartItem(item);
-        return response;
+        });
       },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["cart"] });
+      onMutate: async ({ product, cartId }) => {
+        await queryClient.cancelQueries({ queryKey: ["cart"] });
+
+        const previousCart = queryClient.getQueryData(["cart"]);
+        console.log(previousCart);
+
+        queryClient.setQueryData(["cart"], (oldCart: any) => {
+          if (!oldCart) return { items: [] }; // Handle null case
+
+          // Check if product already exists
+          const existingItem = (oldCart.items as any[]).findIndex(
+            (item: any) => item.productId === product.id
+          );
+          
+          if (existingItem != -1) {
+            // Increment quantity if exists
+            oldCart.items[existingItem].quantity++;
+            return oldCart;
+          } else {
+            // Add new item if not exists
+            oldCart.items.push({
+              id: `temp-${Math.random() * Math.random() * 100}`,
+              ...product,
+              quantity: 1,
+              cartId: oldCart.id,
+            });
+            return oldCart;
+          }
+        });
+
+        return { previousCart };
+      },
+      onSuccess: (data, { product }) => {
+        queryClient.setQueryData(["cart"], data);
+      },
+      onError: (_error, _variables, context) => {
+        queryClient.setQueryData(["cart"], context?.previousCart);
       },
     }),
 

@@ -1,5 +1,7 @@
 "use server";
 
+import { checkUserPermissions } from "@/actions/users/check-permissions";
+import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 
 export const createRegister = async (name: string, openingBalance = 0) => {
@@ -10,6 +12,8 @@ export const createRegister = async (name: string, openingBalance = 0) => {
   //   }
 
   try {
+      await checkUserPermissions(rolePermissions[UserRole.MANAGER]);
+    
     if (!name) {
       throw new Error("Register name is required");
     }

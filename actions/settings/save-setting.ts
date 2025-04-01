@@ -1,10 +1,13 @@
 "use server";
 
+import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { SaveSettingsPayload } from "@/lib/types/settings";
+import { checkUserPermissions } from "../users/check-permissions";
 
 export const saveSetting = async (settings: SaveSettingsPayload) => {
   try {
+    // await checkUserPermissions([...rolePermissions[UserRole.MANAGER]]);
     if (!settings || Object.keys(settings).length === 0) {
       throw new Error("No settings provided");
     }

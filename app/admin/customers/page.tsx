@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useCustomers } from "@/lib/pos-service";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
@@ -110,6 +110,10 @@ export default function Customers() {
   const handleCustomerSuccess = () => {
     refetch();
   };
+
+  useEffect(()=>{
+    
+  })
 
   return (
     <div className="container mx-auto p-6 space-y-6">

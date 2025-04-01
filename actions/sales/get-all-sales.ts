@@ -1,6 +1,8 @@
 "use server";
 
+import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
+import { checkUserPermissions } from "../users/check-permissions";
 
 export const getAllSales = async ({
   page = 1,
@@ -12,6 +14,7 @@ export const getAllSales = async ({
   customerId?: string;
 }) => {
   try {
+    await checkUserPermissions([...rolePermissions[UserRole.ACCOUNTANT]]);
     const pageNum = page;
     const limitNum = limit;
     const skip = (pageNum - 1) * limitNum;

@@ -1,7 +1,9 @@
 "use server";
 
+import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { decimalToNumber } from "@/lib/utils";
+import { checkUserPermissions } from "../users/check-permissions";
 
 export const createNewProduct = async ({
   name,
@@ -29,7 +31,7 @@ export const createNewProduct = async ({
   image_url?: string | null;
 }) => {
   try {
-
+await checkUserPermissions([...rolePermissions[UserRole.MANAGER]]);
     // Validate required fields
     if (!name || !sku || price === undefined || cost === undefined) {
       throw new Error("Missing required product fields");

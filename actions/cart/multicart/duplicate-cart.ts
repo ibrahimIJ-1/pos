@@ -1,12 +1,15 @@
 "use server";
 
 import { checkUser } from "@/actions/Authorization";
+import { checkUserPermissions } from "@/actions/users/check-permissions";
+import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { decimalToNumber } from "@/lib/utils";
 
 export const duplicateCart = async (cartId: string) => {
   try {
     const userId = (await checkUser()).id;
+    await checkUserPermissions(rolePermissions[UserRole.CASHIER]);
     // Check if the cart exists and belongs to the user
     const sourceCart = await prisma.cart.findFirst({
       where: {

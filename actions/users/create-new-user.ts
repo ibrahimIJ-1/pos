@@ -1,7 +1,9 @@
 "use server";
 
+import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
+import { checkUserPermissions } from "./check-permissions";
 
 export const createNewUser = async (
   name: string,
@@ -12,6 +14,7 @@ export const createNewUser = async (
 ) => {
   try {
     // Validate required fields
+    await checkUserPermissions([...rolePermissions[UserRole.MANAGER]]);
     if (
       !name ||
       !email ||

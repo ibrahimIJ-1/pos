@@ -1,4 +1,4 @@
-"server-only";
+"use server";
 
 import { verifyAuth } from "@/lib/auth";
 import { cookies } from "next/headers";

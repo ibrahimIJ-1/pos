@@ -2,6 +2,10 @@
 
 import { prisma } from "@/lib/prisma";
 import { checkUser } from "../Authorization";
+import { checkUserPermissions } from "../users/check-permissions";
+import { rolePermissions, UserRole } from "@/lib/permissions";
+import { decimalToNumber } from "@/lib/utils";
+import { getMyActiveUserCart } from "./get-my-active-cart";
 
 export const addCartItem = async ({
   cartId,
@@ -9,7 +13,7 @@ export const addCartItem = async ({
   name,
   price,
   quantity,
-  taxRate,
+  taxRate = 0,
 }: {
   cartId: string;
   productId: string;
@@ -20,65 +24,17 @@ export const addCartItem = async ({
 }) => {
   try {
     const userId = (await checkUser()).id;
+    await checkUserPermissions(rolePermissions[UserRole.CASHIER]);
 
-    if (!productId || !name || price === undefined || !quantity) {
-      throw new Error("Missing required product details");
-    }
-
-    // Get the active cart
-    let cart = await prisma.cart.findFirst({
-      where: {
-        userId,
-        isActive: true,
-        id: cartId,
-      },
-      include: {
-        items: true,
-      },
+    // Use a single upsert instead of checking if cart exists separately
+    const updatedCart = await prisma.cartItem.upsert({
+      where: { cartId_productId: { cartId, productId } },
+      update: { quantity: { increment: quantity } },
+      create: { cartId, productId, name, price, quantity, taxRate },
     });
-
-    // Create cart if it doesn't exist
-    if (!cart) {
-      cart = await prisma.cart.create({
-        data: {
-          userId,
-          name: "Default Cart",
-          isActive: true,
-        },
-        include: {
-          items: true,
-        },
-      });
-    }
-
-    // Check if product already exists in cart
-    const existingItem = cart.items.find(
-      (item) => item.productId === productId
-    );
-
-    if (existingItem) {
-      // Update quantity if already in cart
-      await prisma.cartItem.update({
-        where: { id: existingItem.id },
-        data: {
-          quantity: existingItem.quantity + quantity,
-        },
-      });
-    } else {
-      // Add new item
-      await prisma.cartItem.create({
-        data: {
-          cartId: cart.id,
-          productId,
-          name,
-          price,
-          quantity,
-          taxRate: taxRate || 0,
-        },
-      });
-    }
-
-    return "Item added to cart";
+    const myCart = getMyActiveUserCart(userId);
+    return myCart;
+    
   } catch (error) {
     console.error("Error adding to cart:", error);
     throw new Error("Failed to add item to cart");

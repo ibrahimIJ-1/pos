@@ -5,6 +5,8 @@ import { generateSaleNumber } from "./generateSaleNumber";
 import { prisma } from "@/lib/prisma";
 import { decimalToNumber } from "@/lib/utils";
 import { checkUser } from "../Authorization";
+import { rolePermissions, UserRole } from "@/lib/permissions";
+import { checkUserPermissions } from "../users/check-permissions";
 
 export const createNewSale = async (
   {
@@ -22,6 +24,7 @@ export const createNewSale = async (
   items: SaleItem[]
 ) => {
   try {
+    await checkUserPermissions([...rolePermissions[UserRole.CASHIER]]);
     if (!items || !Array.isArray(items) || items.length === 0) {
       throw new Error("Sale must include at least one item");
     }

@@ -1,8 +1,12 @@
 "use server";
 
+import { checkUserPermissions } from "@/actions/users/check-permissions";
+import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 
 export const openRegister = async (id: string, openingBalance = 0) => {
+  await checkUserPermissions(rolePermissions[UserRole.ACCOUNTANT]);
+
   if (!id || typeof id !== "string") {
     throw new Error("Invalid register ID");
   }

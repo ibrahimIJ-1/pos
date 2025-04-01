@@ -26,6 +26,8 @@ model User {
   sales                 Sale[]                @relation("UserSales")
   transactions          RegisterTransaction[] @relation("UserTransactions")
   registers             Register[]            @relation("UserRegisters")
+  // Optional: if you filter by active status frequently
+  // @@index([active])
 
   @@map("users")
 }
@@ -60,6 +62,8 @@ model UserPermission {
   permission   Permission @relation("PermissionUsers", fields: [permissionId], references: [id], onDelete: Cascade)
   created_at   DateTime   @default(now()) @map("created_at")
   updated_at   DateTime   @updatedAt @map("updated_at")
+  // Optional: if you often query permissions by user
+  // @@index([userId])
 
   @@unique([userId, permissionId])
   @@map("user_permissions")
@@ -84,7 +88,10 @@ model Product {
   saleItems           SaleItem[]
   discountProducts    Discount[] @relation("DiscountProducts")
   cartItem            CartItem[]
+  // Optional: if you frequently filter active products
+  // @@index([active])
 
+  @@index([category])
   @@map("products")
 }
 
@@ -127,7 +134,10 @@ model Sale {
   discountsApplied SaleDiscount[] @relation("SaleDiscounts")
   register         Register?      @relation(fields: [registerId], references: [id])
   registerId       String?        @map("register_id")
+  // Optionally, if you filter by date range:
+  // @@index([created_at])
 
+  @@index([cashierId])
   @@map("sales")
 }
 
@@ -146,6 +156,7 @@ model SaleItem {
   created_at     DateTime @default(now()) @map("created_at")
   updated_at     DateTime @updatedAt @map("updated_at")
 
+  @@index([saleId])
   @@map("sale_items")
 }
 
@@ -163,6 +174,8 @@ model Register {
   updated_at       DateTime              @updatedAt @map("updated_at")
   transactions     RegisterTransaction[]
   sales            Sale[]
+  // Optional: if you filter by status:
+  // @@index([status])
 
   @@map("registers")
 }
@@ -180,6 +193,8 @@ model RegisterTransaction {
   cashier       User            @relation("UserTransactions", fields: [cashierId], references: [id])
   created_at    DateTime        @default(now()) @map("created_at")
 
+  @@index([registerId])
+  @@index([cashierId])
   @@map("register_transactions")
 }
 
@@ -204,6 +219,7 @@ model Discount {
   updated_at        DateTime          @updatedAt @map("updated_at")
   sales             SaleDiscount[]    @relation("DiscountSales")
 
+  @@index([isActive, startDate, endDate])
   @@map("discounts")
 }
 
@@ -242,6 +258,7 @@ model Cart {
   createdAt  DateTime   @default(now()) @map("created_at")
   updatedAt  DateTime   @updatedAt @map("updated_at")
 
+  @@index([userId, isActive])
   @@map("carts")
 }
 
@@ -258,6 +275,7 @@ model CartItem {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([cartId, productId])
   @@map("cart_items")
 }
 

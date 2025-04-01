@@ -2,10 +2,13 @@
 
 import { prisma } from "@/lib/prisma";
 import { checkUser } from "../Authorization";
+import { rolePermissions, UserRole } from "@/lib/permissions";
+import { checkUserPermissions } from "../users/check-permissions";
 
 export const deleteCartDiscount = async (cartId: string) => {
   try {
     const userId = (await checkUser()).id;
+    await checkUserPermissions(rolePermissions[UserRole.CASHIER]);
     // Get the active cart
     const cart = await prisma.cart.findFirst({
       where: {

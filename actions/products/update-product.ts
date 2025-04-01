@@ -1,7 +1,9 @@
 "use server";
 
+import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { decimalToNumber } from "@/lib/utils";
+import { checkUserPermissions } from "../users/check-permissions";
 
 export const updateProduct = async ({
   id,
@@ -44,6 +46,7 @@ export const updateProduct = async ({
   //   }
 
   try {
+    await checkUserPermissions([...rolePermissions[UserRole.MANAGER],...rolePermissions[UserRole.CASHIER]]);
     const product = await prisma.product.update({
       where: { id },
       data: {

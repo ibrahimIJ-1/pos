@@ -1,12 +1,15 @@
 "use server";
 
 import { checkUser } from "@/actions/Authorization";
+import { checkUserPermissions } from "@/actions/users/check-permissions";
+import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { decimalToNumber } from "@/lib/utils";
 
 export const getAllUserCarts = async () => {
   try {
     const userId = (await checkUser()).id;
+    await checkUserPermissions(rolePermissions[UserRole.CASHIER]);
     // Get all carts for this user
     const carts = await prisma.cart.findMany({
       where: {

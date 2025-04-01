@@ -16,7 +16,7 @@ export default function layout({
   additionalPermissions = [],
 }: AdminLayoutProps) {
   return (
-    <ProtectedRoute requiredRoles={["admin", "manager"]}>
+    <ProtectedRoute requiredRoles={["admin", "manager","cashier"]}>
       <div className="flex min-h-screen">
         <Sidebar additionalPermissions={additionalPermissions} />
         <main className="flex-1 overflow-y-auto">

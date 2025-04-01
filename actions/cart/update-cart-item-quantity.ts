@@ -2,6 +2,8 @@
 
 import { prisma } from "@/lib/prisma";
 import { checkUser } from "../Authorization";
+import { rolePermissions, UserRole } from "@/lib/permissions";
+import { checkUserPermissions } from "../users/check-permissions";
 
 export const updateCartItemQuantity = async (
   cartId: string,
@@ -10,6 +12,7 @@ export const updateCartItemQuantity = async (
 ) => {
   try {
     const userId = (await checkUser()).id;
+    await checkUserPermissions(rolePermissions[UserRole.CASHIER]);
     if (quantity === undefined || quantity < 0) {
       throw new Error("Invalid quantity");
     }

@@ -1,5 +1,6 @@
 "use server";
 
+import { initializePermissions } from "@/lib/initialize-permissions";
 import { Permission, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { saveSettings } from "@/lib/settings-service";
@@ -26,6 +27,8 @@ export const initDatabase = async () => {
       data: roles,
       skipDuplicates: true,
     });
+
+    await initializePermissions()
 
     // Create users
     const adminPassword = await bcrypt.hash("admin123", 10);

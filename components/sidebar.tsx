@@ -29,15 +29,17 @@ import {
   ListChecks,
   Tag,
   LogOut,
+  ComputerIcon,
 } from "lucide-react";
 import { usePermissions } from "@/hooks/usePermissions";
-import { UserRole, Permission } from "@/lib/permissions";
+import { UserRole, Permission, rolePermissions } from "@/lib/permissions";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SidebarProps {
   roles?: (UserRole | string)[] | (UserRole | string);
@@ -49,7 +51,7 @@ export default function Sidebar({
   additionalPermissions = [],
 }: SidebarProps) {
   const userRoles = Array.isArray(roles) ? roles : [roles];
-
+  const { logout, permissions } = useAuth();
   const { checkPermission } = usePermissions(userRoles, additionalPermissions);
   const { toast } = useToast();
   const navigate = useRouter();
@@ -61,11 +63,8 @@ export default function Sidebar({
 
   const handleLogout = () => {
     // Implement actual logout logic here
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out.",
-    });
-    navigate.push("/");
+    logout();
+    navigate.push("/auth/login");
   };
 
   const sidebarItems = [
@@ -73,46 +72,61 @@ export default function Sidebar({
       icon: <Home className="h-4 w-4" />,
       label: "Home",
       href: "/",
+      neededPermissions: [],
     },
     {
       icon: <LayoutDashboard className="h-4 w-4" />,
       label: "Dashboard",
       href: "/admin",
+      neededPermissions: [],
     },
     {
       icon: <Package className="h-4 w-4" />,
       label: "Products",
       href: "/admin/products",
+      neededPermissions: rolePermissions[UserRole.MANAGER],
     },
     {
       icon: <ShoppingCart className="h-4 w-4" />,
       label: "POS",
       href: "/pos",
+      neededPermissions: rolePermissions[UserRole.CASHIER],
     },
     {
       icon: <Users className="h-4 w-4" />,
       label: "Customers",
       href: "/admin/customers",
+      neededPermissions: rolePermissions[UserRole.MANAGER],
     },
     {
       icon: <Coins className="h-4 w-4" />,
       label: "Transactions",
       href: "/admin/transactions",
+      neededPermissions: [...rolePermissions[UserRole.ACCOUNTANT],rolePermissions[UserRole.MANAGER]],
     },
     {
       icon: <Tag className="h-4 w-4" />,
       label: "Discounts",
       href: "/admin/discounts",
+      neededPermissions: [...rolePermissions[UserRole.ACCOUNTANT],rolePermissions[UserRole.MANAGER]],
+    },
+    {
+      icon: <ComputerIcon className="h-4 w-4" />,
+      label: "Registers",
+      href: "/admin/registers",
+      neededPermissions: [...rolePermissions[UserRole.ACCOUNTANT],rolePermissions[UserRole.MANAGER]],
     },
     {
       icon: <ListChecks className="h-4 w-4" />,
       label: "Users",
       href: "/admin/users",
+      neededPermissions: rolePermissions[UserRole.OWNER],
     },
     {
       icon: <Settings className="h-4 w-4" />,
       label: "Settings",
       href: "/admin/settings",
+      neededPermissions: rolePermissions[UserRole.OWNER],
     },
   ];
 
@@ -153,23 +167,29 @@ export default function Sidebar({
                 Manage your store, products, customers, and more.
               </SheetDescription>
             </SheetHeader>
-            <ScrollArea >
+            <ScrollArea>
               <div className="py-2">
-                {sidebarItems.map((item) => (
-                  <Tooltip key={item.label}>
-                    <TooltipTrigger asChild>
-                      <Link
-                        href={item.href}
-                        onClick={closeSidebar}
-                        className="group flex items-center gap-3 rounded-md px-5 py-2 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800"
-                      >
-                        {item.icon}
-                        <span>{item.label}</span>
-                      </Link>
-                    </TooltipTrigger>
-                    <TooltipContent>{item.label}</TooltipContent>
-                  </Tooltip>
-                ))}
+                {sidebarItems.map((item) => {
+                  if (
+                    item.neededPermissions.length == 0 ||
+                    item.neededPermissions.some((perm) => permissions.has(perm as string))
+                  )
+                    return (
+                      <Tooltip key={item.label}>
+                        <TooltipTrigger asChild>
+                          <Link
+                            href={item.href}
+                            onClick={closeSidebar}
+                            className="group flex items-center gap-3 rounded-md px-5 py-2 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800"
+                          >
+                            {item.icon}
+                            <span>{item.label}</span>
+                          </Link>
+                        </TooltipTrigger>
+                        <TooltipContent>{item.label}</TooltipContent>
+                      </Tooltip>
+                    );
+                })}
               </div>
             </ScrollArea>
           </div>

@@ -10,14 +10,12 @@ import { ThemeProvider } from "./ThemeProvider";
 export function AppProviders({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
         <NextTopLoader color="#10b981" showSpinner={false} />
-        <ThemeProvider  defaultTheme="system" >
-          {children}
-        </ThemeProvider>
+        <ThemeProvider defaultTheme="system">{children}</ThemeProvider>
         <ReactQueryDevtools />
-      </QueryClientProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }

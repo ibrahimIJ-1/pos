@@ -33,7 +33,7 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 import { UserRole, Permission } from "@/lib/permissions";
-import { PermissionGuard } from "@/hooks/usePermissions";
+// import { PermissionGuard } from "@/hooks/usePermissions";
 import {
   ShoppingCart,
   Plus,
@@ -143,7 +143,7 @@ function POS() {
       customerId: cart ? cart.customer?.id ?? null : null,
       subtotal: cart ? cart.subtotal : 0,
       taxTotal: cart ? cart.taxTotal : 0,
-      discountTotal:cart ? cart.discountTotal : 0,
+      discountTotal: cart ? cart.discountTotal : 0,
       totalAmount: cart ? cart.totalAmount : 0,
       paymentMethod: paymentMethod,
       paymentStatus: "paid" as const,
@@ -249,7 +249,15 @@ function POS() {
 
   const addItemToCart = useCallback(
     (product: any) => {
-      if (cart) cartOps.addItem.mutate({ product, cartId: cart.id });
+      console.log("asdasdasd");
+
+      if (cart)
+        cartOps.addItem.mutate(
+          { product, cartId: cart.id },
+          {
+            onSettled: (data: any) => {},
+          }
+        );
     },
     [cart, cartOps.addItem] // Dependencies for useCallback
   );
@@ -312,14 +320,14 @@ function POS() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <PermissionGuard
+            {/* <PermissionGuard
               userRole={UserRole.CASHIER}
               permission={Permission.VIEW_REGISTER}
-            >
-              <Button variant="outline" size="icon" className="neon-border">
-                <Barcode className="h-4 w-4" />
-              </Button>
-            </PermissionGuard>
+            > */}
+            <Button variant="outline" size="icon" className="neon-border">
+              <Barcode className="h-4 w-4" />
+            </Button>
+            {/* </PermissionGuard> */}
           </div>
 
           <ScrollArea className="h-[calc(100vh-16rem)]">
@@ -690,29 +698,29 @@ function POS() {
                 </div>
               </div>
 
-              <PermissionGuard
+              {/* <PermissionGuard
                 userRole={UserRole.CASHIER}
                 permission={Permission.CREATE_SALE}
+              > */}
+              <Button
+                className="w-full neon-glow animate-glow bg-neon-purple hover:bg-neon-purple/90"
+                size="lg"
+                disabled={
+                  !(cart?.items as CartItem[])?.length ||
+                  createSaleMutation.isPending
+                }
+                onClick={handleCheckout}
               >
-                <Button
-                  className="w-full neon-glow animate-glow bg-neon-purple hover:bg-neon-purple/90"
-                  size="lg"
-                  disabled={
-                    !(cart?.items as CartItem[])?.length ||
-                    createSaleMutation.isPending
-                  }
-                  onClick={handleCheckout}
-                >
-                  {createSaleMutation.isPending ? (
-                    "Processing..."
-                  ) : (
-                    <>
-                      <Receipt className="h-4 w-4 mr-2" />
-                      Checkout
-                    </>
-                  )}
-                </Button>
-              </PermissionGuard>
+                {createSaleMutation.isPending ? (
+                  "Processing..."
+                ) : (
+                  <>
+                    <Receipt className="h-4 w-4 mr-2" />
+                    Checkout
+                  </>
+                )}
+              </Button>
+              {/* </PermissionGuard> */}
             </CardFooter>
           </Card>
         </div>

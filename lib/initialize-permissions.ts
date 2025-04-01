@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { Permission, UserRole } from "@/lib/permissions";
+import { Permission, rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 
 /**
@@ -20,7 +20,7 @@ export async function initializePermissions() {
     }
     
     // Create roles with their permissions
-    for (const [roleName, permissions] of Object.entries(UserRole)) {
+    for (const [roleName, permissions] of Object.entries(rolePermissions)) {
       const role = await prisma.role.upsert({
         where: { name: roleName },
         update: {}, // Don't update existing role names

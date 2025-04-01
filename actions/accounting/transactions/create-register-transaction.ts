@@ -1,5 +1,7 @@
 "use server";
 
+import { checkUserPermissions } from "@/actions/users/check-permissions";
+import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { decimalToNumber } from "@/lib/utils";
 import { RegisterTransaction } from "@prisma/client";
@@ -7,8 +9,10 @@ import { RegisterTransaction } from "@prisma/client";
 export const createRegisterTransaction = async (
   registerTransaction: RegisterTransaction
 ) => {
-  try {    
-   const transaction =  await prisma.registerTransaction.create({
+  try {
+    await checkUserPermissions(rolePermissions[UserRole.MANAGER]);
+
+    const transaction = await prisma.registerTransaction.create({
       data: registerTransaction,
     });
 

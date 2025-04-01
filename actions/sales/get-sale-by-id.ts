@@ -1,9 +1,12 @@
 "use server";
 
+import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
+import { checkUserPermissions } from "../users/check-permissions";
 
 export const getSaleById = async (id: string) => {
   try {
+    await checkUserPermissions([...rolePermissions[UserRole.CASHIER]]);
     const sale = await prisma.sale.findUnique({
       where: { id },
       include: {

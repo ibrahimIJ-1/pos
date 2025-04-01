@@ -1,9 +1,12 @@
 "use server"
 
+import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
+import { checkUserPermissions } from "../users/check-permissions";
 
 export const getAllProducts = async () => {
   try {
+    await checkUserPermissions([...rolePermissions[UserRole.MANAGER],...rolePermissions[UserRole.CASHIER]]);
     const products = await prisma.product.findMany({
       orderBy: { name: "asc" },
     });

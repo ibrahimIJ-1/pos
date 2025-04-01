@@ -1,10 +1,14 @@
 "use server";
 
+import { checkUserPermissions } from "@/actions/users/check-permissions";
+import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { decimalToNumber } from "@/lib/utils";
 
 export const getAllRegisterTransactions = async () => {
   try {
+    await checkUserPermissions(rolePermissions[UserRole.MANAGER]);
+
     const registers = await prisma.registerTransaction.findMany({
       include: {
         cashier: {

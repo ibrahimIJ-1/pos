@@ -2,6 +2,8 @@
 
 import { prisma } from "@/lib/prisma";
 import { checkUser } from "../Authorization";
+import { rolePermissions, UserRole } from "@/lib/permissions";
+import { checkUserPermissions } from "../users/check-permissions";
 
 export const updateCartDiscount = async (
   cartId: string,
@@ -9,6 +11,7 @@ export const updateCartDiscount = async (
 ) => {
   try {
     const userId = (await checkUser()).id;
+    await checkUserPermissions(rolePermissions[UserRole.CASHIER]);
     if (!discountId) {
       throw new Error("Discount ID is required");
     }

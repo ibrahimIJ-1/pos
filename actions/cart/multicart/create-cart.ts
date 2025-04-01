@@ -1,11 +1,15 @@
 "use server";
 
 import { checkUser } from "@/actions/Authorization";
+import { checkUserPermissions } from "@/actions/users/check-permissions";
+import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 
 export const createCart = async () => {
   try {
     const userId = (await checkUser()).id;
+    await checkUserPermissions(rolePermissions[UserRole.CASHIER]);
+
     // First, set all carts to inactive
     await prisma.cart.updateMany({
       where: {

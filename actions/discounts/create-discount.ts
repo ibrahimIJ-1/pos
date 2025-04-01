@@ -1,8 +1,10 @@
 "use server";
 
+import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { decimalToNumber } from "@/lib/utils";
 import { Discount } from "@prisma/client";
+import { checkUserPermissions } from "../users/check-permissions";
 
 export const createNewDiscount = async ({
   name,
@@ -22,7 +24,7 @@ export const createNewDiscount = async ({
 }: Discount & { productIds?: string[] }) => {
 
   try {
-    
+    await checkUserPermissions([...rolePermissions[UserRole.ACCOUNTANT]]);
     // Validate required fields
     if (!name || !type || value === undefined || !appliesTo || !startDate) {
       throw new Error("Missing required discount fields");
