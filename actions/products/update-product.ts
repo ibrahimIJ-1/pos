@@ -4,6 +4,7 @@ import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { decimalToNumber } from "@/lib/utils";
 import { checkUserPermissions } from "../users/check-permissions";
+import { uploadFile } from "../tools/s3-bucket-uploader";
 
 export const updateProduct = async ({
   id,
@@ -19,6 +20,7 @@ export const updateProduct = async ({
   low_stock_threshold,
   image_url,
   active,
+  image_file,
 }: {
   id: string;
   name: string;
@@ -33,6 +35,7 @@ export const updateProduct = async ({
   low_stock_threshold?: number;
   image_url?: string;
   active?: boolean;
+  image_file?: File | null;
 }) => {
   // Check if user has permission to edit products
   //   if (
@@ -46,7 +49,13 @@ export const updateProduct = async ({
   //   }
 
   try {
-    await checkUserPermissions([...rolePermissions[UserRole.MANAGER],...rolePermissions[UserRole.CASHIER]]);
+    await checkUserPermissions([
+      ...rolePermissions[UserRole.MANAGER],
+      ...rolePermissions[UserRole.CASHIER],
+    ]);
+    if (image_file) {
+      image_url = await uploadFile(image_file);
+    }
     const product = await prisma.product.update({
       where: { id },
       data: {

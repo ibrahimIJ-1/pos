@@ -40,6 +40,13 @@ const productFormSchema = z.object({
   stock: z.number().int().min(0, "Stock cannot be negative."),
   low_stock_threshold: z.number().int().min(0, "Threshold cannot be negative."),
   image_url: z.string().optional(),
+  image_file: z
+    .instanceof(File)
+    .optional()
+    .refine(
+      (file) => file?.size ?? 0 < 0.15 * 1024 * 1024,
+      "File size must be under 150KB"
+    ),
   active: z.boolean().default(true),
 });
 
@@ -75,6 +82,7 @@ export function ProductForm({ product, onSuccess, mode }: ProductFormProps) {
           low_stock_threshold: product.low_stock_threshold || 0,
           image_url: product.image_url || "",
           active: product.active,
+          image_file: undefined,
         }
       : {
           name: "",
@@ -89,6 +97,7 @@ export function ProductForm({ product, onSuccess, mode }: ProductFormProps) {
           low_stock_threshold: 0,
           image_url: "",
           active: true,
+          image_file: undefined,
         },
   });
 
@@ -99,6 +108,7 @@ export function ProductForm({ product, onSuccess, mode }: ProductFormProps) {
     if (file) {
       // In a real app, this would upload to a server
       // Here we'll just create a local data URL as a demo
+      form.setValue("image_file", file);
       const reader = new FileReader();
       reader.onload = () => {
         const result = reader.result as string;
@@ -110,7 +120,6 @@ export function ProductForm({ product, onSuccess, mode }: ProductFormProps) {
   };
 
   const onSubmit = (data: ProductFormValues) => {
-
     if (mode === "create") {
       createProductMutation.mutate(
         {
@@ -125,16 +134,16 @@ export function ProductForm({ product, onSuccess, mode }: ProductFormProps) {
           stock: data.stock,
           low_stock_threshold: data.low_stock_threshold,
           image_url: data.image_url ?? "",
+          image_file: data.image_file,
           active: data.active,
           created_at: new Date(),
-          updated_at: new Date()
+          updated_at: new Date(),
         },
         {
           onSuccess: onSuccess,
         }
       );
     } else if (mode === "edit" && product) {
-      
       updateProductMutation.mutate(
         {
           id: product.id,
@@ -182,6 +191,9 @@ export function ProductForm({ product, onSuccess, mode }: ProductFormProps) {
           </div>
           <div className="flex items-center gap-2">
             <Input
+              ref={(e) => {
+                form.register("image_file");
+              }}
               id="image-upload"
               type="file"
               accept="image/*"

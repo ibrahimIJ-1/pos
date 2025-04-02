@@ -4,6 +4,7 @@ import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { decimalToNumber } from "@/lib/utils";
 import { checkUserPermissions } from "../users/check-permissions";
+import { uploadFile } from "../tools/s3-bucket-uploader";
 
 export const createNewProduct = async ({
   name,
@@ -17,6 +18,7 @@ export const createNewProduct = async ({
   stock,
   low_stock_threshold,
   image_url,
+  image_file,
 }: {
   name: string;
   description?: string;
@@ -29,9 +31,10 @@ export const createNewProduct = async ({
   stock?: any;
   low_stock_threshold?: any;
   image_url?: string | null;
+  image_file?: File | null;
 }) => {
   try {
-await checkUserPermissions([...rolePermissions[UserRole.MANAGER]]);
+    await checkUserPermissions([...rolePermissions[UserRole.MANAGER]]);
     // Validate required fields
     if (!name || !sku || price === undefined || cost === undefined) {
       throw new Error("Missing required product fields");
@@ -44,6 +47,10 @@ await checkUserPermissions([...rolePermissions[UserRole.MANAGER]]);
 
     if (existingProduct) {
       throw new Error("Product with this SKU already exists");
+    }
+    let url: string | null = null;
+    if (image_file) {
+      url = await uploadFile(image_file);
     }
 
     // Create the product
@@ -59,7 +66,7 @@ await checkUserPermissions([...rolePermissions[UserRole.MANAGER]]);
         taxRate: taxRate || 0,
         stock: stock || 0,
         low_stock_threshold: low_stock_threshold || 0,
-        // image_url,
+        image_url: url,
         active: true,
       },
     });
