@@ -69,18 +69,18 @@ export const closeRegister = async (id: string, closingBalance: number) => {
         },
       },
     });
-
-    // Create a transaction record for closing the register
-    await prisma.registerTransaction.create({
-      data: {
-        registerId: id,
-        type: "CASH_OUT",
-        amount: closingBalance,
-        paymentMethod: "CASH",
-        description: "Register closed",
-        cashierId: userId,
-      },
-    });
+    if (closingBalance > 0)
+      // Create a transaction record for closing the register
+      await prisma.registerTransaction.create({
+        data: {
+          registerId: id,
+          type: "CASH_OUT",
+          amount: closingBalance,
+          paymentMethod: "CASH",
+          description: "Register closed",
+          cashierId: userId,
+        },
+      });
 
     return {
       register: decimalToNumber(updatedRegister),

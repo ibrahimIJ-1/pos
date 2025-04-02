@@ -51,18 +51,18 @@ export const openRegister = async (id: string, openingBalance = 0) => {
         },
       },
     });
-
-    // Create a transaction record for opening the register
-    await prisma.registerTransaction.create({
-      data: {
-        registerId: id,
-        type: "CASH_IN",
-        amount: openingBalance,
-        paymentMethod: "CASH",
-        description: "Register opened",
-        cashierId: userId,
-      },
-    });
+    if (openingBalance > 0)
+      // Create a transaction record for opening the register
+      await prisma.registerTransaction.create({
+        data: {
+          registerId: id,
+          type: "CASH_IN",
+          amount: openingBalance,
+          paymentMethod: "CASH",
+          description: "Register opened",
+          cashierId: userId,
+        },
+      });
 
     return decimalToNumber(updatedRegister);
   } catch (error) {
