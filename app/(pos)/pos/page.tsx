@@ -73,9 +73,20 @@ import {
   Sale,
   SaleItem,
 } from "@prisma/client";
-import { Decimal } from "decimal.js";
+import { useAuth } from "@/contexts/AuthContext";
+import Loading from "@/app/loading";
+import MacNotFound from "@/app/mac-not-found";
 
 function POS() {
+  const { macAddress, macLoading } = useAuth();
+
+  if (macLoading) {
+    return Loading();
+  }
+
+  if (!macAddress) {
+    return MacNotFound();
+  }
   const { data: products = [] } = useProducts();
   const { data: customers = [] } = useCustomers();
   const { data: cart } = useCart();

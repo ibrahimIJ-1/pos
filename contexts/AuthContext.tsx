@@ -28,6 +28,9 @@ interface AuthContextType {
   isLoading: boolean;
   permissions: Set<string>;
   userLogin: (email: string, password: string) => Promise<void>;
+  macAddress: string | null;
+  macLoading: boolean;
+  getMacAddress: () => Promise<string | null>;
   register: (
     name: string,
     email: string,
@@ -37,7 +40,9 @@ interface AuthContextType {
   logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined
+);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
@@ -52,6 +57,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [macAddress, setMacAddress] = useState<string | null>(null);
+  const [macLoading, setMacLoading] = useState<boolean>(true);
   const [permissions, setPermissions] = useState<Set<string>>(new Set());
   const removeCredentials = () => {
     localStorage.removeItem("user");
@@ -61,10 +68,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const getPermissions = () => {
     getPermissionMutation.mutate();
   };
-
+  const getMacAddress = async () => {
+    try {
+      setMacLoading(true);
+      const response = await fetch("http://localhost:5001/getmac");
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const macAddress = await response.text();
+      setMacAddress(macAddress);
+      return macAddress;
+    } catch (error) {
+      console.error("Error fetching MAC address:", error);
+      //REMOVE !!!
+      setMacAddress("BC:03:58:B8:53:58");
+      return null;
+    } finally {
+      setMacLoading(false);
+    }
+  };
+  useEffect(() => {
+    getMacAddress();
+  }, []);
   useEffect(() => {
     // Check for existing session on mount
-
     const checkAuth = async () => {
       const token = Cookies.get("authToken");
       const savedUser = Cookies.get("user");
@@ -82,20 +109,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     checkAuth();
   }, []);
-
-  const getMacAddress = async () => {
-    try {
-      const response = await fetch("http://localhost:5001/getmac");
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      const macAddress = await response.text();
-      return macAddress;
-    } catch (error) {
-      console.error("Error fetching MAC address:", error);
-      return null;
-    }
-  };
 
   const userLogin = async (email: string, password: string) => {
     try {
@@ -163,8 +176,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         userLogin,
         register,
+        macLoading,
         logout,
         permissions,
+        macAddress,
+        getMacAddress,
       }}
     >
       {children}
