@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateTransaction } from "@/lib/pos-service";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface TransactionFormProps {
   onSuccess?: () => void;
@@ -51,6 +52,7 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const createTransaction = useCreateTransaction();
+  const { getMacAddress, user } = useAuth();
 
   const form = useForm<z.infer<typeof transactionSchema>>({
     resolver: zodResolver(transactionSchema),
@@ -67,7 +69,10 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
   });
 
   const onSubmit = async (values: z.infer<typeof transactionSchema>) => {
+    if (!user) return;
     setIsSubmitting(true);
+    const mac = await getMacAddress();
+
     try {
       await createTransaction.mutateAsync({
         description: values.description,
@@ -75,8 +80,8 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
         type: values.type,
         paymentMethod: values.paymentMethod,
         referenceId: values.referenceId || undefined,
-        registerId: values.registerId,
-        cashierId: values.cashierId,
+        registerId: mac,
+        cashierId: user.id,
       });
 
       if (onSuccess) onSuccess();
