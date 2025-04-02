@@ -139,17 +139,17 @@ export function withAuth(handler: any, requiredPermissions: Permission[] = []) {
 }
 
 export async function middleware(request: NextRequest) {
-  try {
-    const response = await fetch('http://localhost:5001/getmac');
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    const macAddress = await response.text();
-    // return macAddress;
-  } catch (error) {
-    console.error('Error fetching MAC address:', error);
-    return null;
-  }
+  // try {
+  //   const response = await fetch('http://localhost:5001/getmac');
+  //   if (!response.ok) {
+  //     throw new Error('Network response was not ok');
+  //   }
+  //   const macAddress = await response.text();
+  //   // return macAddress;
+  // } catch (error) {
+  //   console.error('Error fetching MAC address:', error);
+  //   return null;
+  // }
   const token = request.cookies.get("authToken")?.value;
   
   // Check auth routes that don't need authentication
