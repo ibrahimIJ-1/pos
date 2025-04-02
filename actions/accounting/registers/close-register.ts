@@ -1,10 +1,13 @@
 "use server";
 
+import { checkUser } from "@/actions/Authorization";
 import { checkUserPermissions } from "@/actions/users/check-permissions";
 import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
+import { decimalToNumber } from "@/lib/utils";
 
 export const closeRegister = async (id: string, closingBalance: number) => {
+  const userId = (await checkUser()).id;
   await checkUserPermissions(rolePermissions[UserRole.ACCOUNTANT]);
   if (!id || typeof id !== "string") {
     throw new Error("Invalid register ID");
@@ -75,13 +78,12 @@ export const closeRegister = async (id: string, closingBalance: number) => {
         amount: closingBalance,
         paymentMethod: "CASH",
         description: "Register closed",
-        //TODO: get the user ID
-        cashierId: "1",
+        cashierId: userId,
       },
     });
 
     return {
-      register: updatedRegister,
+      register: decimalToNumber(updatedRegister),
       expectedBalance,
       difference: closingBalance - expectedBalance,
     };

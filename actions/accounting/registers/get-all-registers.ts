@@ -7,8 +7,7 @@ import { decimalToNumber } from "@/lib/utils";
 
 export const getAllRegisters = async () => {
   try {
-          await checkUserPermissions(rolePermissions[UserRole.MANAGER]);
-    
+    await checkUserPermissions(rolePermissions[UserRole.MANAGER]);
     const registers = await prisma.register.findMany({
       include: {
         cashier: {

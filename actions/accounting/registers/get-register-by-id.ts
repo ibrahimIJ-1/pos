@@ -6,8 +6,8 @@ import { prisma } from "@/lib/prisma";
 
 export const getRegisterById = async (id: string) => {
   try {
-          await checkUserPermissions(rolePermissions[UserRole.MANAGER]);
     
+    await checkUserPermissions(rolePermissions[UserRole.MANAGER]);
     const register = await prisma.register.findUnique({
       where: { id },
       include: {

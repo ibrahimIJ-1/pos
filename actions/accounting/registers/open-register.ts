@@ -1,10 +1,13 @@
 "use server";
 
+import { checkUser } from "@/actions/Authorization";
 import { checkUserPermissions } from "@/actions/users/check-permissions";
 import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
+import { decimalToNumber } from "@/lib/utils";
 
 export const openRegister = async (id: string, openingBalance = 0) => {
+  const userId = (await checkUser()).id;
   await checkUserPermissions(rolePermissions[UserRole.ACCOUNTANT]);
 
   if (!id || typeof id !== "string") {
@@ -34,8 +37,6 @@ export const openRegister = async (id: string, openingBalance = 0) => {
       where: { id },
       data: {
         status: "OPEN",
-        //TODO Cashier ID
-        currentCashierId: "1",
         openingBalance: openingBalance,
         openedAt: new Date(),
         closedAt: null,
@@ -59,12 +60,11 @@ export const openRegister = async (id: string, openingBalance = 0) => {
         amount: openingBalance,
         paymentMethod: "CASH",
         description: "Register opened",
-        //TODO GET THE USER ID
-        cashierId: "1",
+        cashierId: userId,
       },
     });
 
-    return updatedRegister;
+    return decimalToNumber(updatedRegister);
   } catch (error) {
     console.error(`Error opening register ${id}:`, error);
     throw new Error("Failed to open register");

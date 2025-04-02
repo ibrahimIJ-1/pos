@@ -306,10 +306,15 @@ export const useOpenRegister = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: { userId: string; openingBalance: number }) =>
-      openRegister(data.userId, data.openingBalance),
+    mutationFn: async ({
+      id,
+      openingBalance,
+    }: {
+      id: string;
+      openingBalance: number;
+    }) => openRegister(id, openingBalance),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["register"] });
+      queryClient.invalidateQueries({ queryKey: ["registers"] });
       toast.success("Register opened successfully");
     },
     onError: (error) => {
@@ -324,14 +329,17 @@ export const useOpenRegister = () => {
 
 export const useCloseRegister = () => {
   const queryClient = useQueryClient();
-  //TODO: GET USER ID
-  const auth = useAuth();
-  const userId = auth.user?.id;
+
   return useMutation({
-    mutationFn: async (data: { closingBalance: number }) =>
-      closeRegister(userId!, data.closingBalance),
+    mutationFn: async ({
+      id,
+      closingBalance,
+    }: {
+      id: string;
+      closingBalance: number;
+    }) => closeRegister(id, closingBalance),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["register"] });
+      queryClient.invalidateQueries({ queryKey: ["registers"] });
       toast.success("Register closed successfully");
     },
     onError: (error) => {

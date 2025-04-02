@@ -1,9 +1,23 @@
 import React, { useState } from "react";
-import { useRegisters, useDeleteRegister } from "@/lib/pos-service";
+import {
+  useRegisters,
+  useDeleteRegister,
+  useOpenRegister,
+  useCloseRegister,
+} from "@/lib/pos-service";
 import { useToast } from "@/hooks/use-toast";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Plus, Percent, Tag, Calendar } from "lucide-react";
+import {
+  Edit,
+  Trash2,
+  Plus,
+  Percent,
+  Tag,
+  Calendar,
+  UnlockIcon,
+  LockIcon,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import {
@@ -19,15 +33,19 @@ import {
 import { ColumnDef } from "@tanstack/react-table";
 import { RegisterDialog } from "./RegisterDialog";
 import { Register, RegisterStatus } from "@prisma/client";
+import OpenCloseModal from "./OpenCloseModal";
 
 export const RegisterDataTable = () => {
   const { toast } = useToast();
   const { data: registers = [] } = useRegisters();
   const deleteRegister = useDeleteRegister();
+  const openRegister = useOpenRegister();
+  const closeRegister = useCloseRegister();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isToggleDialogOpen, setIsToggleDialogOpen] = useState(false);
   const [selectedRegister, setSelectedRegister] = useState<Register | null>(
     null
   );
@@ -66,18 +84,54 @@ export const RegisterDataTable = () => {
     }
   };
 
+  const toggleOpenClose = (register: Register) => {
+    setSelectedRegister(register);
+    setIsToggleDialogOpen(true);
+  };
+
   const getRegisterStatusBadge = (register: Register) => {
     if (register.status === RegisterStatus.CLOSED) {
       return (
-        <Badge variant="outline" className="bg-gray-100">
+        <Badge
+          variant="outline"
+          className="bg-gray-100"
+          key={Math.random() * 1000}
+        >
           Closed
         </Badge>
       );
     } else {
       return (
-        <Badge variant="outline" className="bg-green-100 text-green-800">
+        <Badge
+          variant="outline"
+          className="bg-green-100 text-green-800"
+          key={Math.random() * 1000}
+        >
           Opened
         </Badge>
+      );
+    }
+  };
+
+  const getRegisterStatusToggle = (register: Register) => {
+    if (register.status === RegisterStatus.CLOSED) {
+      return (
+        <Button
+          onClick={() => toggleOpenClose(register)}
+          key={Math.random() * 1000}
+        >
+          <UnlockIcon className="w-6 h-6" />
+        </Button>
+      );
+    } else {
+      return (
+        <Button
+          onClick={() => toggleOpenClose(register)}
+          variant={"destructive"}
+          key={Math.random() * 1000}
+        >
+          <LockIcon className="w-6 h-6" />
+        </Button>
       );
     }
   };
@@ -102,6 +156,11 @@ export const RegisterDataTable = () => {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => getRegisterStatusBadge(row.original),
+    },
+    {
+      accessorKey: "status",
+      header: "Lock/Unlock",
+      cell: ({ row }) => getRegisterStatusToggle(row.original),
     },
     {
       id: "actions",
@@ -159,6 +218,14 @@ export const RegisterDataTable = () => {
           open={isEditDialogOpen}
           onOpenChange={setIsEditDialogOpen}
           mode="edit"
+          register={selectedRegister}
+        />
+      )}
+
+      {selectedRegister && (
+        <OpenCloseModal
+          open={isToggleDialogOpen}
+          onOpenChange={setIsToggleDialogOpen}
           register={selectedRegister}
         />
       )}
