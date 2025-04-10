@@ -1,5 +1,6 @@
 "use server";
 
+import { getRegisterById } from "@/actions/accounting/registers/get-register-by-id";
 import { checkUser } from "@/actions/Authorization";
 import { checkUserPermissions } from "@/actions/users/check-permissions";
 import { rolePermissions, UserRole } from "@/lib/permissions";
@@ -7,7 +8,10 @@ import { prisma } from "@/lib/prisma";
 
 export const createCart = async () => {
   try {
-    const userId = (await checkUser()).id;
+    const user = await checkUser();
+    const userId = user.id;
+    const reg = await getRegisterById(user.macAddress);
+    if (!reg) throw new Error("Register Not found");
     await checkUserPermissions(rolePermissions[UserRole.CASHIER]);
 
     // First, set all carts to inactive
@@ -15,6 +19,7 @@ export const createCart = async () => {
       where: {
         userId,
         isActive: true,
+        branchId: reg.branchId,
       },
       data: {
         isActive: false,
@@ -27,6 +32,7 @@ export const createCart = async () => {
         userId,
         name: `Cart ${new Date().toLocaleTimeString()}`,
         isActive: true,
+        branchId: reg.branchId,
       },
       include: {
         items: true,

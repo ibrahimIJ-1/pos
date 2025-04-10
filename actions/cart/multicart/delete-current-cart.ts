@@ -1,5 +1,6 @@
 "use server";
 
+import { getRegisterById } from "@/actions/accounting/registers/get-register-by-id";
 import { checkUser } from "@/actions/Authorization";
 import { checkUserPermissions } from "@/actions/users/check-permissions";
 import { rolePermissions, UserRole } from "@/lib/permissions";
@@ -7,7 +8,10 @@ import { prisma } from "@/lib/prisma";
 
 export const deleteCurrentCart = async (cartId: string) => {
   try {
-    const userId = (await checkUser()).id;
+    const user = await checkUser();
+    const userId = user.id;
+    const reg = await getRegisterById(user.macAddress);
+    if (!reg) throw new Error("Register Not found");
     await checkUserPermissions(rolePermissions[UserRole.CASHIER]);
     // Check if the cart exists and belongs to the user
     const cart = await prisma.cart.findFirst({
@@ -16,7 +20,7 @@ export const deleteCurrentCart = async (cartId: string) => {
         userId,
       },
     });
-    
+
     if (!cart) {
       throw new Error("Cart not found");
     }
@@ -53,6 +57,7 @@ export const deleteCurrentCart = async (cartId: string) => {
             userId,
             name: "Default Cart",
             isActive: true,
+            branchId:reg.branchId
           },
         });
       }
