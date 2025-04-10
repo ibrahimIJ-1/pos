@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
@@ -40,12 +40,12 @@ import { NumberInput } from "@/components/ui/number-input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
+  Branch,
   Discount,
   DiscountAppliesTo,
   DiscountType,
   Product,
 } from "@prisma/client";
-import Decimal from "decimal.js";
 
 const discountSchema = z.object({
   name: z.string().min(3, { message: "Name must be at least 3 characters" }),
@@ -72,6 +72,7 @@ const discountSchema = z.object({
   endDate: z.date().optional(),
   maxUses: z.coerce.number().optional(),
   isActive: z.boolean(),
+  branches: z.array(z.string()).min(1, "At least one branch must be selected"),
 });
 
 type DiscountFormValues = z.infer<typeof discountSchema>;
@@ -80,7 +81,8 @@ interface DiscountDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   mode: "create" | "edit";
-  discount?: Discount;
+  discount?: Discount & { branches?: Branch[] };
+  branches: Branch[];
 }
 
 export function DiscountDialog({
@@ -88,6 +90,7 @@ export function DiscountDialog({
   onOpenChange,
   mode,
   discount,
+  branches,
 }: DiscountDialogProps) {
   const [selectedAppliesTo, setSelectedAppliesTo] =
     useState<DiscountAppliesTo>("ENTIRE_ORDER");
@@ -112,12 +115,12 @@ export function DiscountDialog({
       endDate: undefined,
       maxUses: undefined,
       isActive: true,
+      branches: [],
     },
   });
 
   useEffect(() => {
     if (open && mode === "edit" && discount) {
-
       form.reset({
         name: discount.name,
         code: discount.code || "",
@@ -128,8 +131,9 @@ export function DiscountDialog({
           : 0,
         appliesTo: discount.appliesTo,
         productIds:
-          (discount as any).products?.map((product: Partial<Product>) => product.id) ||
-          [],
+          (discount as any).products?.map(
+            (product: Partial<Product>) => product.id
+          ) || [],
         categoryIds: discount.categoryIds?.split(",") || [],
         buyXQuantity: discount.buyXQuantity ?? undefined,
         getYQuantity: discount.getYQuantity ?? undefined,
@@ -137,6 +141,7 @@ export function DiscountDialog({
         endDate: discount.endDate ? new Date(discount.endDate) : undefined,
         maxUses: discount.maxUses ?? undefined,
         isActive: discount.isActive,
+        branches: discount.branches?.map((b) => b.id) || [],
       });
       setSelectedAppliesTo(discount.appliesTo);
     } else if (open && mode === "create") {
@@ -155,6 +160,7 @@ export function DiscountDialog({
         endDate: undefined,
         maxUses: undefined,
         isActive: true,
+        branches: [],
       });
       setSelectedAppliesTo("ENTIRE_ORDER");
     }
@@ -186,14 +192,22 @@ export function DiscountDialog({
           value: values.value as any,
           minPurchaseAmount: values.minPurchaseAmount || 0,
           appliesTo: values.appliesTo,
-          productIds: values.appliesTo === "SPECIFIC_PRODUCTS"
-            ? values.productIds ? values.productIds : null
-            : null,
-          categoryIds: values.appliesTo === "SPECIFIC_CATEGORIES"
-            ? (values.categoryIds ? values.categoryIds.join(",") : null)
-            : null,
-          buyXQuantity: values.type === "BUY_X_GET_Y" ? values.buyXQuantity ?? null : null,
-          getYQuantity: values.type === "BUY_X_GET_Y" ? values.getYQuantity ?? null : null,
+          productIds:
+            values.appliesTo === "SPECIFIC_PRODUCTS"
+              ? values.productIds
+                ? values.productIds
+                : null
+              : null,
+          categoryIds:
+            values.appliesTo === "SPECIFIC_CATEGORIES"
+              ? values.categoryIds
+                ? values.categoryIds.join(",")
+                : null
+              : null,
+          buyXQuantity:
+            values.type === "BUY_X_GET_Y" ? values.buyXQuantity ?? null : null,
+          getYQuantity:
+            values.type === "BUY_X_GET_Y" ? values.getYQuantity ?? null : null,
           startDate: values.startDate,
           endDate: values.endDate ?? null,
           maxUses: values.maxUses ?? null,
@@ -201,7 +215,8 @@ export function DiscountDialog({
           id: "",
           currentUses: 0,
           created_at: new Date(),
-          updated_at: new Date()
+          updated_at: new Date(),
+          branches: values.branches,
         },
         {
           onSuccess: () => {
@@ -233,6 +248,7 @@ export function DiscountDialog({
           endDate: values.endDate,
           maxUses: values.maxUses,
           isActive: values.isActive,
+          branches: values.branches,
         },
         {
           onSuccess: () => {
@@ -245,7 +261,9 @@ export function DiscountDialog({
 
   const categories = [
     ...new Set(
-      products.map((product) => product.category ?? "").filter(Boolean)
+      (products as Product[])
+        .map((product) => product.category ?? "")
+        .filter(Boolean)
     ),
   ];
   const uniqueCategories = [...new Set(categories)];
@@ -405,6 +423,43 @@ export function DiscountDialog({
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="branches"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Select Branches</FormLabel>
+                      <div className="border rounded-md p-2 max-h-40 overflow-y-auto space-y-2">
+                        {branches.map((branch) => (
+                          <div
+                            key={branch.id}
+                            className="flex items-center space-x-2"
+                          >
+                            <Checkbox
+                              id={`branch-${branch.id}`}
+                              checked={field.value?.includes(branch.id)}
+                              onCheckedChange={(checked) => {
+                                const newValue = checked
+                                  ? [...(field.value || []), branch.id]
+                                  : (field.value || []).filter(
+                                      (id) => id !== branch.id
+                                    );
+                                field.onChange(newValue);
+                              }}
+                            />
+                            <label
+                              htmlFor={`branch-${branch.id}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              {branch.name}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <FormField
                   control={form.control}
@@ -448,7 +503,7 @@ export function DiscountDialog({
                       <FormItem>
                         <FormLabel>Select Products</FormLabel>
                         <div className="border rounded-md p-2 max-h-40 overflow-y-auto space-y-2">
-                          {products.map((product) => (
+                          {(products as Product[]).map((product) => (
                             <div
                               key={product.id}
                               className="flex items-center space-x-2"
@@ -475,7 +530,8 @@ export function DiscountDialog({
                                 htmlFor={`product-${product.id}`}
                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                               >
-                                {product.name} - ${product.price.toFixed(2)}
+                                {product.name}
+                                {/* {product.name} - ${product.price.toFixed(2)} */}
                               </label>
                             </div>
                           ))}

@@ -4,6 +4,7 @@ import { initializePermissions } from "@/lib/initialize-permissions";
 import { Permission, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { saveSettings } from "@/lib/settings-service";
+import { Product } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 
 export const initDatabase = async () => {
@@ -14,6 +15,14 @@ export const initDatabase = async () => {
     };
 
     await saveSettings(settingsPayload);
+    // Create default branch
+    let branch = prisma.branch.create({
+      data: {
+        name: process.env.DEFAULT_BRANCH_NAME as string,
+        address: "Iraq, Erbil",
+        isActive: true,
+      },
+    });
     // Create default permissions
     const permissions = Object.values(Permission).map((name) => ({ name }));
     await prisma.permission.createMany({
@@ -28,7 +37,7 @@ export const initDatabase = async () => {
       skipDuplicates: true,
     });
 
-    await initializePermissions()
+    await initializePermissions();
 
     // Create users
     const adminPassword = await bcrypt.hash("admin123", 10);
@@ -105,114 +114,209 @@ export const initDatabase = async () => {
         description: "Premium Arabica coffee beans",
         sku: "BEV-001",
         barcode: "1234567890123",
-        price: 9.99,
-        cost: 5.5,
         category: "Beverages",
-        taxRate: 7.0,
-        stock: 50,
-        low_stock_threshold: 10,
         image_url:
           "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=500&h=500&fit=crop",
-        active: true,
+        branches: [
+          {
+            branch_id: (await branch).id,
+            active: true,
+            price: 9.99,
+            cost: 5.5,
+            taxRate: 7.0,
+            stock: 50,
+            low_stock_threshold: 10,
+          },
+        ],
       },
       {
         name: "Organic Tea",
         description: "Organic green tea leaves",
         sku: "BEV-002",
         barcode: "1234567890124",
-        price: 6.99,
-        cost: 3.2,
+
         category: "Beverages",
-        taxRate: 7.0,
-        stock: 40,
-        low_stock_threshold: 8,
+
         image_url:
           "https://images.unsplash.com/photo-1597481499750-5f8a6bcabe9d?w=500&h=500&fit=crop",
-        active: true,
+        branches: [
+          {
+            branch_id: (await branch).id,
+            active: true,
+            price: 6.99,
+            cost: 3.2,
+            taxRate: 7.0,
+            stock: 40,
+            low_stock_threshold: 8,
+          },
+        ],
       },
       {
         name: "Chocolate Chip Cookies",
         description: "Freshly baked chocolate chip cookies",
         sku: "SNK-001",
         barcode: "2234567890123",
-        price: 4.99,
-        cost: 2.1,
+
         category: "Snacks",
-        taxRate: 7.0,
-        stock: 30,
-        low_stock_threshold: 5,
+
         image_url:
           "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=500&h=500&fit=crop",
-        active: true,
+        branches: [
+          {
+            branch_id: (await branch).id,
+            active: true,
+            price: 4.99,
+            cost: 2.1,
+            taxRate: 7.0,
+            stock: 30,
+            low_stock_threshold: 5,
+          },
+        ],
       },
       {
         name: "Organic Apples",
         description: "Fresh organic apples",
         sku: "PRD-001",
         barcode: "3234567890123",
-        price: 3.99,
-        cost: 1.8,
         category: "Fresh Produce",
-        taxRate: 0.0,
-        stock: 100,
-        low_stock_threshold: 20,
         image_url:
           "https://images.unsplash.com/photo-1569870499705-504209102861?w=500&h=500&fit=crop",
-        active: true,
+        branches: [
+          {
+            branch_id: (await branch).id,
+            active: true,
+            price: 3.99,
+            cost: 1.8,
+            taxRate: 0.0,
+            stock: 100,
+            low_stock_threshold: 20,
+          },
+        ],
       },
       {
         name: "Whole Milk",
         description: "Fresh whole milk, 1 gallon",
         sku: "DRY-001",
         barcode: "4234567890123",
-        price: 3.49,
-        cost: 2.0,
         category: "Dairy",
-        taxRate: 0.0,
-        stock: 25,
-        low_stock_threshold: 5,
         image_url:
           "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=500&h=500&fit=crop",
-        active: true,
+        branches: [
+          {
+            branch_id: (await branch).id,
+            active: true,
+            price: 3.49,
+            cost: 2.0,
+            taxRate: 0.0,
+            stock: 25,
+            low_stock_threshold: 5,
+          },
+        ],
       },
       {
         name: "Artisan Bread",
         description: "Fresh baked artisan sourdough bread",
         sku: "BKY-001",
         barcode: "5234567890123",
-        price: 4.5,
-        cost: 2.25,
         category: "Bakery",
-        taxRate: 7.0,
-        stock: 15,
-        low_stock_threshold: 3,
         image_url:
           "https://images.unsplash.com/photo-1549931319-a545dcf3bc7c?w=500&h=500&fit=crop",
-        active: true,
+        branches: [
+          {
+            branch_id: (await branch).id,
+            active: true,
+            price: 4.5,
+            cost: 2.25,
+            taxRate: 7.0,
+            stock: 15,
+            low_stock_threshold: 3,
+          },
+        ],
       },
       {
         name: "Smartphone Charger",
         description: "Universal USB smartphone charger",
         sku: "ELC-001",
         barcode: "6234567890123",
-        price: 12.99,
-        cost: 5.0,
         category: "Electronics",
-        taxRate: 7.0,
-        stock: 20,
-        low_stock_threshold: 5,
         image_url:
           "https://images.unsplash.com/photo-1583863788344-a671644ec6a0?w=500&h=500&fit=crop",
-        active: true,
+        branches: [
+          {
+            branch_id: (await branch).id,
+            active: true,
+            price: 12.99,
+            cost: 5.0,
+            taxRate: 7.0,
+            stock: 20,
+            low_stock_threshold: 5,
+          },
+        ],
       },
     ];
 
     for (const product of products) {
-      await prisma.product.upsert({
+      const prod = await prisma.product.upsert({
         where: { sku: product.sku },
-        update: product,
-        create: product,
+        update: {
+          name: product.name,
+          description: product.description,
+          barcode: product.barcode,
+          category: product.category,
+          image_url: product.image_url,
+        },
+        create: {
+          name: product.name,
+          description: product.description,
+          sku: product.sku,
+          barcode: product.barcode,
+          category: product.category,
+          image_url: product.image_url,
+          BranchProduct: {
+            create: product.branches.map((branch) => ({
+              branch: {
+                connect: { id: branch.branch_id },
+              },
+              price: branch.price,
+              cost: branch.cost,
+              taxRate: branch.taxRate,
+              stock: branch.stock,
+              low_stock_threshold: branch.low_stock_threshold,
+              isActive: branch.active,
+            })),
+          },
+        },
       });
+
+      // Optional: Update or upsert BranchProduct separately
+      // for (const branch of product.branches) {
+      //   await prisma.branchProduct.upsert({
+      //     where: {
+      //       productId_branchId: {
+      //         productId: prod.id,
+      //         branchId: branch.branch_id,
+      //       },
+      //     },
+      //     update: {
+      //       price: branch.price,
+      //       cost: branch.cost,
+      //       taxRate: branch.taxRate,
+      //       stock: branch.stock,
+      //       low_stock_threshold: branch.low_stock_threshold,
+      //       isActive: branch.active,
+      //     },
+      //     create: {
+      //       product: { connect: { id: prod.id } },
+      //       branch: { connect: { id: branch.branch_id } },
+      //       price: branch.price,
+      //       cost: branch.cost,
+      //       taxRate: branch.taxRate,
+      //       stock: branch.stock,
+      //       low_stock_threshold: branch.low_stock_threshold,
+      //       isActive: branch.active,
+      //     },
+      //   });
+      // }
     }
 
     console.log(`${products.length} products created`);

@@ -38,6 +38,12 @@ export const getAllSales = async ({
               name: true,
             },
           },
+          branch: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
           items: {
             include: {
               product: {

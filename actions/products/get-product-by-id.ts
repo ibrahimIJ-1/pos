@@ -6,9 +6,19 @@ import { checkUserPermissions } from "../users/check-permissions";
 
 export const getProductById = async (id: string) => {
   try {
-    await checkUserPermissions([...rolePermissions[UserRole.MANAGER],...rolePermissions[UserRole.CASHIER]]);
+    await checkUserPermissions([
+      ...rolePermissions[UserRole.MANAGER],
+      ...rolePermissions[UserRole.CASHIER],
+    ]);
     const product = await prisma.product.findUnique({
       where: { id },
+      include: {
+        BranchProduct: {
+          include: {
+            branch: true,
+          },
+        },
+      },
     });
 
     if (!product) {

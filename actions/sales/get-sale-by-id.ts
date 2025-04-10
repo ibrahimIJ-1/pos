@@ -17,6 +17,12 @@ export const getSaleById = async (id: string) => {
             name: true,
           },
         },
+        branch: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         items: {
           include: {
             product: {
@@ -34,7 +40,11 @@ export const getSaleById = async (id: string) => {
             discount: true,
           },
         },
-        register: true,
+        register: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
 

@@ -47,6 +47,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { deleteRegister } from "@/actions/accounting/registers/delete-register";
 import { createRegister } from "@/actions/accounting/registers/create-register";
 import { updateRegister } from "@/actions/accounting/registers/update-register";
+import { getAllBranches } from "@/actions/branches/get-all-branches";
+import { deleteBranch } from "@/actions/branches/delete-branch";
+import { activateBranch } from "@/actions/branches/activate-branch";
+import { deactivateBranch } from "@/actions/branches/deactivate-branch";
+import { updateBranch } from "@/actions/branches/update-branch";
+import { createBranch } from "@/actions/branches/create-branch";
+import { getAllPOSProducts } from "@/actions/products/get-all-pos-products";
+import { getAllPOSDiscounts } from "@/actions/discounts/get-all-pos-discounts";
 
 // Helper function to simulate API delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -56,6 +64,13 @@ export const useProducts = () => {
   return useQuery({
     queryKey: ["products"],
     queryFn: getAllProducts,
+  });
+};
+
+export const usePOSProducts = () => {
+  return useQuery({
+    queryKey: ["pos-products"],
+    queryFn: getAllPOSProducts,
   });
 };
 
@@ -223,6 +238,116 @@ export const useCreateSale = () => {
   });
 };
 
+export const useBranches = () => {
+  return useQuery({
+    queryKey: ["branches"],
+    queryFn: getAllBranches,
+  });
+};
+
+export const useCreateBranch = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ name, address }: { name: string; address: string }) =>
+      createBranch(name, address),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["branches"] });
+      toast.success("Branch deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(
+        `Failed to delete branch: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    },
+  });
+};
+export const useUpdateBranch = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      address,
+      name,
+    }: {
+      id: string;
+      address: string;
+      name: string;
+    }) => updateBranch(id, name, address),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["branches"] });
+      toast.success("Branch deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(
+        `Failed to delete branch: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    },
+  });
+};
+
+export const useDeleteBranch = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteBranch,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["branches"] });
+      toast.success("Branch deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(
+        `Failed to delete branch: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    },
+  });
+};
+
+export const useOpenBranch = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id }: { id: string }) => activateBranch(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["branches"] });
+      toast.success("Branch activated successfully");
+    },
+    onError: (error) => {
+      toast.error(
+        `Failed to activated branch: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    },
+  });
+};
+
+export const useCloseBranch = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id }: { id: string }) => deactivateBranch(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["branches"] });
+      toast.success("Branch deactivated successfully");
+    },
+    onError: (error) => {
+      toast.error(
+        `Failed to deactivated branch: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    },
+  });
+};
+
 // Register Services
 export const useRegister = () => {
   return useQuery({
@@ -257,11 +382,13 @@ export const useCreateRegister = () => {
       macAddress,
       name,
       openBalance,
+      branchId,
     }: {
       macAddress: string;
       name: string;
       openBalance: number;
-    }) => createRegister(macAddress, name, openBalance),
+      branchId: string;
+    }) => createRegister(macAddress, name, openBalance, branchId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["registers"] });
       toast.success("Register deleted successfully");
@@ -283,11 +410,13 @@ export const useUpdateRegister = () => {
       macAddress,
       name,
       openBalance,
+      branchId,
     }: {
       macAddress: string;
       name: string;
       openBalance: number;
-    }) => updateRegister(macAddress, name, openBalance),
+      branchId: string;
+    }) => updateRegister(macAddress, name, openBalance, branchId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["registers"] });
       toast.success("Register deleted successfully");
@@ -411,6 +540,13 @@ export const useDiscounts = () => {
   });
 };
 
+export const usePOSDiscounts = () => {
+  return useQuery({
+    queryKey: ["pos-discounts"],
+    queryFn: getAllPOSDiscounts,
+  });
+};
+
 export const useDiscount = (id: string) => {
   return useQuery({
     queryKey: ["discounts", id],
@@ -451,7 +587,7 @@ export const useUpdateDiscount = () => {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["discounts"] });
-      queryClient.invalidateQueries({ queryKey: ["discounts", data.id] });
+      queryClient.invalidateQueries({ queryKey: ["discounts", (data as any).id] });
       toast.success("Discount updated successfully");
     },
     onError: (error) => {

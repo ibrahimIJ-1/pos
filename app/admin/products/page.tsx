@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useProducts, useDeleteProduct } from "@/lib/pos-service";
-import { Plus, Package, Search, Edit, Trash2 } from "lucide-react";
+import { useProducts, useDeleteProduct, useBranches } from "@/lib/pos-service";
+import { Plus, Package, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Sheet,
   SheetContent,
@@ -27,13 +26,19 @@ import {
 import { toast } from "sonner";
 import { ProductForm } from "@/components/product/ProductForm";
 import { ProductDetails } from "@/components/product/ProductDetails";
-import { Product } from "@prisma/client";
-import Decimal from "decimal.js";
+import { Branch, BranchProduct, Product } from "@prisma/client";
+import { ProductTable } from "@/components/product/ProductTable";
 
 export default function Products() {
   const { data: products = [], isLoading } = useProducts();
+  const { data: branches = [], isLoading: isBranchLoading } = useBranches();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<
+    | (Product & {
+        BranchProduct: Array<BranchProduct & { branch: Branch }>;
+      })
+    | null
+  >(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -42,7 +47,11 @@ export default function Products() {
 
   const deleteProductMutation = useDeleteProduct();
 
-  const filteredProducts = products.filter(
+  const filteredProducts = (
+    products as (Product & {
+      BranchProduct: Array<BranchProduct & { branch: Branch }>;
+    })[]
+  ).filter(
     (product) =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -66,12 +75,12 @@ export default function Products() {
     }
   };
 
-  const viewProduct = (product: Product) => {
+  const viewProduct = (product: any) => {
     setSelectedProduct(product);
     setIsDetailOpen(true);
   };
 
-  const editProduct = (product: Product) => {
+  const editProduct = (product: any) => {
     setSelectedProduct(product);
     setIsEditOpen(true);
   };
@@ -92,7 +101,7 @@ export default function Products() {
         <Input
           type="search"
           placeholder="Search by name, SKU, barcode or category..."
-          className="pl-8"
+          className="pl-8 neon-input"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -108,69 +117,12 @@ export default function Products() {
           <p>No products found</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {filteredProducts.map((product:any) => {
-            return (
-              <Card
-                key={product.id}
-                className="overflow-hidden transition-all hover:shadow-md cursor-pointer"
-                onClick={() => viewProduct(product)}
-              >
-                <div className="aspect-square relative bg-muted/40">
-                  <img
-                    src={product.image_url || "/placeholder.svg"}
-                    alt={product.name}
-                    className="object-cover w-full h-full"
-                  />
-                  {product.stock <= (product.low_stock_threshold || 0) && (
-                    <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-xs px-2 py-1 rounded-sm">
-                      Low Stock
-                    </div>
-                  )}
-                </div>
-                <CardContent className="p-3">
-                  <h3 className="font-medium truncate">{product.name}</h3>
-                  <div className="flex justify-between items-center mt-1">
-                    <span className="text-base font-bold">
-                      ${product.price.toFixed(2)}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      Stock: {product.stock}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center mt-2 text-xs text-muted-foreground">
-                    <span>SKU: {product.sku}</span>
-                    <span>{product.category}</span>
-                  </div>
-                  <div className="flex justify-end gap-2 mt-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        editProduct(product);
-                      }}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0 text-destructive"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(product);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+        <ProductTable
+          data={filteredProducts}
+          onView={viewProduct}
+          onEdit={editProduct}
+          onDelete={handleDelete}
+        />
       )}
 
       {/* Product Details Sheet */}
@@ -199,6 +151,7 @@ export default function Products() {
           </SheetHeader>
           {selectedProduct && (
             <ProductForm
+              branches={branches}
               product={selectedProduct}
               onSuccess={() => setIsEditOpen(false)}
               mode="edit"
@@ -213,7 +166,11 @@ export default function Products() {
           <SheetHeader>
             <SheetTitle>Add New Product</SheetTitle>
           </SheetHeader>
-          <ProductForm onSuccess={() => setIsCreateOpen(false)} mode="create" />
+          <ProductForm
+            branches={branches}
+            onSuccess={() => setIsCreateOpen(false)}
+            mode="create"
+          />
         </SheetContent>
       </Sheet>
 

@@ -12,14 +12,11 @@ import {
   Edit,
   Trash2,
   Plus,
-  Percent,
-  Tag,
-  Calendar,
+
   UnlockIcon,
   LockIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,16 +29,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ColumnDef } from "@tanstack/react-table";
 import { RegisterDialog } from "./RegisterDialog";
-import { Register, RegisterStatus } from "@prisma/client";
+import { Branch, Register, RegisterStatus } from "@prisma/client";
 import OpenCloseModal from "./OpenCloseModal";
 
 export const RegisterDataTable = () => {
   const { toast } = useToast();
   const { data: registers = [] } = useRegisters();
   const deleteRegister = useDeleteRegister();
-  const openRegister = useOpenRegister();
-  const closeRegister = useCloseRegister();
-
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -136,10 +130,10 @@ export const RegisterDataTable = () => {
     }
   };
 
-  const columns: ColumnDef<Register>[] = [
+  const columns: ColumnDef<Register & { branch?: Branch }>[] = [
     {
       accessorKey: "id",
-      header: "MAC-ADDRESS",
+      header: "Serial Number",
       cell: ({ row }) => <span className="font-medium">{row.original.id}</span>,
     },
     {
@@ -153,12 +147,22 @@ export const RegisterDataTable = () => {
         ),
     },
     {
+      accessorKey: "branch",
+      header: "Branch",
+      cell: ({ row }) =>
+        row.original.branch ? (
+          <Badge variant="outline">{row.original.branch.name}</Badge>
+        ) : (
+          <span className="text-muted-foreground text-sm">No branch</span>
+        ),
+    },
+    {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => getRegisterStatusBadge(row.original),
     },
     {
-      accessorKey: "status",
+      accessorKey: "lock",
       header: "Lock/Unlock",
       cell: ({ row }) => getRegisterStatusToggle(row.original),
     },

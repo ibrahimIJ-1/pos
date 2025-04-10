@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useDiscounts } from "@/lib/pos-service";
+import { useBranches, useDiscounts } from "@/lib/pos-service";
 import { UserRole, Permission } from "@/lib/permissions";
 import { PermissionGuard } from "@/hooks/usePermissions";
 import { useToast } from "@/hooks/use-toast";
@@ -19,11 +19,12 @@ import {
 import { Plus, Search, RefreshCw } from "lucide-react";
 import { DiscountDialog } from "@/components/discount/DiscountDialog";
 import { DiscountDataTable } from "@/components/discount/DiscountDataTable";
+import { Branch } from "@prisma/client";
 
 export default function Discounts() {
   const { toast } = useToast();
   const { data: discounts = [], isLoading, refetch } = useDiscounts();
-
+  const { data: branches = [], isLoading: isBranchLoading } = useBranches();
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
@@ -137,7 +138,7 @@ export default function Discounts() {
                 </div>
               </CardHeader>
               <CardContent>
-                <DiscountDataTable />
+                <DiscountDataTable branches={branches as unknown as Branch[]}/>
               </CardContent>
             </Card>
           </div>
@@ -146,6 +147,7 @@ export default function Discounts() {
 
       {/* Add Discount Dialog */}
       <DiscountDialog
+        branches={branches as unknown as Branch[]}
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
         mode="create"

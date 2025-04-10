@@ -5,40 +5,31 @@ import { prisma } from "@/lib/prisma";
 import { decimalToNumber } from "@/lib/utils";
 import { checkUserPermissions } from "../users/check-permissions";
 import { uploadFile } from "../tools/s3-bucket-uploader";
+import { BranchProduct } from "@prisma/client";
 
 export const createNewProduct = async ({
   name,
   description,
   sku,
   barcode,
-  price,
-  cost,
   category,
-  taxRate,
-  stock,
-  low_stock_threshold,
-  image_url,
   image_file,
+  branches,
 }: {
   name: string;
   description?: string;
   sku: string;
   barcode?: string | null;
-  price: any;
-  cost: any;
   category?: string;
-  taxRate: any;
-  stock?: any;
-  low_stock_threshold?: any;
   image_url?: string | null;
   image_file?: File | null;
+  branches: BranchProduct[];
 }) => {
   try {
     await checkUserPermissions([...rolePermissions[UserRole.MANAGER]]);
     // Validate required fields
-    if (!name || !sku || price === undefined || cost === undefined) {
+    if (!branches || branches.length < 1)
       throw new Error("Missing required product fields");
-    }
 
     // Check if product with SKU already exists
     const existingProduct = await prisma.product.findUnique({
@@ -60,14 +51,21 @@ export const createNewProduct = async ({
         description: description || "",
         sku,
         barcode,
-        price: price,
-        cost: cost,
         category: category || "Uncategorized",
-        taxRate: taxRate || 0,
-        stock: stock || 0,
-        low_stock_threshold: low_stock_threshold || 0,
         image_url: url,
-        active: true,
+        BranchProduct: {
+          create: branches.map((branch) => ({
+            branch: {
+              connect: { id: branch.branchId },
+            },
+            price: branch.price,
+            cost: branch.cost,
+            taxRate: branch.taxRate,
+            stock: branch.stock,
+            low_stock_threshold: branch.low_stock_threshold,
+            isActive: branch.isActive,
+          })),
+        },
       },
     });
 

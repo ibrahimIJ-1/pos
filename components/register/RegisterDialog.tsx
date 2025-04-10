@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
+  useBranches,
   useCreateRegister,
   useUpdateRegister,
-  useProducts,
 } from "@/lib/pos-service";
 import {
   Dialog,
@@ -26,26 +26,25 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+
+import { NumberInput } from "@/components/ui/number-input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Register } from "@prisma/client";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DateInput } from "@/components/ui/date-input";
-import { NumberInput } from "@/components/ui/number-input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Register } from "@prisma/client";
-import Decimal from "decimal.js";
+} from "../ui/select";
 
 const registerSchema = z.object({
-  id: z.string().min(3, { message: "Name must be at least 3 characters" }),
+  id: z.string().min(3, { message: "Serial Number must be at least 3 characters" }),
   name: z.string().min(3, { message: "Name must be at least 3 characters" }),
   openBalance: z.number().min(0, { message: "Value must be 0 or more" }),
+  branchId: z
+    .string()
+    .min(3, { message: "Branch must be at least 3 characters" }),
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -63,7 +62,7 @@ export function RegisterDialog({
   mode,
   register,
 }: RegisterDialogProps) {
-  const { data: products = [] } = useProducts();
+  const { data: branches } = useBranches();
   const createRegister = useCreateRegister();
   const updateRegister = useUpdateRegister();
 
@@ -73,6 +72,7 @@ export function RegisterDialog({
       id: undefined,
       name: undefined,
       openBalance: 0,
+      branchId: undefined,
     },
   });
 
@@ -82,12 +82,14 @@ export function RegisterDialog({
         id: register.id,
         name: register.name,
         openBalance: Number(register.openingBalance),
+        branchId: register.branchId,
       });
     } else if (open && mode === "create") {
       form.reset({
         id: undefined,
         name: undefined,
         openBalance: 0,
+        branchId: undefined,
       });
     }
   }, [open, mode, register, form]);
@@ -99,6 +101,7 @@ export function RegisterDialog({
           macAddress: values.id,
           name: values.name,
           openBalance: values.openBalance,
+          branchId: values.branchId,
         },
         {
           onSuccess: () => {
@@ -112,6 +115,7 @@ export function RegisterDialog({
           macAddress: values.id,
           name: values.name,
           openBalance: values.openBalance,
+          branchId: values.branchId,
         },
         {
           onSuccess: () => {
@@ -140,7 +144,7 @@ export function RegisterDialog({
                   name="id"
                   render={({ field }) => (
                     <FormItem className="px-1">
-                      <FormLabel>MacAddress</FormLabel>
+                      <FormLabel>Serial Number</FormLabel>
                       <FormControl>
                         <Input placeholder="Enter the Mac-Address" {...field} />
                       </FormControl>
@@ -161,6 +165,33 @@ export function RegisterDialog({
                           {...field}
                         />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="branchId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Branch</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a branch" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {branches?.map((branch) => (
+                            <SelectItem key={branch.id} value={branch.id}>
+                              {branch.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

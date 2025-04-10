@@ -3,7 +3,7 @@
 import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { decimalToNumber } from "@/lib/utils";
-import { Discount } from "@prisma/client";
+import { BranchProduct, Discount } from "@prisma/client";
 import { checkUserPermissions } from "../users/check-permissions";
 
 export const createNewDiscount = async ({
@@ -21,8 +21,8 @@ export const createNewDiscount = async ({
   endDate,
   maxUses,
   isActive,
-}: Discount & { productIds?: string[] }) => {
-
+  branches,
+}: Discount & { productIds?: string[] } & { branches?: string[] }) => {
   try {
     await checkUserPermissions([...rolePermissions[UserRole.ACCOUNTANT]]);
     // Validate required fields
@@ -62,6 +62,12 @@ export const createNewDiscount = async ({
           productIds && productIds.length > 0
             ? {
                 connect: productIds.map((id: string) => ({ id })),
+              }
+            : undefined,
+        branches:
+          branches && branches.length > 0
+            ? {
+                connect: branches.map((id: string) => ({ id })),
               }
             : undefined,
       },

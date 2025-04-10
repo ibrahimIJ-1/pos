@@ -1,5 +1,6 @@
 "use server";
 
+import { getRegisterById } from "@/actions/accounting/registers/get-register-by-id";
 import { checkUser } from "@/actions/Authorization";
 import { checkUserPermissions } from "@/actions/users/check-permissions";
 import { rolePermissions, UserRole } from "@/lib/permissions";
@@ -8,12 +9,17 @@ import { decimalToNumber } from "@/lib/utils";
 
 export const getAllUserCarts = async () => {
   try {
-    const userId = (await checkUser()).id;
+    const user = await checkUser();
+    const userId = user.id;
+
+    const reg = await getRegisterById(user.macAddress);
+    if (!reg) throw new Error("Register Not found");
     await checkUserPermissions(rolePermissions[UserRole.CASHIER]);
     // Get all carts for this user
     const carts = await prisma.cart.findMany({
       where: {
         userId,
+        branchId:reg.branchId
       },
       include: {
         items: true,
@@ -30,6 +36,7 @@ export const getAllUserCarts = async () => {
           userId,
           name: "Default Cart",
           isActive: true,
+          branchId:reg.branchId
         },
         include: {
           items: true,

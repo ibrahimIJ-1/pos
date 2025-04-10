@@ -1,5 +1,7 @@
+"use client"
+
 import { useState } from "react";
-import { useDiscounts } from "@/lib/pos-service";
+import { useDiscounts, usePOSDiscounts } from "@/lib/pos-service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -26,7 +28,7 @@ export function DiscountSelector({
   onOpenChange,
   onSelectDiscount,
 }: DiscountSelectorProps) {
-  const { data: discounts = [], isLoading } = useDiscounts();
+  const { data: discounts = [], isLoading } = usePOSDiscounts();
   const [searchTerm, setSearchTerm] = useState("");
 
   // Filter discounts by active status and search term

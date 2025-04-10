@@ -30,6 +30,7 @@ import {
   Tag,
   LogOut,
   ComputerIcon,
+  GitBranchIcon,
 } from "lucide-react";
 import { usePermissions } from "@/hooks/usePermissions";
 import { UserRole, Permission, rolePermissions } from "@/lib/permissions";
@@ -120,6 +121,12 @@ export default function Sidebar({
       icon: <ListChecks className="h-4 w-4" />,
       label: "Users",
       href: "/admin/users",
+      neededPermissions: rolePermissions[UserRole.OWNER],
+    },
+    {
+      icon: <GitBranchIcon className="h-4 w-4" />,
+      label: "Branches",
+      href: "/admin/branches",
       neededPermissions: rolePermissions[UserRole.OWNER],
     },
     {

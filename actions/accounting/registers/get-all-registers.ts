@@ -16,7 +16,14 @@ export const getAllRegisters = async () => {
             name: true,
           },
         },
+        branch: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
+
       orderBy: { name: "asc" },
     });
 

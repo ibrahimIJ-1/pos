@@ -8,7 +8,8 @@ import { decimalToNumber } from "@/lib/utils";
 export const createRegister = async (
   macAddress: string,
   name: string,
-  openingBalance = 0
+  openingBalance = 0,
+  branchId: string
 ) => {
   //   if (!req.user?.roles.some((role) => ["admin", "manager"].includes(role))) {
   //     return res
@@ -17,11 +18,14 @@ export const createRegister = async (
   //   }
 
   try {
-    await checkUserPermissions(rolePermissions[UserRole.MANAGER]);
-
     if (!name) {
       throw new Error("Register name is required");
     }
+    if (!branchId) {
+      throw new Error("Branch is required");
+    }
+
+    await checkUserPermissions(rolePermissions[UserRole.MANAGER]);
 
     const register = await prisma.register.create({
       data: {
@@ -29,6 +33,7 @@ export const createRegister = async (
         name,
         status: "CLOSED",
         openingBalance: openingBalance || 0,
+        branchId: branchId,
       },
       include: {
         cashier: {

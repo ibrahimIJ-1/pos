@@ -18,9 +18,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ColumnDef } from "@tanstack/react-table";
 import { DiscountDialog } from "./DiscountDialog";
-import { Discount, DiscountType } from "@prisma/client";
+import { Branch, Discount, DiscountType } from "@prisma/client";
 
-export const DiscountDataTable = () => {
+export const DiscountDataTable = ({branches}:{branches:Branch[]}) => {
   const { toast } = useToast();
   const { data: discounts = [] } = useDiscounts();
   const deleteDiscount = useDeleteDiscount();
@@ -225,6 +225,7 @@ export const DiscountDataTable = () => {
 
       {/* Add Discount Dialog */}
       <DiscountDialog
+      branches={branches}
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
         mode="create"
@@ -233,6 +234,7 @@ export const DiscountDataTable = () => {
       {/* Edit Discount Dialog */}
       {selectedDiscount && (
         <DiscountDialog
+        branches={branches}
           open={isEditDialogOpen}
           onOpenChange={setIsEditDialogOpen}
           mode="edit"

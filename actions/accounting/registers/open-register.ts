@@ -61,6 +61,7 @@ export const openRegister = async (id: string, openingBalance = 0) => {
           paymentMethod: "CASH",
           description: "Register opened",
           cashierId: userId,
+          branchId:updatedRegister.branchId
         },
       });
 

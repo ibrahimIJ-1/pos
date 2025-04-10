@@ -32,8 +32,18 @@ export const createNewSale = async (
     // Generate a unique sale number
     const saleNumber = await generateSaleNumber();
     const user = await checkUser();
-    
+
     if (!user) throw new Error("user not found");
+
+    const register = await prisma.register.findUnique({
+      where: {
+        id: user.macAddress,
+      },
+    });
+
+    if (!register) {
+      throw new Error("register not found");
+    }
     // Create the sale with its items
     const sale = await prisma.sale.create({
       data: {
@@ -48,6 +58,7 @@ export const createNewSale = async (
         paymentStatus,
         notes,
         registerId: user.macAddress,
+        branchId: register.branchId,
         items: {
           create: items.map((item: SaleItem) => ({
             productId: item.productId,
@@ -68,6 +79,12 @@ export const createNewSale = async (
             name: true,
           },
         },
+        branch: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         items: {
           include: {
             product: {
@@ -75,6 +92,11 @@ export const createNewSale = async (
                 id: true,
                 name: true,
                 sku: true,
+                BranchProduct: {
+                  where: {
+                    branchId: register.branchId,
+                  },
+                },
               },
             },
           },
@@ -82,10 +104,13 @@ export const createNewSale = async (
       },
     });
 
-    items.forEach((item) => {
-      prisma.product.update({
+    items.forEach(async (item) => {
+      await prisma.branchProduct.update({
         where: {
-          id: item.productId,
+          productId_branchId: {
+            branchId: register.branchId,
+            productId: item.productId,
+          },
         },
         data: {
           stock: {
@@ -99,14 +124,15 @@ export const createNewSale = async (
     if (user.macAddress) {
       await prisma.registerTransaction.create({
         data: {
-          registerId:user.macAddress,
+          registerId: user.macAddress,
+          branchId: register.branchId,
           type: "SALE",
           referenceId: sale.id,
           amount: totalAmount,
           paymentMethod,
           description: `Sale #${saleNumber}`,
           //TODO GET THE CASHIER ID
-          cashierId:user.id,
+          cashierId: user.id,
         },
       });
     }

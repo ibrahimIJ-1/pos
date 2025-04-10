@@ -6,7 +6,10 @@ import { checkUserPermissions } from "../users/check-permissions";
 
 export const getAllDiscounts = async () => {
   try {
-    await checkUserPermissions([...rolePermissions[UserRole.ACCOUNTANT],...rolePermissions[UserRole.CASHIER]]);
+    await checkUserPermissions([
+      ...rolePermissions[UserRole.ACCOUNTANT],
+      ...rolePermissions[UserRole.CASHIER],
+    ]);
     const discounts = await prisma.discount.findMany({
       include: {
         products: {
@@ -15,6 +18,7 @@ export const getAllDiscounts = async () => {
             name: true,
           },
         },
+        branches: true,
       },
       orderBy: { name: "asc" },
     });

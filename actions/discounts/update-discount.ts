@@ -2,8 +2,9 @@
 
 import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
-import { Discount } from "@prisma/client";
+import { BranchProduct, Discount } from "@prisma/client";
 import { checkUserPermissions } from "../users/check-permissions";
+import { decimalToNumber } from "@/lib/utils";
 
 export const updateDiscount = async ({
   id,
@@ -21,7 +22,10 @@ export const updateDiscount = async ({
   endDate,
   maxUses,
   isActive,
-}: Partial<Discount & { productIds?: string[] }>) => {
+  branches,
+}: Partial<
+  Discount & { productIds?: string[] } & { branches?: string[] }
+>) => {
   try {
     await checkUserPermissions([...rolePermissions[UserRole.ACCOUNTANT]]);
     // Validate required fields
@@ -53,6 +57,14 @@ export const updateDiscount = async ({
               ? productIds.map((id: string) => ({ id }))
               : undefined,
         },
+        branches: {
+          set: [],
+
+          connect:
+            branches && branches.length > 0
+              ? branches.map((id: string) => ({ id }))
+              : undefined,
+        },
       },
       include: {
         products: {
@@ -64,7 +76,7 @@ export const updateDiscount = async ({
       },
     });
 
-    return discount;
+    return decimalToNumber(discount);
   } catch (error) {
     console.error(`Error updating discount ${id}:`, error);
     throw new Error("Failed to update discount");

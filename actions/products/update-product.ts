@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { decimalToNumber } from "@/lib/utils";
 import { checkUserPermissions } from "../users/check-permissions";
 import { uploadFile } from "../tools/s3-bucket-uploader";
+import { BranchProduct } from "@prisma/client";
 
 export const updateProduct = async ({
   id,
@@ -12,42 +13,21 @@ export const updateProduct = async ({
   description,
   sku,
   barcode,
-  price,
-  cost,
   category,
-  taxRate,
-  stock,
-  low_stock_threshold,
   image_url,
-  active,
   image_file,
+  branches,
 }: {
   id: string;
   name: string;
   description?: string;
   sku: string;
   barcode?: string;
-  price: number;
-  cost: number;
   category?: string;
-  taxRate?: number;
-  stock?: number;
-  low_stock_threshold?: number;
   image_url?: string;
-  active?: boolean;
   image_file?: File | null;
+  branches: any[];
 }) => {
-  // Check if user has permission to edit products
-  //   if (
-  //     !req.user?.roles.includes("admin") &&
-  //     !req.user?.roles.includes("manager") &&
-  //     !req.user?.roles.includes("inventory_clerk")
-  //   ) {
-  //     return res
-  //       .status(403)
-  //       .json({ error: "You do not have permission to edit products" });
-  //   }
-
   try {
     await checkUserPermissions([
       ...rolePermissions[UserRole.MANAGER],
@@ -56,6 +36,46 @@ export const updateProduct = async ({
     if (image_file) {
       image_url = await uploadFile(image_file);
     }
+
+    const incomingBranchIds = branches.map((b) => b.branchId);
+    for (const branch of branches) {
+      await prisma.branchProduct.upsert({
+        where: {
+          productId_branchId: {
+            productId: id,
+            branchId: branch.branchId,
+          },
+        },
+        update: {
+          price: branch.price,
+          cost: branch.cost,
+          taxRate: branch.taxRate,
+          stock: branch.stock,
+          low_stock_threshold: branch.low_stock_threshold,
+          isActive: branch.isActive,
+        },
+        create: {
+          product: { connect: { id: id } },
+          branch: { connect: { id: branch.branchId } },
+          price: branch.price,
+          cost: branch.cost,
+          taxRate: branch.taxRate,
+          stock: branch.stock,
+          low_stock_threshold: branch.low_stock_threshold,
+          isActive: branch.isActive,
+        },
+      });
+    }
+
+    // 3. Delete removed branches
+    await prisma.branchProduct.deleteMany({
+      where: {
+        productId: id,
+        branchId: {
+          notIn: incomingBranchIds,
+        },
+      },
+    });
     const product = await prisma.product.update({
       where: { id },
       data: {
@@ -63,14 +83,8 @@ export const updateProduct = async ({
         sku,
         description,
         barcode,
-        price: price,
-        cost: cost,
         category,
-        taxRate: taxRate ?? 0,
-        stock: stock ?? 0,
-        low_stock_threshold: low_stock_threshold ?? 0,
         image_url,
-        active: active !== undefined ? active : true,
       },
     });
 

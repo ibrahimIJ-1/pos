@@ -1,5 +1,6 @@
 "use server";
 
+import { getRegisterById } from "@/actions/accounting/registers/get-register-by-id";
 import { checkUser } from "@/actions/Authorization";
 import { checkUserPermissions } from "@/actions/users/check-permissions";
 import { rolePermissions, UserRole } from "@/lib/permissions";
@@ -8,13 +9,18 @@ import { decimalToNumber } from "@/lib/utils";
 
 export const duplicateCart = async (cartId: string) => {
   try {
-    const userId = (await checkUser()).id;
+    const user = await checkUser();
+    const userId = user.id;
+
+    const reg = await getRegisterById(user.macAddress);
+    if (!reg) throw new Error("Register Not found");
     await checkUserPermissions(rolePermissions[UserRole.CASHIER]);
     // Check if the cart exists and belongs to the user
     const sourceCart = await prisma.cart.findFirst({
       where: {
         id: cartId,
         userId,
+        branchId: reg.branchId,
       },
       include: {
         items: true,
@@ -44,6 +50,7 @@ export const duplicateCart = async (cartId: string) => {
         isActive: true,
         customerId: sourceCart.customerId,
         discountId: sourceCart.discountId,
+        branchId: reg.branchId,
       },
     });
 
@@ -65,7 +72,7 @@ export const duplicateCart = async (cartId: string) => {
 
     // Return the new cart with items
     const duplicatedCart = await prisma.cart.findUnique({
-      where: { id: newCart.id },
+      where: { id: newCart.id, branchId: reg.branchId },
       include: {
         items: true,
       },

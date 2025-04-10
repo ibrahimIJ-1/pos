@@ -1,33 +1,38 @@
-
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Edit, Barcode, DollarSign, ShoppingCart, AlertTriangle } from "lucide-react";
-import { Product } from "@prisma/client";
+import {
+  Edit,
+  Barcode,
+  DollarSign,
+  ShoppingCart,
+  AlertTriangle,
+  Store,
+} from "lucide-react";
+import { Product, BranchProduct, Branch } from "@prisma/client";
 
 interface ProductDetailsProps {
-  product: Product;
+  product: Product & {
+    BranchProduct: Array<BranchProduct & { branch: Branch }>;
+  };
   onEdit: () => void;
 }
 
 export function ProductDetails({ product, onEdit }: ProductDetailsProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     }).format(date);
   };
-  
-  const isLowStock = product.stock <= (product.low_stock_threshold || 0);
-  
-  // Calculate profit margin percentage
-  const calculateProfitMargin = () => {
-    if (!product.cost || Number(product.cost) === 0) return "N/A";
-    const margin = ((Number(product.price) - Number(product.cost)) / Number(product.price)) * 100;
+
+  const calculateProfitMargin = (price: number, cost: number) => {
+    if (!cost || cost === 0) return "N/A";
+    const margin = ((price - cost) / price) * 100;
     return `${margin.toFixed(1)}%`;
   };
 
@@ -44,7 +49,7 @@ export function ProductDetails({ product, onEdit }: ProductDetailsProps) {
             Edit
           </Button>
         </div>
-        
+
         <div className="aspect-video bg-muted rounded-md overflow-hidden">
           <img
             src={product.image_url || "/placeholder.svg"}
@@ -52,81 +57,127 @@ export function ProductDetails({ product, onEdit }: ProductDetailsProps) {
             className="object-contain w-full h-full"
           />
         </div>
-        
+
         {product.description && (
           <div>
             <h3 className="font-medium mb-1">Description</h3>
-            <p className="text-sm text-muted-foreground">{product.description}</p>
+            <p className="text-sm text-muted-foreground">
+              {product.description}
+            </p>
           </div>
         )}
-        
+
         <Separator />
-        
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <h3 className="text-sm font-medium">Price</h3>
-            <p className="flex items-center gap-1 text-base font-semibold">
-              <DollarSign className="h-4 w-4 text-green-500" />
-              ${product.price.toFixed(2)}
-            </p>
-          </div>
-          
-          <div className="space-y-1">
-            <h3 className="text-sm font-medium">Cost</h3>
-            <p className="flex items-center gap-1 text-base">
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-              ${product.cost.toFixed(2)}
-            </p>
-          </div>
-          
-          <div className="space-y-1">
-            <h3 className="text-sm font-medium">Profit Margin</h3>
-            <p className="text-base">{calculateProfitMargin()}</p>
-          </div>
-          
-          <div className="space-y-1">
-            <h3 className="text-sm font-medium">Tax Rate</h3>
-            <p className="text-base">{(Number(product.taxRate) * 100).toFixed(1)}%</p>
-          </div>
-        </div>
-        
-        <Separator />
-        
-        <div className="space-y-3">
-          <div className="flex justify-between items-center">
-            <h3 className="font-medium">Inventory Status</h3>
-            {isLowStock && (
-              <div className="flex items-center gap-1 text-destructive text-sm">
-                <AlertTriangle className="h-4 w-4" />
-                Low Stock
+
+        {/* Branch Products Section */}
+        <div className="space-y-4">
+          <h3 className="text-xl font-semibold">Branch Availability</h3>
+
+          {product.BranchProduct.map((branchProduct) => {
+            const price = Number(branchProduct.price);
+            const cost = Number(branchProduct.cost);
+            const isLowStock =
+              branchProduct.stock <= branchProduct.low_stock_threshold;
+
+            return (
+              <div
+                key={branchProduct.id}
+                className="space-y-4 p-4 border rounded-lg"
+              >
+                <div className="flex items-center gap-2">
+                  <Store className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <h4 className="font-medium">{branchProduct.branch.name}</h4>
+                    {branchProduct.branch.address && (
+                      <p className="text-sm text-muted-foreground">
+                        {branchProduct.branch.address}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium">Price</h3>
+                    <p className="flex items-center gap-1 text-base font-semibold">
+                      <DollarSign className="h-4 w-4 text-green-500" />$
+                      {price.toFixed(2)}
+                    </p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium">Cost</h3>
+                    <p className="flex items-center gap-1 text-base">
+                      <DollarSign className="h-4 w-4 text-muted-foreground" />$
+                      {cost.toFixed(2)}
+                    </p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium">Profit Margin</h3>
+                    <p className="text-base">
+                      {calculateProfitMargin(price, cost)}
+                    </p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium">Tax Rate</h3>
+                    <p className="text-base">
+                      {(Number(branchProduct.taxRate) * 100).toFixed(1)}%
+                    </p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium">Current Stock</h3>
+                    <p className="flex items-center gap-1 text-base">
+                      <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+                      {branchProduct.stock} units
+                    </p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium">Low Stock Threshold</h3>
+                    <p className="text-base">
+                      {branchProduct.low_stock_threshold} units
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium">Status</h3>
+                    <div
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        branchProduct.isActive
+                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                          : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+                      }`}
+                    >
+                      {branchProduct.isActive ? "Active" : "Inactive"}
+                    </div>
+                  </div>
+
+                  {isLowStock && (
+                    <div className="flex items-center gap-1 text-destructive text-sm">
+                      <AlertTriangle className="h-4 w-4" />
+                      Low Stock
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <h3 className="text-sm font-medium">Current Stock</h3>
-              <p className="flex items-center gap-1 text-base">
-                <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-                {product.stock} units
-              </p>
-            </div>
-            
-            <div className="space-y-1">
-              <h3 className="text-sm font-medium">Low Stock Threshold</h3>
-              <p className="text-base">{product.low_stock_threshold || 0} units</p>
-            </div>
-          </div>
+            );
+          })}
         </div>
-        
+
         <Separator />
-        
+
+        {/* Product Metadata */}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
             <h3 className="text-sm font-medium">Category</h3>
             <p className="text-base">{product.category || "Uncategorized"}</p>
           </div>
-          
+
           {product.barcode && (
             <div className="space-y-1">
               <h3 className="text-sm font-medium">Barcode</h3>
@@ -137,29 +188,35 @@ export function ProductDetails({ product, onEdit }: ProductDetailsProps) {
             </div>
           )}
         </div>
-        
-        <div className="grid grid-cols-2 gap-4">
+
+        {/* <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
             <h3 className="text-sm font-medium">Created</h3>
-            <p className="text-sm text-muted-foreground">{formatDate(product.created_at.toISOString())}</p>
+            <p className="text-sm text-muted-foreground">
+              {product.created_at.toString()}
+            </p>
           </div>
-          
+
           <div className="space-y-1">
             <h3 className="text-sm font-medium">Last Updated</h3>
-            <p className="text-sm text-muted-foreground">{formatDate(product.updated_at.toISOString())}</p>
+            <p className="text-sm text-muted-foreground">
+              {product.updated_at.toString()}
+            </p>
           </div>
-        </div>
-        
-        <div className="space-y-1">
-          <h3 className="text-sm font-medium">Status</h3>
-          <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-            product.active 
-              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300" 
-              : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-          }`}>
+        </div> */}
+
+        {/* <div className="space-y-1">
+          <h3 className="text-sm font-medium">Global Status</h3>
+          <div
+            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+              product.active
+                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+            }`}
+          >
             {product.active ? "Active" : "Inactive"}
           </div>
-        </div>
+        </div> */}
       </div>
     </ScrollArea>
   );

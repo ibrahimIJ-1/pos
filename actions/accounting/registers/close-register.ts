@@ -79,6 +79,7 @@ export const closeRegister = async (id: string, closingBalance: number) => {
           paymentMethod: "CASH",
           description: "Register closed",
           cashierId: userId,
+          branchId:updatedRegister.branchId
         },
       });
 

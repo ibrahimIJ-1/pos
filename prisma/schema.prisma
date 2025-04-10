@@ -70,26 +70,21 @@ model UserPermission {
 }
 
 model Product {
-  id                  String     @id @default(uuid())
-  name                String
-  description         String     @db.Text
-  sku                 String     @unique
-  barcode             String?    @unique
-  price               Decimal    @db.Decimal(10, 2)
-  cost                Decimal    @db.Decimal(10, 2)
-  category            String
-  taxRate             Decimal    @map("tax_rate") @db.Decimal(5, 2)
-  stock               Int
-  low_stock_threshold Int        @map("low_stock_threshold")
-  image_url           String?    @map("image_url") @db.Text
-  active              Boolean    @default(true)
-  created_at          DateTime   @default(now()) @map("created_at")
-  updated_at          DateTime   @updatedAt @map("updated_at")
-  saleItems           SaleItem[]
-  discountProducts    Discount[] @relation("DiscountProducts")
-  cartItem            CartItem[]
+  id               String          @id @default(uuid())
+  name             String
+  description      String          @db.Text
+  sku              String          @unique
+  barcode          String?         @unique
+  category         String
+  image_url        String?         @map("image_url") @db.Text
+  created_at       DateTime        @default(now()) @map("created_at")
+  updated_at       DateTime        @updatedAt @map("updated_at")
+  saleItems        SaleItem[]
+  discountProducts Discount[]      @relation("DiscountProducts")
+  cartItem         CartItem[]
   // Optional: if you frequently filter active products
   // @@index([active])
+  BranchProduct    BranchProduct[]
 
   @@index([category])
   @@map("products")
@@ -132,8 +127,10 @@ model Sale {
   updated_at       DateTime?      @updatedAt @map("updated_at")
   items            SaleItem[]
   discountsApplied SaleDiscount[] @relation("SaleDiscounts")
-  register         Register?      @relation(fields: [registerId], references: [id],onUpdate: Cascade,onDelete: Cascade)
+  register         Register?      @relation(fields: [registerId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   registerId       String?        @map("register_id")
+  branchId         String         @map("branch_id")
+  branch           Branch         @relation(fields: [branchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   // Optionally, if you filter by date range:
   // @@index([created_at])
 
@@ -174,6 +171,8 @@ model Register {
   updated_at       DateTime              @updatedAt @map("updated_at")
   transactions     RegisterTransaction[]
   sales            Sale[]
+  branchId         String                @map("branch_id")
+  branch           Branch                @relation(fields: [branchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   // Optional: if you filter by status:
   // @@index([status])
 
@@ -183,7 +182,7 @@ model Register {
 model RegisterTransaction {
   id            String          @id @default(uuid())
   registerId    String          @map("register_id")
-  register      Register        @relation(fields: [registerId], references: [id], onDelete: Cascade,onUpdate: Cascade)
+  register      Register        @relation(fields: [registerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   type          TransactionType
   referenceId   String?         @map("reference_id")
   amount        Decimal         @db.Decimal(10, 2)
@@ -191,10 +190,13 @@ model RegisterTransaction {
   description   String
   cashierId     String          @map("cashier_id")
   cashier       User            @relation("UserTransactions", fields: [cashierId], references: [id])
+  branchId      String          @map("branch_id")
+  branch        Branch          @relation(fields: [branchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   created_at    DateTime        @default(now()) @map("created_at")
 
   @@index([registerId])
   @@index([cashierId])
+  @@index([branchId])
   @@map("register_transactions")
 }
 
@@ -218,6 +220,7 @@ model Discount {
   created_at        DateTime          @default(now()) @map("created_at")
   updated_at        DateTime          @updatedAt @map("updated_at")
   sales             SaleDiscount[]    @relation("DiscountSales")
+  branches          Branch[]          @relation("DiscountBranches")
 
   @@index([isActive, startDate, endDate])
   @@map("discounts")
@@ -257,6 +260,8 @@ model Cart {
   discountId String?    @map("discount_id")
   createdAt  DateTime   @default(now()) @map("created_at")
   updatedAt  DateTime   @updatedAt @map("updated_at")
+  branchId   String     @map("branch_id")
+  branch     Branch     @relation(fields: [branchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([userId, isActive])
   @@map("carts")
@@ -277,6 +282,42 @@ model CartItem {
 
   @@unique([cartId, productId])
   @@map("cart_items")
+}
+
+model Branch {
+  id                  String                @id @default(uuid())
+  name                String
+  address             String?
+  isActive            Boolean               @default(true) @map("is_active")
+  created_at          DateTime              @default(now()) @map("created_at")
+  updated_at          DateTime              @updatedAt @map("updated_at")
+  Register            Register[]
+  RegisterTransaction RegisterTransaction[]
+  Sale                Sale[]
+  BranchProduct       BranchProduct[]
+  discountBranches    Discount[]            @relation("DiscountBranches")
+  Cart                Cart[]
+
+  @@map("branches")
+}
+
+model BranchProduct {
+  id                  String   @id @default(uuid())
+  branchId            String   @map("branch_id")
+  branch              Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  productId           String   @map("product_id")
+  product             Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  price               Decimal  @db.Decimal(10, 2)
+  cost                Decimal  @db.Decimal(10, 2)
+  taxRate             Decimal  @map("tax_rate") @db.Decimal(5, 2)
+  stock               Int
+  low_stock_threshold Int      @map("low_stock_threshold")
+  isActive            Boolean  @default(true) @map("is_active")
+  created_at          DateTime @default(now()) @map("created_at")
+  updated_at          DateTime @updatedAt @map("updated_at")
+
+  @@unique([productId, branchId])
+  @@map("branch_products")
 }
 
 // Enums

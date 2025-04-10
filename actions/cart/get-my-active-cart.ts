@@ -2,13 +2,20 @@
 
 import { prisma } from "@/lib/prisma";
 import { decimalToNumber } from "@/lib/utils";
+import { checkUser } from "../Authorization";
+import { getRegisterById } from "../accounting/registers/get-register-by-id";
 
 export const getMyActiveUserCart = async (userId: string) => {
   // Try to fetch the active cart for this user
+  const user = await checkUser();
+  const reg = await getRegisterById(user.macAddress)
+  if (!reg) throw new Error("Register Not found");
+  const branchId = reg.branchId;
   let cart = await prisma.cart.findFirst({
     where: {
       userId,
       isActive: true,
+      branchId,
     },
     include: {
       items: {
@@ -26,6 +33,7 @@ export const getMyActiveUserCart = async (userId: string) => {
         userId,
         name: "Default Cart",
         isActive: true,
+        branchId,
       },
       include: {
         items: {

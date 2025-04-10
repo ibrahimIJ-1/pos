@@ -1,4 +1,3 @@
-// actions/dashboard.ts
 "use server";
 
 import { prisma } from "@/lib/prisma";
@@ -9,22 +8,22 @@ type DateRange = "last7" | "last30" | "last90" | "last365" | "all";
 export async function getDashboardData(
   dateRange: DateRange = "last30"
 ): Promise<DashboardData> {
-  // Calculate date based on range
+  // Fixed date calculation (prevents mutation of original date)
   const now = new Date();
   let startDate: Date;
 
   switch (dateRange) {
     case "last7":
-      startDate = new Date(now.setDate(now.getDate() - 7));
+      startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       break;
     case "last30":
-      startDate = new Date(now.setDate(now.getDate() - 30));
+      startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       break;
     case "last90":
-      startDate = new Date(now.setDate(now.getDate() - 90));
+      startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
       break;
     case "last365":
-      startDate = new Date(now.setDate(now.getDate() - 365));
+      startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
       break;
     case "all":
     default:
@@ -77,11 +76,11 @@ export async function getDashboardData(
       },
     }),
 
-    // Low Stock Items (current inventory)
-    prisma.product.count({
+    // FIXED: Low Stock Items (now using BranchProduct)
+    prisma.branchProduct.count({
       where: {
         stock: {
-          lt: prisma.product.fields.low_stock_threshold,
+          lt: prisma.branchProduct.fields.low_stock_threshold,
         },
       },
     }),
@@ -119,7 +118,7 @@ export async function getDashboardData(
       GROUP BY payment_method
     `,
 
-    // Recent Transactions (always shows last 5 regardless of range)
+    // Recent Transactions (last 5 regardless of range)
     prisma.registerTransaction.findMany({
       take: 5,
       orderBy: {

@@ -6,7 +6,10 @@ import { checkUserPermissions } from "../users/check-permissions";
 
 export const getDiscountById = async (id: string) => {
   try {
-    await checkUserPermissions([...rolePermissions[UserRole.ACCOUNTANT],...rolePermissions[UserRole.CASHIER]]);
+    await checkUserPermissions([
+      ...rolePermissions[UserRole.ACCOUNTANT],
+      ...rolePermissions[UserRole.CASHIER],
+    ]);
     const discount = await prisma.discount.findUnique({
       where: { id },
       include: {
@@ -16,6 +19,7 @@ export const getDiscountById = async (id: string) => {
             name: true,
           },
         },
+        branches: true,
       },
     });
 

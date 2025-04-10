@@ -1,4 +1,3 @@
-import "../globals.css";
 import { Toaster } from "sonner";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Sidebar from "@/components/sidebar";
