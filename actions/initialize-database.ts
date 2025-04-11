@@ -16,7 +16,7 @@ export const initDatabase = async () => {
 
     await saveSettings(settingsPayload);
     // Create default branch
-    let branch = prisma.branch.create({
+    let branch = await prisma.branch.create({
       data: {
         name: process.env.DEFAULT_BRANCH_NAME as string,
         address: "Iraq, Erbil",
@@ -53,9 +53,16 @@ export const initDatabase = async () => {
         email: "admin@example.com",
         password: adminPassword,
         avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Admin",
+
         roles: {
           connect: {
             name: UserRole.ADMIN,
+          },
+        },
+        branchId: branch.id,
+        branches: {
+          connect: {
+            id: branch.id,
           },
         },
       },
@@ -75,6 +82,12 @@ export const initDatabase = async () => {
             name: UserRole.CASHIER,
           },
         },
+        branchId: branch.id,
+        branches: {
+          connect: {
+            id: branch.id,
+          },
+        },
       },
     });
 
@@ -90,6 +103,12 @@ export const initDatabase = async () => {
         roles: {
           connect: {
             name: UserRole.MANAGER,
+          },
+        },
+        branchId: branch.id,
+        branches: {
+          connect: {
+            id: branch.id,
           },
         },
       },

@@ -10,6 +10,7 @@ export const updateUser = async ({
   email,
   roles,
   active,
+  branches,
 }: {
   id: string;
   name: string;
@@ -17,6 +18,7 @@ export const updateUser = async ({
   password?: string;
   roles?: string[];
   active?: boolean;
+  branches?: string[];
 }) => {
   try {
     // Validate required fields
@@ -33,7 +35,7 @@ export const updateUser = async ({
     };
 
     // If password is provided, hash it
-    updated_ata.password = await bcrypt.hash("12345678", 10);
+    // updated_ata.password = await bcrypt.hash("12345678", 10);
 
     // Update the user
     const user = await prisma.user.update({
@@ -44,6 +46,12 @@ export const updateUser = async ({
           ? {
               set: [], // First disconnect all roles
               connect: roles.map((role: string) => ({ name: role })),
+            }
+          : undefined,
+        branches: branches
+          ? {
+              set: [], // First disconnect all roles
+              connect: branches.map((branch: string) => ({ id: branch })),
             }
           : undefined,
       },
@@ -59,8 +67,11 @@ export const updateUser = async ({
             name: true,
           },
         },
+        branchId: true,
+        mainBranch: true,
         created_at: true,
         updated_at: true,
+        branches: true,
       },
     });
 

@@ -67,6 +67,8 @@ import { getAllUsers } from "@/actions/users/get-all-users";
 import { createNewUser } from "@/actions/users/create-new-user";
 import { updateUser, updateUserPassword } from "@/actions/users/update-user";
 import { deleteUserById } from "@/actions/users/delete-user";
+import { useBranches } from "@/lib/pos-service";
+import { Branch } from "@prisma/client";
 
 // Define the shape of our user
 interface UserData {
@@ -78,6 +80,7 @@ interface UserData {
   active?: boolean;
   created_at?: Date;
   updated_at?: Date;
+  branches: Branch[];
 }
 
 // Schema for adding/editing users
@@ -98,6 +101,7 @@ const userFormSchema = z.object({
     message: "Please select at least one role.",
   }),
   active: z.boolean().default(true),
+  branches: z.array(z.string()).min(1, "At least one branch must be selected"),
 });
 
 // Schema for changing password
@@ -135,6 +139,7 @@ export default function UsersPage() {
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [activeTab, setActiveTab] = useState("all");
   const { roles } = useRolesPermissions();
+  const { data: branches } = useBranches();
 
   // Form for adding new users
   const addForm = useForm<z.infer<typeof userFormSchema>>({
@@ -144,6 +149,7 @@ export default function UsersPage() {
       email: "",
       roles: [UserRole.VIEWER],
       active: true,
+      branches: [],
     },
   });
 
@@ -155,6 +161,7 @@ export default function UsersPage() {
       email: "",
       roles: [],
       active: true,
+      branches: [],
     },
   });
 
@@ -199,7 +206,9 @@ export default function UsersPage() {
         values.name,
         values.email,
         values.password ?? "12345678",
-        values.roles
+        values.roles,
+        true,
+        values.branches
       );
 
       setData([...data, response]);
@@ -237,6 +246,7 @@ export default function UsersPage() {
         email: values.email,
         roles: values.roles,
         active: values.active,
+        branches: values.branches,
         ...(values.password ? { password: values.password } : {}),
       });
 
@@ -370,6 +380,7 @@ export default function UsersPage() {
         email: selectedUser.email,
         roles: selectedUser.roles.map((r) => r.name),
         active: selectedUser.active ?? true,
+        branches: selectedUser.branches.map((b) => b.id),
       });
     }
   }, [selectedUser, openEditDialog, editForm]);
@@ -600,6 +611,43 @@ export default function UsersPage() {
                   />
                   <FormField
                     control={addForm.control}
+                    name="branches"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Select Branches</FormLabel>
+                        <div className="border rounded-md p-2 max-h-40 overflow-y-auto space-y-2">
+                          {branches?.map((branch) => (
+                            <div
+                              key={branch.id}
+                              className="flex items-center space-x-2"
+                            >
+                              <Checkbox
+                                id={`branch-${branch.id}`}
+                                checked={field.value?.includes(branch.id)}
+                                onCheckedChange={(checked) => {
+                                  const newValue = checked
+                                    ? [...(field.value || []), branch.id]
+                                    : (field.value || []).filter(
+                                        (id: string) => id !== branch.id
+                                      );
+                                  field.onChange(newValue);
+                                }}
+                              />
+                              <label
+                                htmlFor={`branch-${branch.id}`}
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                              >
+                                {branch.name}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={addForm.control}
                     name="roles"
                     render={() => (
                       <FormItem>
@@ -726,6 +774,43 @@ export default function UsersPage() {
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editForm.control}
+                  name="branches"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Select Branches</FormLabel>
+                      <div className="border rounded-md p-2 max-h-40 overflow-y-auto space-y-2">
+                        {branches?.map((branch) => (
+                          <div
+                            key={branch.id}
+                            className="flex items-center space-x-2"
+                          >
+                            <Checkbox
+                              id={`branch-${branch.id}`}
+                              checked={field.value?.includes(branch.id)}
+                              onCheckedChange={(checked) => {
+                                const newValue = checked
+                                  ? [...(field.value || []), branch.id]
+                                  : (field.value || []).filter(
+                                      (id: string) => id !== branch.id
+                                    );
+                                field.onChange(newValue);
+                              }}
+                            />
+                            <label
+                              htmlFor={`branch-${branch.id}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              {branch.name}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}

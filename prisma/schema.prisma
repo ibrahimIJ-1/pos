@@ -26,9 +26,12 @@ model User {
   sales                 Sale[]                @relation("UserSales")
   transactions          RegisterTransaction[] @relation("UserTransactions")
   registers             Register[]            @relation("UserRegisters")
+  branchId              String?               @map("branch_id")
+  mainBranch            Branch?               @relation("MainBranch", fields: [branchId], references: [id])
+  branches              Branch[]              @relation("UserBranches")
+
   // Optional: if you filter by active status frequently
   // @@index([active])
-
   @@map("users")
 }
 
@@ -297,6 +300,8 @@ model Branch {
   BranchProduct       BranchProduct[]
   discountBranches    Discount[]            @relation("DiscountBranches")
   Cart                Cart[]
+  mainBranchUsers     User[]                @relation("MainBranch")
+  users               User[]                @relation("UserBranches")
 
   @@map("branches")
 }
