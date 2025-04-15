@@ -55,6 +55,8 @@ import { updateBranch } from "@/actions/branches/update-branch";
 import { createBranch } from "@/actions/branches/create-branch";
 import { getAllPOSProducts } from "@/actions/products/get-all-pos-products";
 import { getAllPOSDiscounts } from "@/actions/discounts/get-all-pos-discounts";
+import { getAllUserBranches } from "@/actions/branches/get-user-all-branches";
+import { setUserDefaultBranch } from "@/actions/branches/set-user-default-branch";
 
 // Helper function to simulate API delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -244,6 +246,12 @@ export const useBranches = () => {
     queryFn: getAllBranches,
   });
 };
+export const useUserBranches = () => {
+  return useQuery({
+    queryKey: ["userBranches"],
+    queryFn: getAllUserBranches,
+  });
+};
 
 export const useCreateBranch = () => {
   const queryClient = useQueryClient();
@@ -258,6 +266,23 @@ export const useCreateBranch = () => {
     onError: (error) => {
       toast.error(
         `Failed to delete branch: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    },
+  });
+};
+export const useSetUserDefaultBranch = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (branchId: string) => setUserDefaultBranch(branchId),
+    onSuccess: () => {
+      window.location.reload();
+    },
+    onError: (error) => {
+      toast.error(
+        `Failed to change branch: ${
           error instanceof Error ? error.message : "Unknown error"
         }`
       );
@@ -587,7 +612,9 @@ export const useUpdateDiscount = () => {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["discounts"] });
-      queryClient.invalidateQueries({ queryKey: ["discounts", (data as any).id] });
+      queryClient.invalidateQueries({
+        queryKey: ["discounts", (data as any).id],
+      });
       toast.success("Discount updated successfully");
     },
     onError: (error) => {

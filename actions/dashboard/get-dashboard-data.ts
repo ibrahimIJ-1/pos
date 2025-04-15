@@ -1,14 +1,31 @@
+// app/actions/dashboard/get-dashboard-data.ts
 "use server";
 
 import { prisma } from "@/lib/prisma";
 import { DashboardData } from "@/lib/types/dashboard";
+import { checkUser } from "../Authorization";
 
 type DateRange = "last7" | "last30" | "last90" | "last365" | "all";
 
 export async function getDashboardData(
   dateRange: DateRange = "last30"
 ): Promise<DashboardData> {
-  // Fixed date calculation (prevents mutation of original date)
+  // Get authenticated user with branch ID
+  const user = await checkUser();
+
+  const mainBranchId = await prisma.user.findUnique({
+    where: {
+      id: user.id,
+    },
+    select: {
+      branchId: true,
+    },
+  });
+  if (!mainBranchId || !mainBranchId?.branchId)
+    throw new Error("No branch Found");
+  const userBranchId = mainBranchId?.branchId;
+
+  // Date calculations
   const now = new Date();
   let startDate: Date;
 
@@ -27,11 +44,11 @@ export async function getDashboardData(
       break;
     case "all":
     default:
-      startDate = new Date(0); // Unix epoch start
+      startDate = new Date(0);
       break;
   }
 
-  // Fetch all data in parallel
+  // Fetch all data in parallel with branch filtering
   const [
     totalRevenueResult,
     salesCount,
@@ -42,61 +59,56 @@ export async function getDashboardData(
     paymentMethodsRaw,
     recentTransactions,
   ] = await Promise.all([
-    // Total Revenue (filtered by date range)
+    // Total Revenue
     prisma.sale.aggregate({
-      _sum: {
-        totalAmount: true,
-      },
+      _sum: { totalAmount: true },
       where: {
-        created_at: {
-          gte: startDate,
-        },
+        branchId: userBranchId,
+        created_at: { gte: startDate },
       },
     }),
 
-    // Sales Count (filtered by date range)
+    // Sales Count
     prisma.sale.count({
       where: {
-        created_at: {
-          gte: startDate,
-        },
+        branchId: userBranchId,
+        created_at: { gte: startDate },
       },
     }),
 
-    // Active Customers (who made purchases in date range)
+    // Active Customers
     prisma.customer.count({
       where: {
         sales: {
           some: {
-            created_at: {
-              gte: startDate,
-            },
+            branchId: userBranchId,
+            created_at: { gte: startDate },
           },
         },
       },
     }),
 
-    // FIXED: Low Stock Items (now using BranchProduct)
+    // Low Stock Items
     prisma.branchProduct.count({
       where: {
-        stock: {
-          lt: prisma.branchProduct.fields.low_stock_threshold,
-        },
+        branchId: userBranchId,
+        stock: { lt: prisma.branchProduct.fields.low_stock_threshold },
       },
     }),
 
-    // Monthly Revenue (filtered by date range)
+    // Monthly Revenue
     prisma.$queryRaw<{ month: string; revenue: number }[]>`
       SELECT 
         DATE_FORMAT(created_at, '%Y-%m') as month,
         SUM(total_amount) as revenue
       FROM sales
-      WHERE created_at >= ${startDate}
+      WHERE branch_id = ${userBranchId}
+        AND created_at >= ${startDate}
       GROUP BY DATE_FORMAT(created_at, '%Y-%m')
       ORDER BY month ASC
     `,
 
-    // Sales by Category (filtered by date range)
+    // Sales by Category
     prisma.$queryRaw<{ id: string; value: number }[]>`
       SELECT 
         p.category as id,
@@ -104,26 +116,27 @@ export async function getDashboardData(
       FROM sale_items si
       JOIN products p ON si.product_id = p.id
       JOIN sales s ON si.sale_id = s.id
-      WHERE s.created_at >= ${startDate}
+      WHERE s.branch_id = ${userBranchId}
+        AND s.created_at >= ${startDate}
       GROUP BY p.category
     `,
 
-    // Payment Methods (filtered by date range)
+    // Payment Methods
     prisma.$queryRaw<{ id: string; value: number }[]>`
       SELECT 
         payment_method as id,
         SUM(total_amount) as value
       FROM sales
-      WHERE created_at >= ${startDate}
+      WHERE branch_id = ${userBranchId}
+        AND created_at >= ${startDate}
       GROUP BY payment_method
     `,
 
-    // Recent Transactions (last 5 regardless of range)
+    // Recent Transactions
     prisma.registerTransaction.findMany({
+      where: { branchId: userBranchId },
       take: 5,
-      orderBy: {
-        created_at: "desc",
-      },
+      orderBy: { created_at: "desc" },
       select: {
         id: true,
         amount: true,
@@ -134,20 +147,20 @@ export async function getDashboardData(
     }),
   ]);
 
-  // Transform raw SQL results to match expected types
-  const monthlyRevenue = monthlyRevenueRaw.map((item) => ({
-    month: item.month,
-    revenue: Number(item.revenue),
+  // Transform data
+  const monthlyRevenue = monthlyRevenueRaw.map((i) => ({
+    month: i.month,
+    revenue: Number(i.revenue),
   }));
 
-  const salesByCategory = salesByCategoryRaw.map((item) => ({
-    id: item.id,
-    value: Number(item.value),
+  const salesByCategory = salesByCategoryRaw.map((i) => ({
+    id: i.id,
+    value: Number(i.value),
   }));
 
-  const paymentMethods = paymentMethodsRaw.map((item) => ({
-    id: item.id,
-    value: Number(item.value),
+  const paymentMethods = paymentMethodsRaw.map((i) => ({
+    id: i.id,
+    value: Number(i.value),
   }));
 
   return {
@@ -159,10 +172,8 @@ export async function getDashboardData(
     salesByCategory,
     paymentMethods,
     recentTransactions: recentTransactions.map((tx) => ({
-      id: tx.id,
+      ...tx,
       amount: Number(tx.amount),
-      type: tx.type,
-      paymentMethod: tx.paymentMethod,
       createdAt: tx.created_at,
     })),
   };

@@ -31,6 +31,7 @@ import {
   LogOut,
   ComputerIcon,
   GitBranchIcon,
+  Receipt,
 } from "lucide-react";
 import { usePermissions } from "@/hooks/usePermissions";
 import { UserRole, Permission, rolePermissions } from "@/lib/permissions";
@@ -41,6 +42,7 @@ import { ThemeSwitcher } from "./ThemeSwitcher";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import UserBranchSelector from "./branch/UserBranchSelector";
 
 interface SidebarProps {
   roles?: (UserRole | string)[] | (UserRole | string);
@@ -103,19 +105,37 @@ export default function Sidebar({
       icon: <Coins className="h-4 w-4" />,
       label: "Transactions",
       href: "/admin/transactions",
-      neededPermissions: [...rolePermissions[UserRole.ACCOUNTANT],rolePermissions[UserRole.MANAGER]],
+      neededPermissions: [
+        ...rolePermissions[UserRole.ACCOUNTANT],
+        rolePermissions[UserRole.MANAGER],
+      ],
     },
     {
       icon: <Tag className="h-4 w-4" />,
       label: "Discounts",
       href: "/admin/discounts",
-      neededPermissions: [...rolePermissions[UserRole.ACCOUNTANT],rolePermissions[UserRole.MANAGER]],
+      neededPermissions: [
+        ...rolePermissions[UserRole.ACCOUNTANT],
+        rolePermissions[UserRole.MANAGER],
+      ],
     },
     {
       icon: <ComputerIcon className="h-4 w-4" />,
       label: "Registers",
       href: "/admin/registers",
-      neededPermissions: [...rolePermissions[UserRole.ACCOUNTANT],rolePermissions[UserRole.MANAGER]],
+      neededPermissions: [
+        ...rolePermissions[UserRole.ACCOUNTANT],
+        rolePermissions[UserRole.MANAGER],
+      ],
+    },
+    {
+      icon: <Receipt className="h-4 w-4" />,
+      label: "Reports",
+      href: "/admin/reports",
+      neededPermissions: [
+        ...rolePermissions[UserRole.ACCOUNTANT],
+        rolePermissions[UserRole.MANAGER],
+      ],
     },
     {
       icon: <ListChecks className="h-4 w-4" />,
@@ -169,7 +189,12 @@ export default function Sidebar({
         >
           <div className="flex flex-col">
             <SheetHeader className="px-5 pt-4 pb-2.5">
-              <SheetTitle>Dashboard</SheetTitle>
+              <SheetTitle>
+                Dashboard
+                <div>
+                  <UserBranchSelector />
+                </div>
+              </SheetTitle>
               <SheetDescription>
                 Manage your store, products, customers, and more.
               </SheetDescription>
@@ -179,7 +204,9 @@ export default function Sidebar({
                 {sidebarItems.map((item) => {
                   if (
                     item.neededPermissions.length == 0 ||
-                    item.neededPermissions.some((perm) => permissions.has(perm as string))
+                    item.neededPermissions.some((perm) =>
+                      permissions.has(perm as string)
+                    )
                   )
                     return (
                       <Tooltip key={item.label}>
