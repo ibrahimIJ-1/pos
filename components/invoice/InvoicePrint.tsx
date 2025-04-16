@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Printer, Download, Send } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { Sale, SaleItem } from "@prisma/client";
-
+import { ScrollArea } from "../ui/scroll-area";
+import { useReactToPrint } from "react-to-print";
 interface InvoicePrintProps {
   data: any; //Sale
   onClose: () => void;
@@ -12,6 +13,41 @@ interface InvoicePrintProps {
 export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
   const [printing, setPrinting] = useState(false);
 
+  const componentRef = useRef<HTMLDivElement>(null);
+
+  const handleDownloadPDF = useReactToPrint({
+    contentRef: componentRef,
+    documentTitle: `invoice-${data.id}`,
+    pageStyle: `
+    @media print { 
+      @page { 
+        size: A4 portrait;
+        margin: 15mm 10mm;
+      }
+      body { 
+        -webkit-print-color-adjust: exact;
+        background: white !important;
+        color: black !important;
+        font-size: 12pt !important;
+      }
+      .no-print { 
+        display: none !important; 
+      }
+      .print-table {
+        width: 100% !important;
+        display: table !important;
+      }
+      .scroll-area {
+        overflow: visible !important;
+        height: auto !important;
+      }
+      .invoice-card {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+      }
+    }
+  `,
+  });
   // const printReceipt = async () => {
   //   try {
   //     setPrinting(true);
@@ -134,7 +170,9 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 flex flex-col h-[90vh] overflow-y-scroll">
+      {" "}
+      {/* Control overall height */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Invoice</h2>
         <div className="flex space-x-2">
@@ -147,7 +185,11 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
             <Printer className="h-4 w-4" />
             {printing ? "Printing..." : "Print"}
           </Button>
-          <Button variant="outline" className="gap-2">
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={()=>handleDownloadPDF()}
+          >
             <Download className="h-4 w-4" />
             Download
           </Button>
@@ -160,127 +202,139 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
           </Button>
         </div>
       </div>
-
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-3xl mx-auto">
-        <div className="print:block">
+      <div
+        ref={componentRef}
+        className="bg-white p-6 rounded-lg shadow-lg max-w-3xl mx-auto flex-1 flex flex-col h"
+      >
+        <div className="print:block flex-1 flex flex-col gap-4">
           {/* Invoice Header */}
-          <div className="flex justify-between items-start mb-8">
+          <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-3xl font-bold text-primary">Invoice</h1>
-              <p className="text-muted-foreground">#{data.id}</p>
+              <h1 className="text-2xl font-bold text-primary">Invoice</h1>
+              <p className="text-muted-foreground text-sm">#{data.id}</p>
             </div>
             <div className="text-right">
-              <div className="h-10 w-10 rounded-md bg-primary flex items-center justify-center mb-2 ml-auto">
-                <span className="text-primary-foreground font-bold">P</span>
+              <div className="mb-2 flex items-center gap-2">
+                <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
+                  <span className="text-primary-foreground font-bold text-sm">
+                    POS
+                  </span>
+                </div>
+                <p className="font-bold text-sm">POS System</p>
               </div>
-              <p className="font-bold">POS System</p>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground text-xs">
                 123 Business Street
               </p>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground text-xs">
                 contact@possystem.com
               </p>
             </div>
           </div>
 
           {/* Invoice Details */}
-          <div className="grid grid-cols-2 gap-8 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <h3 className="font-semibold mb-1 text-muted-foreground">
+              <h3 className="text-sm font-semibold text-muted-foreground mb-1">
                 Bill To:
               </h3>
-              <p className="font-bold">
+              <p className="font-medium">
                 {data.customer?.name || "Guest Customer"}
               </p>
-              {data.customerId && (
+            </div>
+            <div>
+              <div className="flex flex-col md:items-end">
                 <p className="text-sm text-muted-foreground">
-                  ID: {data.customerId}
+                  <span className="font-semibold">Date:</span>{" "}
+                  {formatDate(data.date)}
                 </p>
-              )}
-            </div>
-            <div className="text-right">
-              <div className="mb-2">
-                <h3 className="font-semibold text-muted-foreground">
-                  Invoice Date:
-                </h3>
-                <p>{formatDate(data.date)}</p>
-              </div>
-              <div>
-                <h3 className="font-semibold text-muted-foreground">
-                  Payment Method:
-                </h3>
-                <p className="capitalize">{data.paymentMethod}</p>
+                <p className="text-sm text-muted-foreground">
+                  <span className="font-semibold">Payment:</span>{" "}
+                  {data.paymentMethod}
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Invoice Table */}
-          <div className="mb-8">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="py-2 text-left">Item</th>
-                  <th className="py-2 text-right">Qty</th>
-                  <th className="py-2 text-right">Unit Price</th>
-                  <th className="py-2 text-right">Discount</th>
-                  <th className="py-2 text-right">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.items.map((item: SaleItem) => (
-                  <tr key={item.id} className="border-b">
-                    <td className="py-3">{item.productName}</td>
-                    <td className="py-3 text-right">{item.quantity}</td>
-                    <td className="py-3 text-right">
-                      ${item.unitPrice.toString()}
-                    </td>
-                    <td className="py-3 text-right">
-                      {parseFloat(item.discountAmount.toString()) > 0
-                        ? `$${item.discountAmount}`
-                        : "-"}
-                    </td>
-                    <td className="py-3 text-right">
-                      ${item.subtotal.toString()}
-                    </td>
+          {/* Scrollable Items Table */}
+          <div className="flex-1 overflow-hidden border rounded-lg">
+            <ScrollArea className="h-full">
+              <table className="w-full relative">
+                <thead className="sticky top-0 bg-background z-10 border-b">
+                  <tr>
+                    <th className="text-left py-3 px-4 text-sm font-semibold">
+                      Item
+                    </th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold">
+                      Qty
+                    </th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold">
+                      Price
+                    </th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold">
+                      Discount
+                    </th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold">
+                      Amount
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {data.items.map((item: SaleItem) => (
+                    <tr key={item.id} className="border-b hover:bg-muted/10">
+                      <td className="py-2 px-4 text-sm">{item.productName}</td>
+                      <td className="py-2 px-4 text-sm text-right">
+                        {item.quantity}
+                      </td>
+                      <td className="py-2 px-4 text-sm text-right">
+                        ${item.unitPrice.toFixed(2)}
+                      </td>
+                      <td className="py-2 px-4 text-sm text-right">
+                        {Number(item.discountAmount) > 0
+                          ? `-$${item.discountAmount.toFixed(2)}`
+                          : "-"}
+                      </td>
+                      <td className="py-2 px-4 text-sm text-right font-medium">
+                        ${item.subtotal.toFixed(2)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </ScrollArea>
           </div>
 
-          {/* Invoice Summary */}
-          <div className="flex justify-end mb-8">
-            <div className="w-72">
-              <div className="flex justify-between py-1">
-                <span className="text-muted-foreground">Subtotal:</span>
-                <span>${data.subtotal.toString()}</span>
-              </div>
-              {parseFloat(data.discountTotal.toString()) > 0 && (
-                <div className="flex justify-between py-1">
-                  <span className="text-muted-foreground">Discount:</span>
-                  <span className="text-green-600">
-                    -${data.discountTotal.toString()}
-                  </span>
+          {/* Totals Section */}
+          <div className="border-t pt-4">
+            <div className="flex justify-end">
+              <div className="w-full md:w-64">
+                <div className="flex justify-between py-1 text-sm">
+                  <span className="text-muted-foreground">Subtotal:</span>
+                  <span>${data.subtotal.toFixed(2)}</span>
                 </div>
-              )}
-              <div className="flex justify-between py-1">
-                <span className="text-muted-foreground">Tax:</span>
-                <span>${data.taxTotal.toString()}</span>
-              </div>
-              <div className="flex justify-between py-2 border-t font-bold">
-                <span>Total:</span>
-                <span>${data.totalAmount.toString()}</span>
+                {data.discountTotal > 0 && (
+                  <div className="flex justify-between py-1 text-sm">
+                    <span className="text-muted-foreground">Discount:</span>
+                    <span className="text-green-600">
+                      -${data.discountTotal.toFixed(2)}
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-between py-1 text-sm">
+                  <span className="text-muted-foreground">Tax:</span>
+                  <span>${data.taxTotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between py-2 border-t font-semibold">
+                  <span>Total:</span>
+                  <span>${data.totalAmount.toFixed(2)}</span>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="text-center text-sm text-muted-foreground border-t pt-4">
+          <div className="text-center text-xs text-muted-foreground pt-4">
             <p>Thank you for your business!</p>
-            <p>
-              For questions or concerns regarding this invoice, please contact
-              our customer service.
-            </p>
+            <p>Questions? Contact our customer service</p>
           </div>
         </div>
       </div>

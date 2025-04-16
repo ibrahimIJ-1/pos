@@ -4,8 +4,73 @@ import { initializePermissions } from "@/lib/initialize-permissions";
 import { Permission, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { saveSettings } from "@/lib/settings-service";
-import { Product } from "@prisma/client";
+import { Branch, Product } from "@prisma/client";
 import * as bcrypt from "bcrypt";
+
+const generateProducts = (branch:Branch)=>{
+  const TOTAL_PRODUCTS = 50;
+  const CATEGORIES = [
+    { name: "Beverages", prefix: "BEV", taxRate: 7.0, image: "1541167760496-1628856ab772" },
+    { name: "Snacks", prefix: "SNK", taxRate: 7.0, image: "1558961363-fa8fdf82db35" },
+    { name: "Fresh Produce", prefix: "PRD", taxRate: 0.0, image: "1569870499705-504209102861" },
+    { name: "Dairy", prefix: "DRY", taxRate: 0.0, image: "1563636619-e9143da7973b" },
+    { name: "Bakery", prefix: "BKY", taxRate: 7.0, image: "1549931319-a545dcf3bc7c" },
+    { name: "Electronics", prefix: "ELC", taxRate: 7.0, image: "1583863788344-a671644ec6a0" },
+    { name: "Clothing", prefix: "CLT", taxRate: 7.0, image: "1583863788344-a671644ec6a1" },
+    { name: "Home Goods", prefix: "HOM", taxRate: 7.0, image: "1583863788344-a671644ec6a2" },
+    { name: "Beauty", prefix: "BEA", taxRate: 7.0, image: "1583863788344-a671644ec6a3" },
+    { name: "Books", prefix: "BOK", taxRate: 0.0, image: "1583863788344-a671644ec6a4" }
+  ];
+
+  const PRODUCT_TYPES = {
+    Beverages: ["Coffee", "Tea", "Juice", "Soda", "Energy Drink"],
+    Snacks: ["Cookies", "Chips", "Nuts", "Candy", "Granola Bars"],
+    "Fresh Produce": ["Apples", "Bananas", "Carrots", "Lettuce", "Tomatoes"],
+    Dairy: ["Milk", "Cheese", "Yogurt", "Butter", "Ice Cream"],
+    Bakery: ["Bread", "Bagels", "Muffins", "Croissants", "Cakes"],
+    Electronics: ["Charger", "Cable", "Headphones", "Case", "Adapter"],
+    Clothing: ["T-Shirt", "Jeans", "Jacket", "Dress", "Sweater"],
+    "Home Goods": ["Lamp", "Cushion", "Vase", "Curtains", "Rug"],
+    Beauty: ["Shampoo", "Lotion", "Perfume", "Makeup", "Soap"],
+    Books: ["Novel", "Textbook", "Cookbook", "Journal", "Guide"]
+  } as any;
+
+  const ADJECTIVES = ["Premium", "Organic", "Fresh", "Artisan", "Natural", "Deluxe", "Gourmet", "Vintage", "Handmade", "Sustainable"];
+
+  // Helper functions
+  const randomElement = (arr:string[]) => arr[Math.floor(Math.random() * arr.length)];
+  const randomPrice = (min:number, max:number) => parseFloat((Math.random() * (max - min) + min).toFixed(2));
+
+  let products = [];
+  let barcode = 1234567890123;
+  const productsPerCategory = TOTAL_PRODUCTS / CATEGORIES.length;
+
+  for (const category of CATEGORIES) {
+    for (let i = 1; i <= productsPerCategory; i++) {
+      products.push({
+        name: `${randomElement(ADJECTIVES)} ${randomElement(PRODUCT_TYPES[category.name])}`,
+        description: `${randomElement(ADJECTIVES)} ${randomElement(PRODUCT_TYPES[category.name])} - High quality product for daily use`,
+        sku: `${category.prefix}-${String(i).padStart(5, '0')}`,
+        barcode: (barcode++).toString(),
+        category: category.name,
+        image_url: `https://images.unsplash.com/photo-${category.image}?w=500&h=500&fit=crop`,
+        branches: [{
+          branch_id: branch.id,
+          active: true,
+          price: randomPrice(2, 50),
+          cost: randomPrice(1, 25),
+          taxRate: category.taxRate,
+          stock: Math.floor(Math.random() * 100),
+          low_stock_threshold: Math.floor(Math.random() * 10) + 5
+        }]
+      });
+    }
+  }
+
+  return products;
+
+}
+
 
 export const initDatabase = async () => {
   try {
@@ -117,162 +182,168 @@ export const initDatabase = async () => {
     console.log("Users created");
 
     // Create product categories (used by products)
-    const categories = [
-      "Beverages",
-      "Snacks",
-      "Fresh Produce",
-      "Dairy",
-      "Bakery",
-      "Electronics",
-    ];
+    // const categories = [
+    //   "Beverages",
+    //   "Snacks",
+    //   "Fresh Produce",
+    //   "Dairy",
+    //   "Bakery",
+    //   "Electronics",
+    //   "Clothing",
+    //   "Home Goods",
+    //   "Beauty",
+    //   "Books",
+    // ];
 
     // Create products
-    const products = [
-      {
-        name: "Coffee",
-        description: "Premium Arabica coffee beans",
-        sku: "BEV-001",
-        barcode: "1234567890123",
-        category: "Beverages",
-        image_url:
-          "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=500&h=500&fit=crop",
-        branches: [
-          {
-            branch_id: (await branch).id,
-            active: true,
-            price: 9.99,
-            cost: 5.5,
-            taxRate: 7.0,
-            stock: 50,
-            low_stock_threshold: 10,
-          },
-        ],
-      },
-      {
-        name: "Organic Tea",
-        description: "Organic green tea leaves",
-        sku: "BEV-002",
-        barcode: "1234567890124",
+    // const products = [
+    //   {
+    //     name: "Coffee",
+    //     description: "Premium Arabica coffee beans",
+    //     sku: "BEV-001",
+    //     barcode: "1234567890123",
+    //     category: "Beverages",
+    //     image_url:
+    //       "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=500&h=500&fit=crop",
+    //     branches: [
+    //       {
+    //         branch_id: (await branch).id,
+    //         active: true,
+    //         price: 9.99,
+    //         cost: 5.5,
+    //         taxRate: 7.0,
+    //         stock: 50,
+    //         low_stock_threshold: 10,
+    //       },
+    //     ],
+    //   },
+    //   {
+    //     name: "Organic Tea",
+    //     description: "Organic green tea leaves",
+    //     sku: "BEV-002",
+    //     barcode: "1234567890124",
 
-        category: "Beverages",
+    //     category: "Beverages",
 
-        image_url:
-          "https://images.unsplash.com/photo-1597481499750-5f8a6bcabe9d?w=500&h=500&fit=crop",
-        branches: [
-          {
-            branch_id: (await branch).id,
-            active: true,
-            price: 6.99,
-            cost: 3.2,
-            taxRate: 7.0,
-            stock: 40,
-            low_stock_threshold: 8,
-          },
-        ],
-      },
-      {
-        name: "Chocolate Chip Cookies",
-        description: "Freshly baked chocolate chip cookies",
-        sku: "SNK-001",
-        barcode: "2234567890123",
+    //     image_url:
+    //       "https://images.unsplash.com/photo-1597481499750-5f8a6bcabe9d?w=500&h=500&fit=crop",
+    //     branches: [
+    //       {
+    //         branch_id: (await branch).id,
+    //         active: true,
+    //         price: 6.99,
+    //         cost: 3.2,
+    //         taxRate: 7.0,
+    //         stock: 40,
+    //         low_stock_threshold: 8,
+    //       },
+    //     ],
+    //   },
+    //   {
+    //     name: "Chocolate Chip Cookies",
+    //     description: "Freshly baked chocolate chip cookies",
+    //     sku: "SNK-001",
+    //     barcode: "2234567890123",
 
-        category: "Snacks",
+    //     category: "Snacks",
 
-        image_url:
-          "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=500&h=500&fit=crop",
-        branches: [
-          {
-            branch_id: (await branch).id,
-            active: true,
-            price: 4.99,
-            cost: 2.1,
-            taxRate: 7.0,
-            stock: 30,
-            low_stock_threshold: 5,
-          },
-        ],
-      },
-      {
-        name: "Organic Apples",
-        description: "Fresh organic apples",
-        sku: "PRD-001",
-        barcode: "3234567890123",
-        category: "Fresh Produce",
-        image_url:
-          "https://images.unsplash.com/photo-1569870499705-504209102861?w=500&h=500&fit=crop",
-        branches: [
-          {
-            branch_id: (await branch).id,
-            active: true,
-            price: 3.99,
-            cost: 1.8,
-            taxRate: 0.0,
-            stock: 100,
-            low_stock_threshold: 20,
-          },
-        ],
-      },
-      {
-        name: "Whole Milk",
-        description: "Fresh whole milk, 1 gallon",
-        sku: "DRY-001",
-        barcode: "4234567890123",
-        category: "Dairy",
-        image_url:
-          "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=500&h=500&fit=crop",
-        branches: [
-          {
-            branch_id: (await branch).id,
-            active: true,
-            price: 3.49,
-            cost: 2.0,
-            taxRate: 0.0,
-            stock: 25,
-            low_stock_threshold: 5,
-          },
-        ],
-      },
-      {
-        name: "Artisan Bread",
-        description: "Fresh baked artisan sourdough bread",
-        sku: "BKY-001",
-        barcode: "5234567890123",
-        category: "Bakery",
-        image_url:
-          "https://images.unsplash.com/photo-1549931319-a545dcf3bc7c?w=500&h=500&fit=crop",
-        branches: [
-          {
-            branch_id: (await branch).id,
-            active: true,
-            price: 4.5,
-            cost: 2.25,
-            taxRate: 7.0,
-            stock: 15,
-            low_stock_threshold: 3,
-          },
-        ],
-      },
-      {
-        name: "Smartphone Charger",
-        description: "Universal USB smartphone charger",
-        sku: "ELC-001",
-        barcode: "6234567890123",
-        category: "Electronics",
-        image_url:
-          "https://images.unsplash.com/photo-1583863788344-a671644ec6a0?w=500&h=500&fit=crop",
-        branches: [
-          {
-            branch_id: (await branch).id,
-            active: true,
-            price: 12.99,
-            cost: 5.0,
-            taxRate: 7.0,
-            stock: 20,
-            low_stock_threshold: 5,
-          },
-        ],
-      },
-    ];
+    //     image_url:
+    //       "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=500&h=500&fit=crop",
+    //     branches: [
+    //       {
+    //         branch_id: (await branch).id,
+    //         active: true,
+    //         price: 4.99,
+    //         cost: 2.1,
+    //         taxRate: 7.0,
+    //         stock: 30,
+    //         low_stock_threshold: 5,
+    //       },
+    //     ],
+    //   },
+    //   {
+    //     name: "Organic Apples",
+    //     description: "Fresh organic apples",
+    //     sku: "PRD-001",
+    //     barcode: "3234567890123",
+    //     category: "Fresh Produce",
+    //     image_url:
+    //       "https://images.unsplash.com/photo-1569870499705-504209102861?w=500&h=500&fit=crop",
+    //     branches: [
+    //       {
+    //         branch_id: (await branch).id,
+    //         active: true,
+    //         price: 3.99,
+    //         cost: 1.8,
+    //         taxRate: 0.0,
+    //         stock: 100,
+    //         low_stock_threshold: 20,
+    //       },
+    //     ],
+    //   },
+    //   {
+    //     name: "Whole Milk",
+    //     description: "Fresh whole milk, 1 gallon",
+    //     sku: "DRY-001",
+    //     barcode: "4234567890123",
+    //     category: "Dairy",
+    //     image_url:
+    //       "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=500&h=500&fit=crop",
+    //     branches: [
+    //       {
+    //         branch_id: (await branch).id,
+    //         active: true,
+    //         price: 3.49,
+    //         cost: 2.0,
+    //         taxRate: 0.0,
+    //         stock: 25,
+    //         low_stock_threshold: 5,
+    //       },
+    //     ],
+    //   },
+    //   {
+    //     name: "Artisan Bread",
+    //     description: "Fresh baked artisan sourdough bread",
+    //     sku: "BKY-001",
+    //     barcode: "5234567890123",
+    //     category: "Bakery",
+    //     image_url:
+    //       "https://images.unsplash.com/photo-1549931319-a545dcf3bc7c?w=500&h=500&fit=crop",
+    //     branches: [
+    //       {
+    //         branch_id: (await branch).id,
+    //         active: true,
+    //         price: 4.5,
+    //         cost: 2.25,
+    //         taxRate: 7.0,
+    //         stock: 15,
+    //         low_stock_threshold: 3,
+    //       },
+    //     ],
+    //   },
+    //   {
+    //     name: "Smartphone Charger",
+    //     description: "Universal USB smartphone charger",
+    //     sku: "ELC-001",
+    //     barcode: "6234567890123",
+    //     category: "Electronics",
+    //     image_url:
+    //       "https://images.unsplash.com/photo-1583863788344-a671644ec6a0?w=500&h=500&fit=crop",
+    //     branches: [
+    //       {
+    //         branch_id: (await branch).id,
+    //         active: true,
+    //         price: 12.99,
+    //         cost: 5.0,
+    //         taxRate: 7.0,
+    //         stock: 20,
+    //         low_stock_threshold: 5,
+    //       },
+    //     ],
+    //   },
+    // ];
+
+    const products = generateProducts(branch)
 
     for (const product of products) {
       const prod = await prisma.product.upsert({

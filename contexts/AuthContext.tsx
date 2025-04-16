@@ -81,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Error fetching MAC address:", error);
       //REMOVE !!!
-      setMacAddress("BC:03:58:B8:53:58");
+      setMacAddress("R9NRKD034636377");
       return null;
     } finally {
       setMacLoading(false);
