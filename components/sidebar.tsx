@@ -163,7 +163,7 @@ export default function Sidebar({
         <SheetTrigger asChild>
           <button
             aria-label="Open navigation menu"
-            className="peer inline-flex items-center justify-center rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 disabled:pointer-events-none data-[state=open]:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[state=open]:bg-gray-800"
+            className="bg-white peer inline-flex items-start justify-center rounded-md p-2 text-gray-500 hover:bg-white hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 disabled:pointer-events-none data-[state=open]:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[state=open]:bg-gray-800"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -225,9 +225,9 @@ export default function Sidebar({
                     );
                 })}
               </div>
+              <SheetFooter logout={handleLogout} />
             </ScrollArea>
           </div>
-          <SheetFooter logout={handleLogout} />
         </SheetContent>
       </Sheet>
     </TooltipProvider>

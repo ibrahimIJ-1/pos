@@ -6,7 +6,7 @@ import FullCart from "@/components/pos/FullCart";
 function POS() {
   return (
     <div className="px-10 py-4 neon-card h-screen">
-      <div className="flex gap-4">
+      <div className="flex gap-4 h-screen">
         <div className="w-2/4 lg:w-3/4">
           <ItemsSelector />
         </div>

@@ -34,6 +34,26 @@ export default async function login(
     if (!passwordMatch) {
       throw new Error("Invalid credentials");
     }
+
+    console.log("USER1", "ASDASD");
+    const reg = await prisma.register.updateMany({
+      where: {
+        currentCashierId: user?.id,
+      },
+      data: {
+        currentCashierId: null,
+      },
+    });
+
+    await prisma.register.updateMany({
+      where: {
+        id: mac,
+      },
+      data: {
+        currentCashierId: user?.id,
+      },
+    });
+    console.log("USER2", "ASDASD");
     // Generate JWT token
     const token = jwt.sign(
       {

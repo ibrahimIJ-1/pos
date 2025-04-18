@@ -13,6 +13,7 @@ import { userRegister } from "@/actions/auth/register";
 import Cookies from "js-cookie";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAllUserPermissions } from "@/actions/users/get-all-permissions";
+import logoutUser from "@/actions/auth/logout";
 
 interface User {
   id: string;
@@ -158,14 +159,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("user");
-    Cookies.remove("authToken");
-    Cookies.remove("user");
-    setUser(null);
+  const logout = async () => {
+    const response = await logoutUser();
+    if (response === true) {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("user");
+      Cookies.remove("authToken");
+      Cookies.remove("user");
+      setUser(null);
 
-    toast.info("You have been logged out");
+      toast.info("You have been logged out");
+      return;
+    }
+    toast.error("Log out failed");
   };
 
   return (

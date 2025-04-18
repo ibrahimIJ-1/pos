@@ -28,7 +28,7 @@ export function ThemeProvider({
   storageKey = "admin-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>("system");
+  const [theme, setTheme] = useState<Theme>("light");
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
