@@ -32,7 +32,7 @@ const compressImage = async (file: File) => {
     .toBuffer();
   const compressedSizeMB = compressed1.length / (1024 * 1024);
   if (compressedSizeMB > 1) {
-    return await sharp(buffer)
+    return await sharp(compressed1)
       .resize({
         width: 800, // Adjust as needed
         height: 800, // Adjust as needed
@@ -56,9 +56,13 @@ export async function uploadFile(
 ): Promise<string> {
   let fileBuffer: ArrayBuffer | Buffer | null = null;
   const fileSizeMB = file.size / (1024 * 1024);
-  if (canCompressImage) {
+  console.log(fileSizeMB);
+  
+  if (canCompressImage == true) {
     if (fileSizeMB > 1) fileBuffer = await compressImage(file);
     else fileBuffer = await file.arrayBuffer();
+    console.log(fileBuffer.byteLength);
+    
   } else {
     fileBuffer = await file.arrayBuffer();
   }
