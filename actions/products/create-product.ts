@@ -41,7 +41,7 @@ export const createNewProduct = async ({
     }
     let url: string | null = null;
     if (image_file) {
-      url = await uploadFile(image_file);
+      url = await uploadFile(image_file,true);
     }
 
     // Create the product

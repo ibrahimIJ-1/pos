@@ -34,7 +34,7 @@ export const updateProduct = async ({
       ...rolePermissions[UserRole.CASHIER],
     ]);
     if (image_file) {
-      image_url = await uploadFile(image_file);
+      image_url = await uploadFile(image_file,true);
     }
 
     const incomingBranchIds = branches.map((b) => b.branchId);
