@@ -42,7 +42,7 @@ export async function uploadProductsFromExcel(formData: FormData) {
         const barcode = row.getCell(4).value?.toString() || undefined;
         const branchName = row.getCell(6).value?.toString();
         // console.log("@BARCODE",row.getCell(2).value?.toString());
-        
+
         if (!branchName) {
           errors.push(`Row ${rowNumber}: Branch name is required`);
           errorCount++;
@@ -68,31 +68,48 @@ export async function uploadProductsFromExcel(formData: FormData) {
             } else {
               const base64String = imageCell.value.toString();
               // Implement a function to upload from base64
-            //   image_url = await uploadFileFromBase64(base64String, true);
+              //   image_url = await uploadFileFromBase64(base64String, true);
             }
           }
         }
-
-        const productData = {
-          name: row.getCell(1).value?.toString() || "",
-          description: row.getCell(2).value?.toString() || "",
-          sku: row.getCell(3).value?.toString() || "",
-          barcode,
-          category: row.getCell(5).value?.toString() || "Uncategorized",
-          image_url,
-        };
-
-        const newStock = parseInt(row.getCell(10).value?.toString() || "0");
-        const branchProductData = {
-          price: parseFloat(row.getCell(7).value?.toString() || "0"),
-          cost: parseFloat(row.getCell(8).value?.toString() || "0"),
-          taxRate: parseFloat(row.getCell(9).value?.toString() || "0"),
-          stock: newStock,
-          low_stock_threshold: parseInt(
+        let productData: any = {};
+        if (row.getCell(1).value) {
+          productData.name = row.getCell(1).value?.toString() || "";
+        }
+        if (row.getCell(2).value) {
+          productData.description = row.getCell(2).value?.toString() || "";
+        }
+        if (row.getCell(3).value) {
+          productData.sku = row.getCell(3).value?.toString() || "";
+        }
+        if (row.getCell(5).value) {
+          productData.category = row.getCell(5).value?.toString() || "";
+        }
+        productData.barcode = barcode;
+        let branchProductData: any = {};
+        if (row.getCell(7).value) {
+          productData.price = parseFloat(
+            row.getCell(7).value?.toString() || "0"
+          );
+        }
+        if (row.getCell(8).value) {
+          productData.cost = parseFloat(
+            row.getCell(8).value?.toString() || "0"
+          );
+        }
+        if (row.getCell(9).value) {
+          productData.taxRate = parseFloat(
+            row.getCell(9).value?.toString() || "0"
+          );
+        }
+        if (row.getCell(11).value) {
+          productData.low_stock_threshold = parseInt(
             row.getCell(11).value?.toString() || "10"
-          ),
-          isActive: true,
-        };
+          );
+        }
+        const newStock = parseInt(row.getCell(10).value?.toString() || "0");
+        branchProductData.stock = newStock;
+        branchProductData.isActive = true;
 
         // Upsert product (create or update by barcode)
         let product: Product;
