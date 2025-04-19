@@ -57,6 +57,8 @@ import { getAllPOSProducts } from "@/actions/products/get-all-pos-products";
 import { getAllPOSDiscounts } from "@/actions/discounts/get-all-pos-discounts";
 import { getAllUserBranches } from "@/actions/branches/get-user-all-branches";
 import { setUserDefaultBranch } from "@/actions/branches/set-user-default-branch";
+import { getProductsTemplate } from "@/actions/products/get-products-template";
+import { uploadProductsFromExcel } from "@/actions/products/upload-product-template";
 
 // Helper function to simulate API delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -107,6 +109,46 @@ export const useCreateProduct = () => {
           error instanceof Error ? error.message : "Unknown error"
         }`
       );
+    },
+  });
+};
+
+export const useGetProductsTemplate = () => {
+  return useMutation({
+    mutationFn: getProductsTemplate,
+    onSuccess: (data) => {
+      if (data.success && data.data) {
+        // Create download link
+        const link = document.createElement("a");
+        link.href = `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${data.data}`;
+        link.download = "products_template.xlsx";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        toast.success("Template downloaded successfully");
+      } else {
+        toast.error(data.error || "Failed to download template");
+      }
+    },
+    onError: () => {
+      toast.error("Failed to download template");
+    },
+  });
+};
+
+export const useUploadProductsTemplate = () => {
+  return useMutation({
+    mutationFn: (formData: FormData) => uploadProductsFromExcel(formData),
+    onSuccess: (data) => {
+      if (data!.success) {
+        toast.success(data!.message || "Products imported successfully");
+      } else {
+        toast.error(data!.error || "Failed to import products");
+      }
+    },
+    onError: () => {
+      toast.error("Failed to import products");
     },
   });
 };

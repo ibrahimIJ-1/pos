@@ -21,7 +21,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
   (
     {
       min = 0,
-      max = 100,
+      max = 99999999999,
       step = 1,
       value,
       onChange,

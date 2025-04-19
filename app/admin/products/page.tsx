@@ -1,8 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useProducts, useDeleteProduct, useBranches } from "@/lib/pos-service";
-import { Plus, Package, Search } from "lucide-react";
+import {
+  useProducts,
+  useDeleteProduct,
+  useBranches,
+  useGetProductsTemplate,
+  useUploadProductsTemplate,
+} from "@/lib/pos-service";
+import { Plus, Package, Search, DownloadIcon, UploadIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -46,7 +52,10 @@ export default function Products() {
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
 
   const deleteProductMutation = useDeleteProduct();
-
+  const downloadTemplate = useGetProductsTemplate();
+  const [file, setFile] = useState<File | null>(null);
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const uploadProductsMutation = useUploadProductsTemplate();
   const filteredProducts = (
     products as (Product & {
       BranchProduct: Array<BranchProduct & { branch: Branch }>;
@@ -85,15 +94,64 @@ export default function Products() {
     setIsEditOpen(true);
   };
 
+  const getTemplate = () => {
+    downloadTemplate.mutate();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+    }
+  };
+
+  const openUploadTemplate = () => {
+    setIsUploadDialogOpen(true);
+  };
+
+  const uploadTemplate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!file) {
+      toast.error("Please select a file");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    uploadProductsMutation.mutate(formData, {
+      onSuccess: () => {
+        setIsUploadDialogOpen(false);
+        setFile(null);
+      },
+    });
+  };
+
   return (
     <div className="container max-w-7xl mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Inventory Management</h1>
 
-        <Button onClick={() => setIsCreateOpen(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Product
-        </Button>
+        <div className="flex gap-2 items-center">
+          <Button
+            variant={"outline"}
+            onClick={() => getTemplate()}
+            className="gap-2"
+          >
+            <DownloadIcon className="h-4 w-4" />
+            Get Template
+          </Button>
+          <Button
+            variant={"default"}
+            onClick={() => openUploadTemplate()}
+            className="gap-2"
+          >
+            <UploadIcon className="h-4 w-4" />
+            Excel Products
+          </Button>
+          <Button onClick={() => setIsCreateOpen(true)} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Add Product
+          </Button>
+        </div>
       </div>
 
       <div className="relative mb-6">
@@ -196,6 +254,49 @@ export default function Products() {
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog
+        open={isUploadDialogOpen}
+        onOpenChange={setIsUploadDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Upload Products from Excel</AlertDialogTitle>
+            <AlertDialogDescription>
+              Select an Excel file to import products. Make sure the file
+              follows the template format.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <form onSubmit={uploadTemplate}>
+            <div className="grid gap-4 py-4">
+              <Input
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleFileChange}
+                disabled={uploadProductsMutation.isPending}
+              />
+              {file && (
+                <div className="text-sm text-muted-foreground">
+                  Selected file: {file.name}
+                </div>
+              )}
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel
+                type="button"
+                disabled={uploadProductsMutation.isPending}
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                type="submit"
+                disabled={!file || uploadProductsMutation.isPending}
+              >
+                {uploadProductsMutation.isPending ? "Importing..." : "Import"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </form>
         </AlertDialogContent>
       </AlertDialog>
     </div>
