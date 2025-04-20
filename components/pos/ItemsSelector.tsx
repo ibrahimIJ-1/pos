@@ -7,10 +7,17 @@ import { Input } from "../ui/input";
 import { ScrollArea } from "../ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePOS } from "@/providers/POSProvider";
+import { cn } from "@/lib/utils";
 
 function ItemsSelector() {
-  const { searchTerm, setSearchTerm, products, addItemToCart, inputRef } =
-    usePOS();
+  const {
+    searchTerm,
+    setSearchTerm,
+    products,
+    addItemToCart,
+    inputRef,
+    showImage,
+  } = usePOS();
 
   const filteredProducts = products.filter(
     (product) =>
@@ -48,22 +55,27 @@ function ItemsSelector() {
           {filteredProducts.map((product) => (
             <Card
               key={product.id}
-              className="group relative overflow-hidden transition-all hover:shadow-md cursor-pointer neon-card neon-border aspect-[0.75]"
+              className={cn(
+                "group relative overflow-hidden transition-all hover:shadow-md cursor-pointer neon-card neon-border",
+                showImage ? "aspect-[0.75]" : ""
+              )}
               onClick={() => addItemToCart(product)}
             >
               {/* Image Container */}
-              <div className="aspect-square relative bg-muted/40">
-                <img
-                  src={product.image_url || "/placeholder.svg"}
-                  alt={product.name}
-                  className="object-cover w-full h-full transition-transform group-hover:scale-105"
-                />
-                {product.stock <= (product.low_stock_threshold || 0) && (
-                  <div className="absolute top-1 right-1 bg-destructive/90 text-destructive-foreground text-[0.6rem] px-2 py-1 rounded-sm sm:text-xs sm:top-2 sm:right-2">
-                    Low Stock
-                  </div>
-                )}
-              </div>
+              {showImage === true && (
+                <div className="aspect-square relative bg-muted/40">
+                  <img
+                    src={product.image_url || "/placeholder.svg"}
+                    alt={product.name}
+                    className="object-cover w-full h-full transition-transform group-hover:scale-105"
+                  />
+                  {product.stock <= (product.low_stock_threshold || 0) && (
+                    <div className="absolute top-1 right-1 bg-destructive/90 text-destructive-foreground text-[0.6rem] px-2 py-1 rounded-sm sm:text-xs sm:top-2 sm:right-2">
+                      Low Stock
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Product Info */}
               <CardContent className="p-2 space-y-1 sm:p-3 sm:space-y-2">

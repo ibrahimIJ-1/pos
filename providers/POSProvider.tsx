@@ -36,6 +36,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Loading from "@/app/loading";
 import MacNotFound from "@/app/mac-not-found";
 import { POSContextType } from "./context-types/POSContextType";
+import { getPOSSettings, getStoreSettings } from "@/lib/settings-service";
 
 export const POSContext = createContext<POSContextType | undefined>(undefined);
 
@@ -58,6 +59,7 @@ export function POSProvider({ children }: { children: ReactNode }) {
   const [cashReceived, setCashReceived] = useState<number>(0);
   const [isCartsPopoverOpen, setIsCartsPopoverOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showImage, setShowImage] = useState(false);
 
   const scannedData = useRef("");
   const inputRef = useRef(null);
@@ -249,6 +251,17 @@ export function POSProvider({ children }: { children: ReactNode }) {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [addItemToCart, products]);
+
+  useEffect(() => {
+    getStoreSettings().then((data) => {
+      if (data && data.productImages === "true") {
+        console.log(data.productImages);
+        
+        setShowImage(true);
+      }
+    });
+  }, []);
+
   const { macAddress, macLoading } = useAuth();
   console.log(macAddress);
 
@@ -297,6 +310,7 @@ export function POSProvider({ children }: { children: ReactNode }) {
         products,
         addItemToCart,
         inputRef,
+        showImage,
       }}
     >
       {macLoading ? Loading() : !macAddress ? MacNotFound() : children}

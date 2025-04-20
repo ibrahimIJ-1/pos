@@ -1,6 +1,13 @@
 import { useCartOperations, useMultiCartOperations } from "@/lib/pos-service";
 import { ProductPOS } from "@/lib/product-branch-mapper";
-import { Cart, CartItem, Customer, Discount, Sale, SaleItem } from "@prisma/client";
+import {
+  Cart,
+  CartItem,
+  Customer,
+  Discount,
+  Sale,
+  SaleItem,
+} from "@prisma/client";
 import { UseMutationResult } from "@tanstack/react-query";
 import { Dispatch, SetStateAction } from "react";
 
@@ -55,4 +62,5 @@ export interface POSContextType {
   products: ProductPOS[];
   addItemToCart: (product: any) => void;
   inputRef: React.RefObject<null>;
+  showImage: boolean;
 }

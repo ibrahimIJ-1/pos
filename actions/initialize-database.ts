@@ -77,6 +77,7 @@ export const initDatabase = async () => {
     console.log("Seeding database...");
     const settingsPayload = {
       DB_INITIALIZED: { value: "1", category: "DB" },
+      productImages: { value: "false", category: "store" },
     };
 
     await saveSettings(settingsPayload);

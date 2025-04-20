@@ -30,3 +30,4 @@ export const saveSettings = async (settings: {
 export const getGeneralSettings = () => getSettings("general");
 export const getStoreSettings = () => getSettings("store");
 export const getNotificationSettings = () => getSettings("notifications");
+export const getPOSSettings = async () => await getSettings("POS");
