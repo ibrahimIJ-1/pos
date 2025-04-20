@@ -92,11 +92,7 @@ export async function uploadProductsFromExcel(formData: FormData) {
             row.getCell(7).value?.toString() || "0"
           );
         }
-        if (row.getCell(8).value) {
-          productData.cost = parseFloat(
-            row.getCell(8).value?.toString() || "0"
-          );
-        }
+        productData.cost = parseFloat(row.getCell(8).value?.toString() || "0");
         if (row.getCell(9).value) {
           productData.taxRate = parseFloat(
             row.getCell(9).value?.toString() || "0"
