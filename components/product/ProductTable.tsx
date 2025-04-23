@@ -10,7 +10,7 @@ import {
   ColumnFiltersState,
   getFilteredRowModel,
 } from "@tanstack/react-table";
-import { ArrowDown, ArrowUp, Edit, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, BarcodeIcon, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -22,9 +22,13 @@ import {
 } from "@/components/ui/table";
 import { BranchProduct, Product } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
+import { generateBarcodeFrontEnd } from "@/lib/utils/barcode-frontend";
+import { useDownloadBarcodePdf } from "@/lib/products-service";
 
 interface ProductTableProps {
-  data: (Product&{BranchProduct?:BranchProduct[]})[];
+  data: (Product & { BranchProduct?: BranchProduct[] })[];
+  selectedIds: string[];
+  setSelectedIds: (ids:string[]) => void;
   onView: (product: Product) => void;
   onEdit: (product: Product) => void;
   onDelete: (product: Product) => void;
@@ -35,13 +39,46 @@ export function ProductTable({
   onView,
   onEdit,
   onDelete,
+  selectedIds,
+  setSelectedIds
 }: ProductTableProps) {
+  const download = useDownloadBarcodePdf();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
 
-  const columns: ColumnDef<Product & {BranchProduct?:BranchProduct[]}>[] = [
+  const columns: ColumnDef<Product & { BranchProduct?: BranchProduct[] }>[] = [
+    {
+      accessorKey: "selected",
+      header: "",
+      cell: ({ row }) => {
+        const imageUrl = row.original.image_url || "/placeholder.svg";
+        return (
+          <div className="relative h-12 w-12">
+            <input
+              type="checkbox"
+              checked={selectedIds.findIndex((c) => c == row.original.id) != -1}
+              onChange={(e) => {
+                e.stopPropagation();
+                const ind = selectedIds.findIndex((c) => c == row.original.id);
+                if (ind == -1) {
+                  setSelectedIds([...selectedIds, row.original.id]);
+                } else {
+                  const tempIds = selectedIds.filter(
+                    (c) => c != row.original.id
+                  );
+                  setSelectedIds(tempIds);
+                }
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            />
+          </div>
+        );
+      },
+    },
     {
       accessorKey: "image_url",
       header: "Image",
@@ -81,14 +118,70 @@ export function ProductTable({
       ),
     },
     {
-      accessorKey: "sku",
-      header: "SKU",
-      cell: ({ row }) => (
-        <div className="text-sm text-muted-foreground">
-          {row.getValue("sku")}
-        </div>
-      ),
+      accessorKey: "barcode",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="p-0 hover:bg-transparent"
+          >
+            Barcode
+            {column.getIsSorted() === "asc" ? (
+              <ArrowUp className="ml-2 h-4 w-4" />
+            ) : column.getIsSorted() === "desc" ? (
+              <ArrowDown className="ml-2 h-4 w-4" />
+            ) : null}
+          </Button>
+        );
+      },
+      cell: ({ row }) => {
+        if (row.getValue("barcode")) {
+          const svgRef = generateBarcodeFrontEnd(row.getValue("barcode"));
+          if (svgRef)
+            return (
+              <div>
+                <img
+                  className="w-40 h-20 cursor-pointer"
+                  src={svgRef}
+                  alt="Barcode"
+                  onClick={() => {
+                    const printWindow = window.open("", "_blank");
+                    if (printWindow) {
+                      printWindow.document.write(`
+                <html>
+                  <head>
+                    <title>Print Barcode</title>
+                    <style>
+                      body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+                      img { max-width: 100%; height: auto; }
+                    </style>
+                  </head>
+                  <body onload="window.print(); window.close();">
+                    <img src="${svgRef}" alt="Barcode" />
+                  </body>
+                </html>
+              `);
+                      printWindow.document.close();
+                    }
+                  }}
+                />
+              </div>
+            );
+        } else {
+          return <div className="font-medium">{row.getValue("barcode")}</div>;
+        }
+      },
     },
+    // {
+    //   accessorKey: "sku",
+    //   header: "SKU",
+    //   cell: ({ row }) => (
+    //     <div className="text-sm text-muted-foreground">
+    //       {row.getValue("sku")}
+    //     </div>
+    //   ),
+    // },
     // {
     //   accessorKey: "price",
     //   header: ({ column }) => {
@@ -165,9 +258,18 @@ export function ProductTable({
       header: "Actions",
       cell: ({ row }) => {
         const product = row.original;
-
         return (
           <div className="flex items-center justify-start ">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                download.mutate([product.id]);
+              }}
+            >
+              <BarcodeIcon className="h-4 w-4" />
+            </Button>
             <Button
               variant="ghost"
               size="icon"

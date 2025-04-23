@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Package, Search, DownloadIcon, UploadIcon } from "lucide-react";
+import {
+  Plus,
+  Package,
+  Search,
+  DownloadIcon,
+  UploadIcon,
+  DownloadCloudIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -27,11 +34,18 @@ import { ProductForm } from "@/components/product/ProductForm";
 import { ProductDetails } from "@/components/product/ProductDetails";
 import { Branch, BranchProduct, Product } from "@prisma/client";
 import { ProductTable } from "@/components/product/ProductTable";
-import { useDeleteProduct, useGetProductsTemplate, useProducts, useUploadProductsTemplate } from "@/lib/products-service";
+import {
+  useDeleteProduct,
+  useDownloadBarcodePdf,
+  useGetProductsTemplate,
+  useProducts,
+  useUploadProductsTemplate,
+} from "@/lib/products-service";
 import { useBranches } from "@/lib/branches-service";
 
 export default function Products() {
   const { data: products = [], isLoading } = useProducts();
+  const download = useDownloadBarcodePdf();
   const { data: branches = [], isLoading: isBranchLoading } = useBranches();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<
@@ -50,6 +64,7 @@ export default function Products() {
   const downloadTemplate = useGetProductsTemplate();
   const [file, setFile] = useState<File | null>(null);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const uploadProductsMutation = useUploadProductsTemplate();
   const filteredProducts = (
     products as (Product & {
@@ -128,6 +143,15 @@ export default function Products() {
         <div className="flex gap-2 items-center">
           <Button
             variant={"outline"}
+            onClick={() => download.mutate(selectedIds)}
+            disabled={download.isPending}
+            className="gap-2"
+          >
+            <DownloadCloudIcon className="h-4 w-4" />
+            Get Barcodes
+          </Button>
+          <Button
+            variant={"outline"}
             onClick={() => getTemplate()}
             className="gap-2"
           >
@@ -175,6 +199,8 @@ export default function Products() {
           onView={viewProduct}
           onEdit={editProduct}
           onDelete={handleDelete}
+          selectedIds={selectedIds}
+          setSelectedIds={setSelectedIds}
         />
       )}
 

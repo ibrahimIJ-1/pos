@@ -7,6 +7,7 @@ import { getAllPOSProducts } from "@/actions/products/get-all-pos-products";
 import { toast } from "sonner";
 import { getProductsTemplate } from "@/actions/products/get-products-template";
 import { uploadProductsFromExcel } from "@/actions/products/upload-product-template";
+import { downloadBarcodePDF } from "@/actions/products/download-barcode-pdf";
 
 export const useProducts = () => {
   return useQuery({
@@ -135,3 +136,16 @@ export const useDeleteProduct = () => {
     },
   });
 };
+
+export function useDownloadBarcodePdf() {
+  return useMutation({
+    mutationFn: async (productIds: string[] | null) => {
+      const s3Url = await downloadBarcodePDF(productIds);
+
+      const a = document.createElement("a");
+      a.href = s3Url;
+      a.download = "barcodes.pdf";
+      a.click();
+    },
+  });
+}
