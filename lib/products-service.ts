@@ -145,6 +145,7 @@ export function useDownloadBarcodePdf() {
       const a = document.createElement("a");
       a.href = s3Url;
       a.download = "barcodes.pdf";
+      a.target = "_blank"
       a.click();
     },
   });
