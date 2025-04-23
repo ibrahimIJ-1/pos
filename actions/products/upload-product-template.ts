@@ -88,18 +88,18 @@ export async function uploadProductsFromExcel(formData: FormData) {
         productData.barcode = barcode;
         let branchProductData: any = {};
         if (row.getCell(7).value) {
-          productData.price = parseFloat(
+          branchProductData.price = parseFloat(
             row.getCell(7).value?.toString() || "0"
           );
         }
-        productData.cost = parseFloat(row.getCell(8).value?.toString() || "0");
+        branchProductData.cost = parseFloat(row.getCell(8).value?.toString() || "0");
         if (row.getCell(9).value) {
-          productData.taxRate = parseFloat(
+          branchProductData.taxRate = parseFloat(
             row.getCell(9).value?.toString() || "0"
           );
         }
         if (row.getCell(11).value) {
-          productData.low_stock_threshold = parseInt(
+          branchProductData.low_stock_threshold = parseInt(
             row.getCell(11).value?.toString() || "10"
           );
         }
