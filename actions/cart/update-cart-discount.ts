@@ -15,10 +15,19 @@ export const updateCartDiscount = async (
     if (!discountId) {
       throw new Error("Discount ID is required");
     }
-
+    const today = new Date();
     // Get the discount from the database
     const discount = await prisma.discount.findUnique({
-      where: { id: discountId },
+      where: {
+        id: discountId,
+        startDate: {
+          lte: today,
+        },
+        endDate: {
+          gte: today,
+        },
+        isActive: true,
+      },
     });
 
     if (!discount) {
@@ -27,10 +36,6 @@ export const updateCartDiscount = async (
 
     if (!discount.isActive) {
       throw new Error("Discount is not active");
-    }
-
-    if (discount.endDate && new Date(discount.endDate) < new Date()) {
-      throw new Error("Discount has expired");
     }
 
     if (discount.maxUses && discount.currentUses >= discount.maxUses) {
@@ -71,7 +76,7 @@ export const updateCartDiscount = async (
         discountId,
       },
     });
-
+    
     return "Discount applied";
   } catch (error) {
     console.error("Error applying discount:", error);

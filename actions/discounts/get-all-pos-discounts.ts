@@ -14,6 +14,7 @@ export const getAllPOSDiscounts = async () => {
     ]);
     let user = await checkUser();
     const reg = await getRegisterById(user.macAddress);
+    const today = new Date();
     const discounts = await prisma.discount.findMany({
       where: {
         branches: {
@@ -21,6 +22,13 @@ export const getAllPOSDiscounts = async () => {
             id: reg.branchId,
           },
         },
+        startDate: {
+          lte: today,
+        },
+        endDate: {
+          gte: today,
+        },
+        isActive: true,
       },
       include: {
         products: {

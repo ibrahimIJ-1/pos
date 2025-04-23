@@ -17,12 +17,13 @@ export const getAllPOSProducts = async () => {
     let user = await checkUser();
     const reg = await getRegisterById(user.macAddress);
     const products = await prisma.product.findMany({
-      where:{
-        BranchProduct:{
-          some:{
-            branchId:reg.branchId
-          }
-        }
+      where: {
+        BranchProduct: {
+          some: {
+            branchId: reg.branchId,
+            isActive: true,
+          },
+        },
       },
       include: {
         BranchProduct: {

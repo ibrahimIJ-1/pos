@@ -4,11 +4,12 @@ import { prisma } from "@/lib/prisma";
 import { decimalToNumber } from "@/lib/utils";
 import { checkUser } from "../Authorization";
 import { getRegisterById } from "../accounting/registers/get-register-by-id";
+import { checkDiscountById } from "../discounts/check-discount";
 
 export const getMyActiveUserCart = async (userId: string) => {
   // Try to fetch the active cart for this user
   const user = await checkUser();
-  const reg = await getRegisterById(user.macAddress)
+  const reg = await getRegisterById(user.macAddress);
   if (!reg) throw new Error("Register Not found");
   const branchId = reg.branchId;
   let cart = await prisma.cart.findFirst({
@@ -66,7 +67,7 @@ export const getMyActiveUserCart = async (userId: string) => {
   let discount = null;
 
   // Process discount if it exists on the cart
-  if (cart.discountId) {
+  if (cart.discountId && (await checkDiscountById(cart.discountId))) {
     const discountData = await prisma.discount.findUnique({
       where: { id: cart.discountId },
       include: { products: true },
