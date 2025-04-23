@@ -15,12 +15,8 @@ import { UseMutationResult, useQueryClient } from "@tanstack/react-query";
 import {
   useCart,
   useCartOperations,
-  useCreateSale,
-  useCustomers,
   useMultiCart,
   useMultiCartOperations,
-  usePOSProducts,
-  useProducts,
 } from "@/lib/pos-service";
 import {
   Cart,
@@ -37,6 +33,9 @@ import Loading from "@/app/loading";
 import MacNotFound from "@/app/mac-not-found";
 import { POSContextType } from "./context-types/POSContextType";
 import { getPOSSettings, getStoreSettings } from "@/lib/settings-service";
+import { useCustomers } from "@/lib/customers-service";
+import { useCreateSale } from "@/lib/sales-service";
+import { usePOSProducts } from "@/lib/products-service";
 
 export const POSContext = createContext<POSContextType | undefined>(undefined);
 

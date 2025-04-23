@@ -5,11 +5,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
-  useBranches,
-  useCreateRegister,
-  useUpdateRegister,
-} from "@/lib/pos-service";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -37,6 +32,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { useBranches } from "@/lib/branches-service";
+import { useCreateRegister, useUpdateRegister } from "@/lib/registers-service";
 
 const registerSchema = z.object({
   id: z.string().min(3, { message: "Serial Number must be at least 3 characters" }),

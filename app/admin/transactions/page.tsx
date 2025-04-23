@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { useTransactions } from "@/lib/pos-service";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
@@ -14,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RegisterTransaction } from "@prisma/client";
+import { useTransactions } from "@/lib/transactions-service";
 
 export default function Transactions() {
   const { data: transactions, isLoading, error } = useTransactions();

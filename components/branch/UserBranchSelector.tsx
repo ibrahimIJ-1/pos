@@ -6,8 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { FormControl } from "../ui/form";
-import { useSetUserDefaultBranch, useUserBranches } from "@/lib/pos-service";
+import { useSetUserDefaultBranch, useUserBranches } from "@/lib/branches-service";
 
 function UserBranchSelector() {
   const { data } = useUserBranches();

@@ -1,3 +1,4 @@
+import { accountingSummary } from "@/actions/accounting/summery";
 import { getAdvancedReport } from "@/actions/dashboard/advance-reports";
 import { getCustomerReport } from "@/actions/dashboard/customer-report";
 import { getInventoryReport } from "@/actions/dashboard/inventory-report";
@@ -94,6 +95,17 @@ const useAdvancedReports = (
       return getAdvancedReport(reportType,dateRange,fromDate,toDate);
     },
     enabled: !!fromDate && !!toDate && !!reportType && !!dateRange,
+  });
+};
+
+export const useAccountingSummary = (period: "day" | "week" | "month") => {
+  return useQuery({
+    queryKey: ["accounting", "summary", period],
+    queryFn: async () => {
+      const response = await accountingSummary(period);
+
+      return response;
+    },
   });
 };
 

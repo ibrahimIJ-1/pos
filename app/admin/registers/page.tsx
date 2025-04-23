@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRegisters } from "@/lib/pos-service";
 import { UserRole, Permission } from "@/lib/permissions";
 import { PermissionGuard } from "@/hooks/usePermissions";
 import { useToast } from "@/hooks/use-toast";
@@ -20,6 +19,7 @@ import { Plus, Search, RefreshCw } from "lucide-react";
 import { RegisterDialog } from "@/components/register/RegisterDialog";
 import { RegisterDataTable } from "@/components/register/RegisterDataTable";
 import { Register } from "@prisma/client";
+import { useRegisters } from "@/lib/registers-service";
 
 export default function Registers() {
   const { toast } = useToast();

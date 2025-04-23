@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useDiscounts, useDeleteDiscount } from "@/lib/pos-service";
 import { useToast } from "@/hooks/use-toast";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
@@ -19,6 +18,7 @@ import {
 import { ColumnDef } from "@tanstack/react-table";
 import { DiscountDialog } from "./DiscountDialog";
 import { Branch, Discount, DiscountType } from "@prisma/client";
+import { useDeleteDiscount, useDiscounts } from "@/lib/discounts-service";
 
 export const DiscountDataTable = ({branches}:{branches:Branch[]}) => {
   const { toast } = useToast();

@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react";
-import { useDiscounts, usePOSDiscounts } from "@/lib/pos-service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -15,7 +14,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Percent, Tag, Search, Calendar } from "lucide-react";
-import { Discount, DiscountType } from "@prisma/client";
+import { DiscountType } from "@prisma/client";
+import { usePOSDiscounts } from "@/lib/discounts-service";
 
 interface DiscountSelectorProps {
   open: boolean;

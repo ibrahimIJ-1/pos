@@ -67,8 +67,8 @@ import { getAllUsers } from "@/actions/users/get-all-users";
 import { createNewUser } from "@/actions/users/create-new-user";
 import { updateUser, updateUserPassword } from "@/actions/users/update-user";
 import { deleteUserById } from "@/actions/users/delete-user";
-import { useBranches } from "@/lib/pos-service";
 import { Branch } from "@prisma/client";
+import { useBranches } from "@/lib/branches-service";
 
 // Define the shape of our user
 interface UserData {

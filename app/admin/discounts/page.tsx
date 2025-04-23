@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useBranches, useDiscounts } from "@/lib/pos-service";
 import { UserRole, Permission } from "@/lib/permissions";
 import { PermissionGuard } from "@/hooks/usePermissions";
 import { useToast } from "@/hooks/use-toast";
@@ -20,6 +19,8 @@ import { Plus, Search, RefreshCw } from "lucide-react";
 import { DiscountDialog } from "@/components/discount/DiscountDialog";
 import { DiscountDataTable } from "@/components/discount/DiscountDataTable";
 import { Branch } from "@prisma/client";
+import { useDiscounts } from "@/lib/discounts-service";
+import { useBranches } from "@/lib/branches-service";
 
 export default function Discounts() {
   const { toast } = useToast();

@@ -20,8 +20,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { useCreateTransaction } from "@/lib/pos-service";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCreateTransaction } from "@/lib/transactions-service";
 
 interface TransactionFormProps {
   onSuccess?: () => void;

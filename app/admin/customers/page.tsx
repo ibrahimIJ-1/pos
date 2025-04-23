@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useEffect, useState } from "react";
-import { useCustomers } from "@/lib/pos-service";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
@@ -12,6 +11,7 @@ import { CheckCircle, XCircle, UserPlus, User, Users } from "lucide-react";
 import { UserRole, Permission } from "@/lib/permissions";
 import { PermissionGuard } from "@/hooks/usePermissions";
 import { Customer } from "@prisma/client";
+import { useCustomers } from "@/lib/customers-service";
 
 export default function Customers() {
   const { data: customers, isLoading, refetch } = useCustomers();

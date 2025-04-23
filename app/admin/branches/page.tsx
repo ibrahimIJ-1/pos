@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useBranches } from "@/lib/pos-service";
 import { UserRole, Permission } from "@/lib/permissions";
 import { PermissionGuard } from "@/hooks/usePermissions";
 import { useToast } from "@/hooks/use-toast";
@@ -19,7 +18,7 @@ import {
 import { Plus, Search, RefreshCw } from "lucide-react";
 import { BranchDialog } from "@/components/branch/BranchDialog";
 import { BranchDataTable } from "@/components/branch/BranchDataTable";
-import { Branch } from "@prisma/client";
+import { useBranches } from "@/lib/branches-service";
 
 export default function Branches() {
   const { toast } = useToast();

@@ -5,11 +5,6 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
-  useCreateDiscount,
-  useUpdateDiscount,
-  useProducts,
-} from "@/lib/pos-service";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -46,6 +41,8 @@ import {
   DiscountType,
   Product,
 } from "@prisma/client";
+import { useProducts } from "@/lib/products-service";
+import { useCreateDiscount, useUpdateDiscount } from "@/lib/discounts-service";
 
 const discountSchema = z.object({
   name: z.string().min(3, { message: "Name must be at least 3 characters" }),

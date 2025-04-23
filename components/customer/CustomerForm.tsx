@@ -16,7 +16,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { useCreateCustomer, useUpdateCustomer } from "@/lib/pos-service";
 import { toast } from "sonner";
 import {
   Select,
@@ -27,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { Customer } from "@prisma/client";
+import { useCreateCustomer, useUpdateCustomer } from "@/lib/customers-service";
 
 // List of countries for the dropdown
 const countries = [

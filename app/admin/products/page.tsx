@@ -1,13 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import {
-  useProducts,
-  useDeleteProduct,
-  useBranches,
-  useGetProductsTemplate,
-  useUploadProductsTemplate,
-} from "@/lib/pos-service";
 import { Plus, Package, Search, DownloadIcon, UploadIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +27,8 @@ import { ProductForm } from "@/components/product/ProductForm";
 import { ProductDetails } from "@/components/product/ProductDetails";
 import { Branch, BranchProduct, Product } from "@prisma/client";
 import { ProductTable } from "@/components/product/ProductTable";
+import { useDeleteProduct, useGetProductsTemplate, useProducts, useUploadProductsTemplate } from "@/lib/products-service";
+import { useBranches } from "@/lib/branches-service";
 
 export default function Products() {
   const { data: products = [], isLoading } = useProducts();

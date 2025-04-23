@@ -5,11 +5,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
-  useCreateBranch,
-  useUpdateBranch,
-  useProducts,
-} from "@/lib/pos-service";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -30,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { NumberInput } from "@/components/ui/number-input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Branch } from "@prisma/client";
+import { useCreateBranch, useUpdateBranch } from "@/lib/branches-service";
 
 const branchSchema = z.object({
   name: z.string().min(3, { message: "Name must be at least 3 characters" }),

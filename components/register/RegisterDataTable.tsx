@@ -1,10 +1,4 @@
 import React, { useState } from "react";
-import {
-  useRegisters,
-  useDeleteRegister,
-  useOpenRegister,
-  useCloseRegister,
-} from "@/lib/pos-service";
 import { useToast } from "@/hooks/use-toast";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
@@ -31,6 +25,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { RegisterDialog } from "./RegisterDialog";
 import { Branch, Register, RegisterStatus } from "@prisma/client";
 import OpenCloseModal from "./OpenCloseModal";
+import { useDeleteRegister, useRegisters } from "@/lib/registers-service";
 
 export const RegisterDataTable = () => {
   const { toast } = useToast();

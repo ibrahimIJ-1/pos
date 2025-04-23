@@ -1,5 +1,4 @@
 import React from "react";
-import { useAccountingSummary } from "@/lib/pos-service";
 import {
   Card,
   CardContent,
@@ -15,6 +14,7 @@ import {
   ShoppingCartIcon,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAccountingSummary } from "@/lib/reports-service";
 
 export function AccountingSummary() {
   const [period, setPeriod] = React.useState<"day" | "week" | "month">("day");

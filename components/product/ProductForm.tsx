@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useCreateProduct, useUpdateProduct } from "@/lib/pos-service";
 import {
   Form,
   FormControl,
@@ -27,6 +26,7 @@ import { NumberInput } from "@/components/ui/number-input";
 import { ImagePlus, Upload, Plus } from "lucide-react";
 import { Product, BranchProduct, Branch } from "@prisma/client";
 import Decimal from "decimal.js";
+import { useCreateProduct, useUpdateProduct } from "@/lib/products-service";
 
 const productFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),

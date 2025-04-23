@@ -1,5 +1,4 @@
 import React from "react";
-import { useTransaction } from "@/lib/pos-service";
 import {
   Card,
   CardContent,
@@ -9,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTransaction } from "@/lib/transactions-service";
 
 interface TransactionDetailsProps {
   id: string;

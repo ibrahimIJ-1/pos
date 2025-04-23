@@ -1,8 +1,4 @@
 import React, { useState } from "react";
-import {
-  useBranches,
-  useDeleteBranch,
-} from "@/lib/pos-service";
 import { useToast } from "@/hooks/use-toast";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
@@ -29,6 +25,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { BranchDialog } from "./BranchDialog";
 import { Branch } from "@prisma/client";
 import ActivateDeactivateModal from "./ActivateDeactivateModal";
+import { useBranches, useDeleteBranch } from "@/lib/branches-service";
 
 export const BranchDataTable = () => {
   const { toast } = useToast();
