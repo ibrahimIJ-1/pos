@@ -55,19 +55,6 @@ export default function Registers() {
             >
               <RefreshCw className="h-4 w-4" />
             </Button>
-
-            <PermissionGuard
-              userRole={UserRole.MANAGER}
-              permission={Permission.CREATE_DISCOUNT}
-            >
-              <Button
-                onClick={() => setIsAddDialogOpen(true)}
-                className="gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                Add Register
-              </Button>
-            </PermissionGuard>
           </div>
         </div>
 

@@ -16,7 +16,7 @@ export const createRegister = async (
   //       .status(403)
   //       .json({ error: "You do not have permission to create registers" });
   //   }
-
+  throw new Error("Contact Support to add new register");
   try {
     if (!name) {
       throw new Error("Register name is required");
