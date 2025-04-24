@@ -344,40 +344,40 @@ export const initDatabase = async () => {
     //   },
     // ];
 
-    const products = generateProducts(branch)
+    // const products = generateProducts(branch)
 
-    for (const product of products) {
-      const prod = await prisma.product.upsert({
-        where: { sku: product.sku },
-        update: {
-          name: product.name,
-          description: product.description,
-          barcode: product.barcode,
-          category: product.category,
-          image_url: product.image_url,
-        },
-        create: {
-          name: product.name,
-          description: product.description,
-          sku: product.sku,
-          barcode: product.barcode,
-          category: product.category,
-          image_url: product.image_url,
-          BranchProduct: {
-            create: product.branches.map((branch) => ({
-              branch: {
-                connect: { id: branch.branch_id },
-              },
-              price: branch.price,
-              cost: branch.cost,
-              taxRate: branch.taxRate,
-              stock: branch.stock,
-              low_stock_threshold: branch.low_stock_threshold,
-              isActive: branch.active,
-            })),
-          },
-        },
-      });
+    // for (const product of products) {
+    //   const prod = await prisma.product.upsert({
+    //     where: { sku: product.sku },
+    //     update: {
+    //       name: product.name,
+    //       description: product.description,
+    //       barcode: product.barcode,
+    //       category: product.category,
+    //       image_url: product.image_url,
+    //     },
+    //     create: {
+    //       name: product.name,
+    //       description: product.description,
+    //       sku: product.sku,
+    //       barcode: product.barcode,
+    //       category: product.category,
+    //       image_url: product.image_url,
+    //       BranchProduct: {
+    //         create: product.branches.map((branch) => ({
+    //           branch: {
+    //             connect: { id: branch.branch_id },
+    //           },
+    //           price: branch.price,
+    //           cost: branch.cost,
+    //           taxRate: branch.taxRate,
+    //           stock: branch.stock,
+    //           low_stock_threshold: branch.low_stock_threshold,
+    //           isActive: branch.active,
+    //         })),
+    //       },
+    //     },
+    //   });
 
       // Optional: Update or upsert BranchProduct separately
       // for (const branch of product.branches) {
@@ -410,57 +410,57 @@ export const initDatabase = async () => {
       // }
     }
 
-    console.log(`${products.length} products created`);
+    // console.log(`${products.length} products created`);
 
     // Create customers
-    const customers = [
-      {
-        name: "John Smith",
-        email: "john.smith@example.com",
-        phone: "555-123-4567",
-        address: "123 Main St",
-        city: "Anytown",
-        state: "CA",
-        postal_code: "12345",
-        country: "USA",
-        tax_exempt: false,
-        notes: "Regular customer",
-      },
-      {
-        name: "Jane Doe",
-        email: "jane.doe@example.com",
-        phone: "555-987-6543",
-        address: "456 Oak Ave",
-        city: "Somewhere",
-        state: "NY",
-        postal_code: "67890",
-        country: "USA",
-        tax_exempt: true,
-        notes: "Tax exempt business customer",
-      },
-      {
-        name: "Bob Johnson",
-        email: "bob.johnson@example.com",
-        phone: "555-567-8901",
-        address: "789 Pine Rd",
-        city: "Elsewhere",
-        state: "TX",
-        postal_code: "45678",
-        country: "USA",
-        tax_exempt: false,
-        notes: "Prefers delivery",
-      },
-    ];
+    // const customers = [
+    //   {
+    //     name: "John Smith",
+    //     email: "john.smith@example.com",
+    //     phone: "555-123-4567",
+    //     address: "123 Main St",
+    //     city: "Anytown",
+    //     state: "CA",
+    //     postal_code: "12345",
+    //     country: "USA",
+    //     tax_exempt: false,
+    //     notes: "Regular customer",
+    //   },
+    //   {
+    //     name: "Jane Doe",
+    //     email: "jane.doe@example.com",
+    //     phone: "555-987-6543",
+    //     address: "456 Oak Ave",
+    //     city: "Somewhere",
+    //     state: "NY",
+    //     postal_code: "67890",
+    //     country: "USA",
+    //     tax_exempt: true,
+    //     notes: "Tax exempt business customer",
+    //   },
+    //   {
+    //     name: "Bob Johnson",
+    //     email: "bob.johnson@example.com",
+    //     phone: "555-567-8901",
+    //     address: "789 Pine Rd",
+    //     city: "Elsewhere",
+    //     state: "TX",
+    //     postal_code: "45678",
+    //     country: "USA",
+    //     tax_exempt: false,
+    //     notes: "Prefers delivery",
+    //   },
+    // ];
 
-    for (const customer of customers) {
-      await prisma.customer.upsert({
-        where: { email: customer.email },
-        update: customer,
-        create: customer,
-      });
-    }
+    // for (const customer of customers) {
+    //   await prisma.customer.upsert({
+    //     where: { email: customer.email },
+    //     update: customer,
+    //     create: customer,
+    //   });
+    // }
 
-    console.log(`${customers.length} customers created`);
+    // console.log(`${customers.length} customers created`);
 
     // Fix: Create registers with correct data structure
     // const registers = [
@@ -499,81 +499,81 @@ export const initDatabase = async () => {
     // console.log(`${registers.length} registers created`);
 
     // Fix: Create discounts with correct data structure
-    const today = new Date();
-    const nextMonth = new Date(today);
-    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    // const today = new Date();
+    // const nextMonth = new Date(today);
+    // nextMonth.setMonth(nextMonth.getMonth() + 1);
 
-    const discounts = [
-      {
-        name: "10% Off All Products",
-        code: "SUMMER10",
-        type: "PERCENTAGE",
-        value: 10.0,
-        minPurchaseAmount: 20.0,
-        appliesTo: "ENTIRE_ORDER",
-        startDate: today,
-        endDate: nextMonth,
-        maxUses: 100,
-        currentUses: 0,
-        isActive: true,
-      },
-      {
-        name: "$5 Off Beverages",
-        code: "DRINKS5",
-        type: "FIXED",
-        value: 5.0,
-        minPurchaseAmount: 15.0,
-        appliesTo: "SPECIFIC_CATEGORIES",
-        categoryIds: "Beverages",
-        startDate: today,
-        endDate: nextMonth,
-        maxUses: 50,
-        currentUses: 0,
-        isActive: true,
-      },
-      {
-        name: "Buy 1 Get 1 Snacks",
-        code: "BOGO",
-        type: "BUY_X_GET_Y",
-        value: 100.0, // 100% off second item
-        appliesTo: "SPECIFIC_CATEGORIES",
-        categoryIds: "Snacks",
-        buyXQuantity: 1,
-        getYQuantity: 1,
-        startDate: today,
-        endDate: nextMonth,
-        maxUses: 30,
-        currentUses: 0,
-        isActive: true,
-      },
-    ];
+    // const discounts = [
+    //   {
+    //     name: "10% Off All Products",
+    //     code: "SUMMER10",
+    //     type: "PERCENTAGE",
+    //     value: 10.0,
+    //     minPurchaseAmount: 20.0,
+    //     appliesTo: "ENTIRE_ORDER",
+    //     startDate: today,
+    //     endDate: nextMonth,
+    //     maxUses: 100,
+    //     currentUses: 0,
+    //     isActive: true,
+    //   },
+    //   {
+    //     name: "$5 Off Beverages",
+    //     code: "DRINKS5",
+    //     type: "FIXED",
+    //     value: 5.0,
+    //     minPurchaseAmount: 15.0,
+    //     appliesTo: "SPECIFIC_CATEGORIES",
+    //     categoryIds: "Beverages",
+    //     startDate: today,
+    //     endDate: nextMonth,
+    //     maxUses: 50,
+    //     currentUses: 0,
+    //     isActive: true,
+    //   },
+    //   {
+    //     name: "Buy 1 Get 1 Snacks",
+    //     code: "BOGO",
+    //     type: "BUY_X_GET_Y",
+    //     value: 100.0, // 100% off second item
+    //     appliesTo: "SPECIFIC_CATEGORIES",
+    //     categoryIds: "Snacks",
+    //     buyXQuantity: 1,
+    //     getYQuantity: 1,
+    //     startDate: today,
+    //     endDate: nextMonth,
+    //     maxUses: 30,
+    //     currentUses: 0,
+    //     isActive: true,
+    //   },
+    // ];
 
-    for (const discount of discounts) {
-      // Fix: Ensure enums are properly typed
-      const discountData = {
-        name: discount.name,
-        code: discount.code,
-        type: discount.type as any, // Cast to any to handle enum
-        value: discount.value,
-        minPurchaseAmount: discount.minPurchaseAmount,
-        appliesTo: discount.appliesTo as any, // Cast to any to handle enum
-        categoryIds: discount.categoryIds,
-        buyXQuantity: discount.buyXQuantity,
-        getYQuantity: discount.getYQuantity,
-        startDate: discount.startDate,
-        endDate: discount.endDate,
-        maxUses: discount.maxUses,
-        currentUses: discount.currentUses,
-        isActive: discount.isActive,
-      };
+    // for (const discount of discounts) {
+    //   // Fix: Ensure enums are properly typed
+    //   const discountData = {
+    //     name: discount.name,
+    //     code: discount.code,
+    //     type: discount.type as any, // Cast to any to handle enum
+    //     value: discount.value,
+    //     minPurchaseAmount: discount.minPurchaseAmount,
+    //     appliesTo: discount.appliesTo as any, // Cast to any to handle enum
+    //     categoryIds: discount.categoryIds,
+    //     buyXQuantity: discount.buyXQuantity,
+    //     getYQuantity: discount.getYQuantity,
+    //     startDate: discount.startDate,
+    //     endDate: discount.endDate,
+    //     maxUses: discount.maxUses,
+    //     currentUses: discount.currentUses,
+    //     isActive: discount.isActive,
+    //   };
 
-      await prisma.discount.upsert({
-        where: { code: discount.code },
-        update: discountData,
-        create: discountData,
-      });
-    }
-    console.log(`${discounts.length} discounts created`);
+    //   await prisma.discount.upsert({
+    //     where: { code: discount.code },
+    //     update: discountData,
+    //     create: discountData,
+    //   });
+    // }
+    // console.log(`${discounts.length} discounts created`);
   } catch (error) {
     console.error("Error seeding database:", error);
   } finally {
