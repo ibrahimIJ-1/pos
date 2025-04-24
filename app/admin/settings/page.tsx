@@ -179,7 +179,7 @@ export default function SettingsPage() {
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
         <div className="flex gap-2">
-          <DatabaseInitializer />
+          {/* <DatabaseInitializer /> */}
           <Button
             onClick={handleSaveSettings}
             disabled={isSaving}
