@@ -408,7 +408,7 @@ export const initDatabase = async () => {
       //     },
       //   });
       // }
-    }
+    // }
 
     // console.log(`${products.length} products created`);
 
