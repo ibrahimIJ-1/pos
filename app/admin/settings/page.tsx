@@ -33,8 +33,10 @@ import {
 import { toast } from "sonner";
 import { DatabaseInitializer } from "@/components/DatabaseInitializer";
 import { UserRoleManager } from "@/components/user-management/UserRoleManager";
+import { useTranslations } from "next-intl";
 
 export default function SettingsPage() {
+  const t = useTranslations();
   // For demonstration, assume admin with multiple roles
   const userRoles = [UserRole.ADMIN, UserRole.MANAGER];
   const additionalPermissions = [Permission.ISSUE_REFUND];
@@ -95,7 +97,7 @@ export default function SettingsPage() {
         });
       } catch (error) {
         console.error("Error fetching settings:", error);
-        toast.error("Failed to load settings");
+        toast.error(t("Failed to load settings"));
       }
     };
 
@@ -106,7 +108,7 @@ export default function SettingsPage() {
   const handleSaveSettings = async () => {
     try {
       setIsSaving(true);
-      toast.loading("Saving settings...");
+      toast.loading(t("Saving settings") + "...");
 
       // Prepare settings object for API
       const settingsPayload = {
@@ -141,10 +143,10 @@ export default function SettingsPage() {
       };
 
       await saveSettings(settingsPayload);
-      toast.success("Settings saved successfully");
+      toast.success(t("Settings saved successfully"));
     } catch (error) {
       console.error("Error saving settings:", error);
-      toast.error("Failed to save settings");
+      toast.error(t("Failed to save settings"));
     } finally {
       setIsSaving(false);
     }
@@ -177,7 +179,7 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t("Settings")}</h1>
         <div className="flex gap-2">
           {/* <DatabaseInitializer /> */}
           <Button
@@ -185,7 +187,7 @@ export default function SettingsPage() {
             disabled={isSaving}
             className="neon-glow animate-glow"
           >
-            {isSaving ? "Saving..." : "Save Changes"}
+            {isSaving ? t("Saving") + "..." : t("Save Changes")}
           </Button>
         </div>
       </div>
@@ -194,16 +196,17 @@ export default function SettingsPage() {
         value={activeTab}
         onValueChange={setActiveTab}
         className="space-y-4"
+        dir={t("dir") as "rtl" | "ltr"}
       >
         <TabsList>
           <TabsTrigger value="general" className="flex items-center gap-1">
             <Settings2 className="h-4 w-4" />
-            <span>General</span>
+            <span>{t("General")}</span>
           </TabsTrigger>
 
           <TabsTrigger value="store" className="flex items-center gap-1">
             <Store className="h-4 w-4" />
-            <span>Store</span>
+            <span>{t("Store")}</span>
           </TabsTrigger>
 
           <TabsTrigger
@@ -211,13 +214,13 @@ export default function SettingsPage() {
             className="flex items-center gap-1"
           >
             <Bell className="h-4 w-4" />
-            <span>Notifications</span>
+            <span>{t("Notifications")}</span>
           </TabsTrigger>
 
           {checkPermission(Permission.EDIT_USERS) && (
             <TabsTrigger value="users" className="flex items-center gap-1">
               <Users className="h-4 w-4" />
-              <span>Users</span>
+              <span>{t("Users")}</span>
             </TabsTrigger>
           )}
 
@@ -227,7 +230,7 @@ export default function SettingsPage() {
               className="flex items-center gap-1"
             >
               <Shield className="h-4 w-4" />
-              <span>Permissions</span>
+              <span>{t("Permissions")}</span>
             </TabsTrigger>
           )}
         </TabsList>
@@ -235,14 +238,14 @@ export default function SettingsPage() {
         <TabsContent value="general">
           <Card className="neon-card neon-border">
             <CardHeader>
-              <CardTitle>General Settings</CardTitle>
-              <CardDescription>
-                Manage your application settings
+              <CardTitle className="rtl:text-start">{t("General Settings")}</CardTitle>
+              <CardDescription className="rtl:text-start">
+                {t("Manage your application settings")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="app-name">Application Name</Label>
+                <Label htmlFor="app-name">{t("Application Name")}</Label>
                 <Input
                   id="app-name"
                   value={generalSettings.appName}
@@ -254,12 +257,13 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="timezone">Timezone</Label>
+                <Label htmlFor="timezone">{t("Timezone")}</Label>
                 <Select
                   value={generalSettings.timezone}
                   onValueChange={(value) =>
                     handleGeneralChange("timezone", value)
                   }
+                  dir={t("dir") as "rtl" | "ltr"}
                 >
                   <SelectTrigger id="timezone" className="neon-input">
                     <SelectValue placeholder="Select timezone" />
@@ -276,9 +280,9 @@ export default function SettingsPage() {
 
               <div className="flex items-center justify-between pt-2">
                 <div className="space-y-0.5">
-                  <Label htmlFor="show-image">Show Product Images</Label>
+                  <Label htmlFor="show-image">{t("Show Product Images")}</Label>
                   <p className="text-sm text-muted-foreground">
-                    Show POS Product Image
+                    {t("Show POS Product Image")}
                   </p>
                 </div>
                 <Switch
@@ -291,9 +295,9 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center justify-between pt-2">
                 <div className="space-y-0.5">
-                  <Label htmlFor="dark-mode">Dark Mode</Label>
+                  <Label htmlFor="dark-mode">{t("Dark Mode")}</Label>
                   <p className="text-sm text-muted-foreground">
-                    Toggle dark mode on or off
+                    {t("Toggle dark mode on or off")}
                   </p>
                 </div>
                 <Switch
@@ -311,14 +315,14 @@ export default function SettingsPage() {
         <TabsContent value="store">
           <Card className="neon-card neon-border">
             <CardHeader>
-              <CardTitle>Store Settings</CardTitle>
-              <CardDescription>
-                Configure your store information
+              <CardTitle className="rtl:text-start">{t("Store Settings")}</CardTitle>
+              <CardDescription className="rtl:text-start">
+                {t("Configure your store information")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="store-name">Store Name</Label>
+                <Label htmlFor="store-name">{t("Store Name")}</Label>
                 <Input
                   id="store-name"
                   value={storeSettings.storeName}
@@ -330,7 +334,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="store-address">Store Address</Label>
+                <Label htmlFor="store-address">{t("Store Address")}</Label>
                 <Input
                   id="store-address"
                   value={storeSettings.storeAddress}
@@ -342,12 +346,13 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="currency">Currency</Label>
+                <Label htmlFor="currency">{t("Currency")}</Label>
                 <Select
                   value={storeSettings.currency}
                   onValueChange={(value) =>
                     handleStoreChange("currency", value)
                   }
+                  dir={t("dir") as "rtl" | "ltr"}
                 >
                   <SelectTrigger id="currency" className="neon-input">
                     <SelectValue placeholder="Select currency" />
@@ -363,9 +368,9 @@ export default function SettingsPage() {
 
               <div className="flex items-center justify-between pt-2">
                 <div className="space-y-0.5">
-                  <Label htmlFor="tax-enabled">Enable Tax</Label>
+                  <Label htmlFor="tax-enabled">{t("Enable Tax")}</Label>
                   <p className="text-sm text-muted-foreground">
-                    Apply tax to transactions
+                    {t("Apply tax to transactions")}
                   </p>
                 </div>
                 <Switch
@@ -383,19 +388,19 @@ export default function SettingsPage() {
         <TabsContent value="notifications">
           <Card className="neon-card neon-border">
             <CardHeader>
-              <CardTitle>Notification Settings</CardTitle>
-              <CardDescription>
-                Configure when and how you receive notifications
+              <CardTitle className="rtl:text-start">{t("Notification Settings")}</CardTitle>
+              <CardDescription className="rtl:text-start">
+                {t("Configure when and how you receive notifications")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label htmlFor="email-notifications">
-                    Email Notifications
+                    {t("Email Notifications")}
                   </Label>
                   <p className="text-sm text-muted-foreground">
-                    Receive notifications via email
+                    {t("Receive notifications via email")}
                   </p>
                 </div>
                 <Switch
@@ -412,9 +417,11 @@ export default function SettingsPage() {
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="inventory-alerts">Inventory Alerts</Label>
+                  <Label htmlFor="inventory-alerts">
+                    {t("Inventory Alerts")}
+                  </Label>
                   <p className="text-sm text-muted-foreground">
-                    Notify when inventory is low
+                    {t("Notify when inventory is low")}
                   </p>
                 </div>
                 <Switch
@@ -431,9 +438,9 @@ export default function SettingsPage() {
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="sales-reports">Sales Reports</Label>
+                  <Label htmlFor="sales-reports">{t("Sales Reports")}</Label>
                   <p className="text-sm text-muted-foreground">
-                    Receive daily sales reports
+                    {t("Receive daily sales reports")}
                   </p>
                 </div>
                 <Switch

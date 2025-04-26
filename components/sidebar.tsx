@@ -43,6 +43,8 @@ import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import UserBranchSelector from "./branch/UserBranchSelector";
+import { useTranslations } from "next-intl";
+import LanguageSwitcher from "./language-switcher/LanguageSwitcher";
 
 interface SidebarProps {
   roles?: (UserRole | string)[] | (UserRole | string);
@@ -53,6 +55,7 @@ export default function Sidebar({
   roles = UserRole.ADMIN,
   additionalPermissions = [],
 }: SidebarProps) {
+  const t = useTranslations();
   const userRoles = Array.isArray(roles) ? roles : [roles];
   const { logout, permissions } = useAuth();
   const { checkPermission } = usePermissions(userRoles, additionalPermissions);
@@ -71,39 +74,39 @@ export default function Sidebar({
   };
 
   const sidebarItems = [
-    {
-      icon: <Home className="h-4 w-4" />,
-      label: "Home",
-      href: "/",
-      neededPermissions: [],
-    },
+    // {
+    //   icon: <Home className="h-4 w-4" />,
+    //   label: t("Home"),
+    //   href: "/",
+    //   neededPermissions: [],
+    // },
     {
       icon: <LayoutDashboard className="h-4 w-4" />,
-      label: "Dashboard",
+      label: t("Dashboard"),
       href: "/admin",
       neededPermissions: [],
     },
     {
       icon: <Package className="h-4 w-4" />,
-      label: "Products",
+      label: t("Products"),
       href: "/admin/products",
       neededPermissions: rolePermissions[UserRole.MANAGER],
     },
     {
       icon: <ShoppingCart className="h-4 w-4" />,
-      label: "POS",
+      label: t("POS"),
       href: "/pos",
       neededPermissions: rolePermissions[UserRole.CASHIER],
     },
     {
       icon: <Users className="h-4 w-4" />,
-      label: "Customers",
+      label: t("Customers"),
       href: "/admin/customers",
       neededPermissions: rolePermissions[UserRole.MANAGER],
     },
     {
       icon: <Coins className="h-4 w-4" />,
-      label: "Transactions",
+      label: t("Transactions"),
       href: "/admin/transactions",
       neededPermissions: [
         ...rolePermissions[UserRole.ACCOUNTANT],
@@ -112,7 +115,7 @@ export default function Sidebar({
     },
     {
       icon: <Tag className="h-4 w-4" />,
-      label: "Discounts",
+      label: t("Discounts"),
       href: "/admin/discounts",
       neededPermissions: [
         ...rolePermissions[UserRole.ACCOUNTANT],
@@ -121,7 +124,7 @@ export default function Sidebar({
     },
     {
       icon: <ComputerIcon className="h-4 w-4" />,
-      label: "Registers",
+      label: t("Registers"),
       href: "/admin/registers",
       neededPermissions: [
         ...rolePermissions[UserRole.ACCOUNTANT],
@@ -130,7 +133,7 @@ export default function Sidebar({
     },
     {
       icon: <Receipt className="h-4 w-4" />,
-      label: "Reports",
+      label: t("Reports"),
       href: "/admin/reports",
       neededPermissions: [
         ...rolePermissions[UserRole.ACCOUNTANT],
@@ -139,19 +142,19 @@ export default function Sidebar({
     },
     {
       icon: <ListChecks className="h-4 w-4" />,
-      label: "Users",
+      label: t("Users"),
       href: "/admin/users",
       neededPermissions: rolePermissions[UserRole.OWNER],
     },
     {
       icon: <GitBranchIcon className="h-4 w-4" />,
-      label: "Branches",
+      label: t("Branches"),
       href: "/admin/branches",
       neededPermissions: rolePermissions[UserRole.OWNER],
     },
     {
       icon: <Settings className="h-4 w-4" />,
-      label: "Settings",
+      label: t("Settings"),
       href: "/admin/settings",
       neededPermissions: rolePermissions[UserRole.OWNER],
     },
@@ -163,7 +166,10 @@ export default function Sidebar({
         <SheetTrigger asChild>
           <button
             aria-label="Open navigation menu"
-            className="bg-white peer inline-flex items-start justify-center rounded-md p-2 text-gray-500 hover:bg-white hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 disabled:pointer-events-none data-[state=open]:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[state=open]:bg-gray-800"
+            className={cn(
+              "bg-white peer inline-flex items-start justify-center rounded-md p-2 text-gray-500 hover:bg-white hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 disabled:pointer-events-none data-[state=open]:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[state=open]:bg-gray-800",
+              t("dir") == "rtl" && "flex justify-end"
+            )}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -184,19 +190,32 @@ export default function Sidebar({
           </button>
         </SheetTrigger>
         <SheetContent
-          side="left"
+          side={t("dir") == "ltr" ? "left" : "right"}
           className="w-64 border-right p-0 flex flex-col justify-between"
         >
-          <div className="flex flex-col">
-            <SheetHeader className="px-5 pt-4 pb-2.5">
+          <div
+            className={cn(
+              "flex flex-col rtl:direction-reverse",
+              t("dir") == "rtl" && ""
+            )}
+            dir={t("dir")}
+          >
+            <SheetHeader
+              className={cn(
+                "px-5 pt-4 pb-2.5",
+                t("dir") == "rtl" && "text-start"
+              )}
+            >
               <SheetTitle>
-                Dashboard
+                {t("Dashboard")}
                 <div>
                   <UserBranchSelector />
                 </div>
               </SheetTitle>
-              <SheetDescription>
-                Manage your store, products, customers, and more.
+              <SheetDescription
+                className={cn("", t("dir") == "rtl" && "text-start")}
+              >
+                {t("Manage your store, products, customers, and more")}.
               </SheetDescription>
             </SheetHeader>
             <ScrollArea>
@@ -214,7 +233,11 @@ export default function Sidebar({
                           <Link
                             href={item.href}
                             onClick={closeSidebar}
-                            className="group flex items-center gap-3 rounded-md px-5 py-2 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800"
+                            className={cn(
+                              "group flex items-center gap-3 rounded-md px-5 py-2 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800",
+                              t("dir") == "rtl" &&
+                                "justify-start flex-row-reverse"
+                            )}
                           >
                             {item.icon}
                             <span>{item.label}</span>
@@ -239,19 +262,24 @@ interface SheetFooterProps {
 }
 
 function SheetFooter({ logout }: SheetFooterProps) {
+  const t = useTranslations();
   return (
-    <div
-      className={cn(
-        "flex items-center p-4 border-t neon-border",
-        "justify-between"
-      )}
-    >
-      <ThemeSwitcher />
+    <div className="flex flex-col">
+      <LanguageSwitcher />
 
-      <Button variant="ghost" size="sm" className="gap-2" onClick={logout}>
-        <LogOut className="h-4 w-4" />
-        <span>Logout</span>
-      </Button>
+      <div
+        className={cn(
+          "flex items-center p-4 border-t neon-border rtl:flex-row-reverse",
+          "justify-between"
+        )}
+      >
+        <ThemeSwitcher />
+
+        <Button variant="ghost" size="sm" className="gap-2" onClick={logout}>
+          <LogOut className="h-4 w-4" />
+          <span>{t("Logout")}</span>
+        </Button>
+      </div>
     </div>
   );
 }

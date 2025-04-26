@@ -41,18 +41,22 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 const COLORS = ["#6366F1", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6"];
 
-const DATE_RANGES = [
-  { value: "last7", label: "Last 7 days" },
-  { value: "last30", label: "Last 30 days" },
-  { value: "last90", label: "Last 90 days" },
-  { value: "last365", label: "Last 365 days" },
-  { value: "all", label: "All time" },
-];
+
 
 export default function Dashboard() {
+  const t = useTranslations();
+  const DATE_RANGES = [
+    { value: "last7", label: t("Last 7 days") },
+    { value: "last30", label: t("Last 30 days") },
+    { value: "last90", label: t("Last 90 days") },
+    { value: "last365", label: t("Last 365 days") },
+    { value: "all", label: t("All time") },
+  ];
+
   const [dateRange, setDateRange] = useState("last30");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -70,7 +74,7 @@ export default function Dashboard() {
 
   const selectedRangeLabel =
     DATE_RANGES.find((range) => range.value === dateRange)?.label ||
-    "Select range";
+    t("Select range");
 
   if (error) {
     return (
@@ -80,13 +84,13 @@ export default function Dashboard() {
         className="flex flex-col items-center justify-center h-screen gap-4"
       >
         <div className="text-2xl font-bold text-destructive">
-          Error loading dashboard data
+          {t("Error loading dashboard data")}
         </div>
         <Button onClick={handleRefresh} disabled={isRefreshing}>
           <RefreshCw
             className={cn("mr-2 h-4 w-4", isRefreshing && "animate-spin")}
           />
-          {isRefreshing ? "Refreshing..." : "Retry"}
+          {isRefreshing ? t("Refreshing")+"..." : t("Retry")}
         </Button>
       </motion.div>
     );
@@ -102,12 +106,12 @@ export default function Dashboard() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            Dashboard Overview
+            {t("Dashboard Overview")}
           </h1>
           <p className="text-gray-500 flex items-center gap-1">
             {format(new Date(), "MMMM d, yyyy")}
             <span className="h-1 w-1 bg-gray-400 rounded-full"></span>
-            Real-time data
+            {t("Real-time data")}
           </p>
         </div>
         <div className="flex gap-3">
@@ -165,10 +169,10 @@ export default function Dashboard() {
             <RefreshCw
               className={cn("h-4 w-4", isRefreshing && "animate-spin")}
             />
-            Refresh
+            {t("Refresh")}
           </Button>
           <Button className="gap-2 bg-gradient-to-r from-indigo-600 to-indigo-400 hover:from-indigo-700 hover:to-indigo-500 shadow-indigo-200 hover:shadow-indigo-300 shadow-sm">
-            Export Report
+            {t("Export Report")}
           </Button>
         </div>
       </div>
@@ -176,7 +180,7 @@ export default function Dashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Total Revenue"
+          title={t("Total Revenue")}
           value={data?.totalRevenue}
           change={12.5}
           icon={<DollarSign className="h-5 w-5" />}
@@ -185,7 +189,7 @@ export default function Dashboard() {
           color="indigo"
         />
         <StatCard
-          title="Total Sales"
+          title={t("Total Sales")}
           value={data?.salesCount}
           change={8.2}
           icon={<ShoppingCart className="h-5 w-5" />}
@@ -193,7 +197,7 @@ export default function Dashboard() {
           color="green"
         />
         <StatCard
-          title="Active Customers"
+          title={t("Active Customers")}
           value={data?.activeCustomers}
           change={5.7}
           icon={<Users className="h-5 w-5" />}
@@ -201,7 +205,7 @@ export default function Dashboard() {
           color="blue"
         />
         <StatCard
-          title="Low Stock Items"
+          title={t("Low Stock Items")}
           value={data?.productsLowStock}
           change={-3.1}
           icon={<Package className="h-5 w-5" />}
@@ -218,7 +222,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg font-semibold flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-indigo-500" />
-                Revenue Trend
+                {t("Revenue Trend")}
               </CardTitle>
               <div className="text-sm text-gray-500">{selectedRangeLabel}</div>
             </div>
@@ -304,7 +308,7 @@ export default function Dashboard() {
           <CardHeader className="p-0 pb-6">
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
               <BarChart2 className="h-5 w-5 text-green-500" />
-              Sales by Category
+              {t("Sales by Category")}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0 h-[300px]">
@@ -368,7 +372,7 @@ export default function Dashboard() {
           <CardHeader className="p-0 pb-6">
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
               <PieChart className="h-5 w-5 text-purple-500" />
-              Payment Methods
+              {t("Payment Methods")}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0 h-[300px]">
@@ -414,7 +418,7 @@ export default function Dashboard() {
                             </p>
                             <p className="text-gray-500 text-sm">
                               {(payload[0].payload.percent * 100).toFixed(1)}%
-                              of total
+                              {t("of total")}
                             </p>
                           </motion.div>
                         );
@@ -444,7 +448,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
               <CreditCard className="h-5 w-5 text-orange-500" />
-              Recent Transactions
+              {t("Recent Transactions")}
             </CardTitle>
             <Button variant="ghost" size="sm" className="text-gray-500">
               <MoreHorizontal className="h-4 w-4" />
@@ -486,9 +490,9 @@ export default function Dashboard() {
                       <div>
                         <p className="font-medium">
                           {tx.type === "SALE"
-                            ? "Sale"
+                            ? t("Sale")
                             : tx.type === "REFUND"
-                            ? "Refund"
+                            ? t("Refund")
                             : tx.type}
                         </p>
                         <p className="text-sm text-gray-500 flex items-center gap-1">
@@ -549,6 +553,7 @@ function StatCard({
   isCurrency?: boolean;
   color?: "indigo" | "green" | "blue" | "orange" | "red";
 }) {
+  const t = useTranslations();
   const colorClasses = {
     indigo: {
       bg: "bg-indigo-100",
@@ -621,7 +626,7 @@ function StatCard({
                   }`}
                 >
                   {change && change >= 0 ? "+" : ""}
-                  {change}% from last month
+                  {change}% {t("from last month")}
                 </p>
               </div>
             </>

@@ -36,10 +36,12 @@ import { getPOSSettings, getStoreSettings } from "@/lib/settings-service";
 import { useCustomers } from "@/lib/customers-service";
 import { useCreateSale } from "@/lib/sales-service";
 import { usePOSProducts } from "@/lib/products-service";
+import { useTranslations } from "next-intl";
 
 export const POSContext = createContext<POSContextType | undefined>(undefined);
 
 export function POSProvider({ children }: { children: ReactNode }) {
+  const trans = useTranslations();
   const queryClient = useQueryClient();
   const { data: cart } = useCart();
   const cartOps = useCartOperations();
@@ -255,7 +257,7 @@ export function POSProvider({ children }: { children: ReactNode }) {
     getStoreSettings().then((data) => {
       if (data && data.productImages === "true") {
         console.log(data.productImages);
-        
+
         setShowImage(true);
       }
     });
@@ -310,9 +312,10 @@ export function POSProvider({ children }: { children: ReactNode }) {
         addItemToCart,
         inputRef,
         showImage,
+        trans,
       }}
     >
-      {macLoading ? Loading() : !macAddress ? MacNotFound() : children}
+      {macLoading ? <Loading /> : !macAddress ? <MacNotFound /> : children}
     </POSContext.Provider>
   );
 }

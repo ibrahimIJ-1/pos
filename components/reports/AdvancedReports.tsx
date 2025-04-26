@@ -37,8 +37,10 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import useAdvancedReports from "@/lib/reports-service";
+import { useTranslations } from "next-intl";
 
 export function AdvancedReports() {
+  const t = useTranslations();
   const [reportType, setReportType] = useState<
     "sales" | "inventory" | "customers" | "profit"
   >("sales");
@@ -68,7 +70,7 @@ export function AdvancedReports() {
     if (!data || !data.chartData) {
       return (
         <div className="text-center py-12">
-          No data available for the selected period
+          {t("No data available for the selected period")}
         </div>
       );
     }
@@ -86,7 +88,7 @@ export function AdvancedReports() {
     // Define children as a React Node (required by the chart components)
     const chartChildren: ReactNode = <React.Fragment />;
     console.log(data.chartData);
-    
+
     switch (chartType) {
       case "bar":
         return (
@@ -172,28 +174,34 @@ export function AdvancedReports() {
   };
 
   return (
-    <Card className="border-neon-purple/30 dark:border-neon-purple/20 shadow-md">
+    <Card
+      className="border-neon-purple/30 dark:border-neon-purple/20 shadow-md"
+      dir={t("dir") as "rtl" | "ltr"}
+    >
       <CardHeader>
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <CardTitle>Advanced Reports</CardTitle>
-            <CardDescription>
-              Analyze your business performance with detailed reports
+            <CardTitle className="rtl:text-start">
+              {t("Advanced Reports")}
+            </CardTitle>
+            <CardDescription className="rtl:text-start">
+              {t("Analyze your business performance with detailed reports")}
             </CardDescription>
           </div>
           <div className="flex flex-wrap gap-2">
             <Select
               value={chartType}
               onValueChange={(value) => setChartType(value as any)}
+              dir={t("dir") as "rtl" | "ltr"}
             >
               <SelectTrigger className="w-[130px]">
                 <SelectValue placeholder="Chart Type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="bar">Bar Chart</SelectItem>
-                <SelectItem value="line">Line Chart</SelectItem>
-                <SelectItem value="pie">Pie Chart</SelectItem>
-                <SelectItem value="area">Area Chart</SelectItem>
+                <SelectItem value="bar">{t("Bar Chart")}</SelectItem>
+                <SelectItem value="line">{t("Line Chart")}</SelectItem>
+                <SelectItem value="pie">{t("Pie Chart")}</SelectItem>
+                <SelectItem value="area">{t("Area Chart")}</SelectItem>
               </SelectContent>
             </Select>
 
@@ -202,15 +210,20 @@ export function AdvancedReports() {
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="gap-2">
                     <CalendarIcon className="h-4 w-4" />
-                    <span>Date Range</span>
+                    <span>{t("Date Range")}</span>
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-2" align="end">
+                <PopoverContent
+                  className="w-auto p-2"
+                  align="end"
+                  dir={t("dir") as "rtl" | "ltr"}
+                >
                   <div className="grid gap-2">
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <div className="text-sm mb-2">From</div>
+                        <div className="text-sm mb-2">{t("From")}</div>
                         <Calendar
+                          dir={t("dir") as "rtl" | "ltr"}
                           mode="single"
                           selected={fromDate}
                           onSelect={(date) => date && setFromDate(date)}
@@ -218,8 +231,9 @@ export function AdvancedReports() {
                         />
                       </div>
                       <div>
-                        <div className="text-sm mb-2">To</div>
+                        <div className="text-sm mb-2">{t("To")}</div>
                         <Calendar
+                          dir={t("dir") as "rtl" | "ltr"}
                           mode="single"
                           selected={toDate}
                           onSelect={(date) => date && setToDate(date)}
@@ -228,7 +242,7 @@ export function AdvancedReports() {
                       </div>
                     </div>
                     <div className="flex justify-end">
-                      <Button size="sm">Apply Range</Button>
+                      <Button size="sm">{t("Apply Range")}</Button>
                     </div>
                   </div>
                 </PopoverContent>
@@ -236,7 +250,7 @@ export function AdvancedReports() {
 
               <Button variant="outline" className="gap-2">
                 <FileDown className="h-4 w-4" />
-                Export
+                {t("Export")}
               </Button>
 
               <Button variant="outline" size="icon">
@@ -251,23 +265,24 @@ export function AdvancedReports() {
           value={reportType}
           onValueChange={(value) => setReportType(value as any)}
           className="mb-6"
+          dir={t("dir") as "rtl" | "ltr"}
         >
           <TabsList className="grid grid-cols-4 mb-4">
             <TabsTrigger value="sales" className="gap-2">
               <BarChart3 className="h-4 w-4" />
-              Sales
+              {t("Sales")}
             </TabsTrigger>
             <TabsTrigger value="inventory" className="gap-2">
               <BarChart3 className="h-4 w-4" />
-              Inventory
+              {t("Inventory")}
             </TabsTrigger>
             <TabsTrigger value="customers" className="gap-2">
               <PieChartIcon className="h-4 w-4" />
-              Customers
+              {t("Customers")}
             </TabsTrigger>
             <TabsTrigger value="profit" className="gap-2">
               <LineChartIcon className="h-4 w-4" />
-              Profit
+              {t("Profit")}
             </TabsTrigger>
           </TabsList>
 
@@ -275,13 +290,14 @@ export function AdvancedReports() {
             <Tabs
               value={dateRange}
               onValueChange={(value) => setDateRange(value as any)}
+              dir={t("dir") as "rtl" | "ltr"}
             >
               <TabsList>
-                <TabsTrigger value="day">Today</TabsTrigger>
-                <TabsTrigger value="week">This Week</TabsTrigger>
-                <TabsTrigger value="month">This Month</TabsTrigger>
-                <TabsTrigger value="quarter">Quarter</TabsTrigger>
-                <TabsTrigger value="year">Year</TabsTrigger>
+                <TabsTrigger value="day">{t("Today")}</TabsTrigger>
+                <TabsTrigger value="week">{t("This Week")}</TabsTrigger>
+                <TabsTrigger value="month">{t("This Month")}</TabsTrigger>
+                <TabsTrigger value="quarter">{t("Quarter")}</TabsTrigger>
+                <TabsTrigger value="year">{t("Year")}</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -292,10 +308,10 @@ export function AdvancedReports() {
           {data && data.summary && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
               {data.summary.map((item: any, index: number) => (
-                <Card key={index} className="bg-muted/40">
+                <Card key={index} className="bg-muted/40" dir={t("dir") as "rtl" | "ltr"}>
                   <CardContent className="p-6">
                     <div className="text-sm text-muted-foreground">
-                      {item.label}
+                      {t(item.label)}
                     </div>
                     <div className="text-2xl font-bold mt-1">
                       {item.formatter ? item.formatter(item.value) : item.value}
@@ -309,7 +325,7 @@ export function AdvancedReports() {
                         }`}
                       >
                         {item.change >= 0 ? "↑" : "↓"} {Math.abs(item.change)}%
-                        from last period
+                        {t("from last period")}
                       </div>
                     )}
                   </CardContent>
@@ -320,14 +336,14 @@ export function AdvancedReports() {
 
           {data && data.tableData && (
             <div className="mt-8">
-              <h3 className="text-lg font-medium mb-4">Detailed Data</h3>
+              <h3 className="text-lg font-medium mb-4">{t("Detailed Data")}</h3>
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead>
                     <tr className="border-b">
                       {data.tableHeaders?.map((header: any, index: number) => (
-                        <th key={index} className="text-left py-3 px-4">
-                          {header}
+                        <th key={index} className="text-left py-3 px-4 rtl:text-start">
+                          {t(header)}
                         </th>
                       ))}
                     </tr>

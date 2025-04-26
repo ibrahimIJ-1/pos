@@ -5,12 +5,14 @@ import { formatDate } from "@/lib/utils";
 import { Sale, SaleItem } from "@prisma/client";
 import { ScrollArea } from "../ui/scroll-area";
 import { useReactToPrint } from "react-to-print";
+import { usePOS } from "@/providers/POSProvider";
 interface InvoicePrintProps {
   data: any; //Sale
   onClose: () => void;
 }
 
 export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
+  const {trans} = usePOS();
   const [printing, setPrinting] = useState(false);
 
   const componentRef = useRef<HTMLDivElement>(null);
@@ -174,7 +176,7 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
       {" "}
       {/* Control overall height */}
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">Invoice</h2>
+        <h2 className="text-2xl font-bold">{trans("Invoice")}</h2>
         <div className="flex space-x-2">
           <Button
             className="gap-2"
@@ -191,14 +193,14 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
             onClick={()=>handleDownloadPDF()}
           >
             <Download className="h-4 w-4" />
-            Download
+            {trans("Download")}
           </Button>
           <Button variant="outline" className="gap-2">
             <Send className="h-4 w-4" />
-            Email
+            {trans("Email")}
           </Button>
           <Button variant="ghost" onClick={onClose}>
-            Close
+            {trans("Close")}
           </Button>
         </div>
       </div>
@@ -210,7 +212,7 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
           {/* Invoice Header */}
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-2xl font-bold text-primary">Invoice</h1>
+              <h1 className="text-2xl font-bold text-primary">{trans("Invoice")}</h1>
               <p className="text-muted-foreground text-sm">#{data.id}</p>
             </div>
             <div className="text-right">
@@ -235,7 +237,7 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <h3 className="text-sm font-semibold text-muted-foreground mb-1">
-                Bill To:
+                {trans("Bill To")}:
               </h3>
               <p className="font-medium">
                 {data.customer?.name || "Guest Customer"}
@@ -244,11 +246,11 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
             <div>
               <div className="flex flex-col md:items-end">
                 <p className="text-sm text-muted-foreground">
-                  <span className="font-semibold">Date:</span>{" "}
+                  <span className="font-semibold">{trans("Date")}:</span>{" "}
                   {formatDate(data.date)}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  <span className="font-semibold">Payment:</span>{" "}
+                  <span className="font-semibold">{trans("Payment")}:</span>{" "}
                   {data.paymentMethod}
                 </p>
               </div>
@@ -262,19 +264,19 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
                 <thead className="sticky top-0 bg-background z-10 border-b">
                   <tr>
                     <th className="text-left py-3 px-4 text-sm font-semibold">
-                      Item
+                      {trans("Item")}
                     </th>
                     <th className="text-right py-3 px-4 text-sm font-semibold">
-                      Qty
+                      {trans("Qty")}
                     </th>
                     <th className="text-right py-3 px-4 text-sm font-semibold">
-                      Price
+                      {trans("Price")}
                     </th>
                     <th className="text-right py-3 px-4 text-sm font-semibold">
-                      Discount
+                      {trans("Discount")}
                     </th>
                     <th className="text-right py-3 px-4 text-sm font-semibold">
-                      Amount
+                      {trans("Amount")}
                     </th>
                   </tr>
                 </thead>
@@ -308,23 +310,23 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
             <div className="flex justify-end">
               <div className="w-full md:w-64">
                 <div className="flex justify-between py-1 text-sm">
-                  <span className="text-muted-foreground">Subtotal:</span>
+                  <span className="text-muted-foreground">{trans("Subtotal")}:</span>
                   <span>${data.subtotal.toFixed(2)}</span>
                 </div>
                 {data.discountTotal > 0 && (
                   <div className="flex justify-between py-1 text-sm">
-                    <span className="text-muted-foreground">Discount:</span>
+                    <span className="text-muted-foreground">{trans("Discount")}:</span>
                     <span className="text-green-600">
                       -${data.discountTotal.toFixed(2)}
                     </span>
                   </div>
                 )}
                 <div className="flex justify-between py-1 text-sm">
-                  <span className="text-muted-foreground">Tax:</span>
+                  <span className="text-muted-foreground">{trans("Tax")}:</span>
                   <span>${data.taxTotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between py-2 border-t font-semibold">
-                  <span>Total:</span>
+                  <span>{trans("Total")}:</span>
                   <span>${data.totalAmount.toFixed(2)}</span>
                 </div>
               </div>
@@ -333,8 +335,8 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
 
           {/* Footer */}
           <div className="text-center text-xs text-muted-foreground pt-4">
-            <p>Thank you for your business!</p>
-            <p>Questions? Contact our customer service</p>
+            <p>{trans("Thank you for your business")}!</p>
+            <p>{trans("Questions")}? {trans("Contact our customer service")}</p>
           </div>
         </div>
       </div>

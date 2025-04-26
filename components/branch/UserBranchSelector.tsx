@@ -7,8 +7,10 @@ import {
   SelectValue,
 } from "../ui/select";
 import { useSetUserDefaultBranch, useUserBranches } from "@/lib/branches-service";
+import { useTranslations } from "next-intl";
 
 function UserBranchSelector() {
+  const t = useTranslations();
   const { data } = useUserBranches();
   const [value, setValue] = useState(data?.branchId ?? undefined);
   const branchChangerMutation = useSetUserDefaultBranch();
@@ -26,9 +28,10 @@ function UserBranchSelector() {
         defaultValue={value}
         value={value}
         disabled={branchChangerMutation.isPending}
+        dir={t("dir") as "rtl" | "ltr"}
       >
         <SelectTrigger>
-          <SelectValue placeholder="Select Branch" />
+          <SelectValue placeholder={t("Select Branch")} />
         </SelectTrigger>
         <SelectContent>
           {data?.branches?.map((branch) => (

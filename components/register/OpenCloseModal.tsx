@@ -23,13 +23,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "@/hooks/use-toast";
 import { useCloseRegister, useOpenRegister } from "@/lib/registers-service";
-
-const registerSchema = z.object({
-  id: z.string().min(3, { message: "Name must be at least 3 characters" }),
-  balance: z.number().min(0, { message: "Value must be 0 or more" }),
-});
-
-type ToggleFormValues = z.infer<typeof registerSchema>;
+import { useTranslations } from "next-intl";
 
 interface RegisterDialogProps {
   open: boolean;
@@ -37,6 +31,13 @@ interface RegisterDialogProps {
   register: Register;
 }
 function OpenCloseModal({ open, onOpenChange, register }: RegisterDialogProps) {
+  const t = useTranslations();
+  const registerSchema = z.object({
+    id: z.string().min(3, { message: t("Name must be at least 3 characters") }),
+    balance: z.number().min(0, { message: t("Value must be 0 or more") }),
+  });
+
+  type ToggleFormValues = z.infer<typeof registerSchema>;
   const openRegister = useOpenRegister();
   const closeRegister = useCloseRegister();
 
@@ -57,16 +58,18 @@ function OpenCloseModal({ open, onOpenChange, register }: RegisterDialogProps) {
         {
           onSuccess: () => {
             toast({
-              title: "Register Switched",
-              description: `Register "${register.name}" successfully Switched`,
+              title: t("Register Switched"),
+              description: `${t("Register")} "${register.name}" ${t(
+                "successfully Switched"
+              )}`,
             });
             onOpenChange(false);
           },
           onError: (error: any) => {
             toast({
-              title: "Error",
-              description: `Failed to Switch register: ${
-                error instanceof Error ? error.message : "Unknown error"
+              title: t("Error"),
+              description: `${t("Failed to Switch register")}: ${
+                error instanceof Error ? error.message : t("Unknown error")
               }`,
               variant: "destructive",
             });
@@ -82,16 +85,18 @@ function OpenCloseModal({ open, onOpenChange, register }: RegisterDialogProps) {
         {
           onSuccess: () => {
             toast({
-              title: "Register Switched",
-              description: `Register "${register.name}" successfully Switched`,
+              title: t("Register Switched"),
+              description: `${t("Register")} "${register.name}" ${t(
+                "successfully Switched"
+              )}`,
             });
             onOpenChange(false);
           },
           onError: (error: any) => {
             toast({
-              title: "Error",
-              description: `Failed to Switch register: ${
-                error instanceof Error ? error.message : "Unknown error"
+              title: t("Error"),
+              description: `${t("Failed to Switch register")}: ${
+                error instanceof Error ? error.message : t("Unknown error")
               }`,
               variant: "destructive",
             });
@@ -104,15 +109,15 @@ function OpenCloseModal({ open, onOpenChange, register }: RegisterDialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="rtl:text-start">
             {register.status === RegisterStatus.OPEN
-              ? "Close Register"
-              : "Open Register"}
+              ? t("Close Register")
+              : t("Open Register")}
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <ScrollArea className="h-auto p-4">
+            <ScrollArea className="h-auto p-4" dir={t("dir") as "rtl" | "ltr"}>
               <div className="space-y-4">
                 <FormField
                   control={form.control}
@@ -121,9 +126,9 @@ function OpenCloseModal({ open, onOpenChange, register }: RegisterDialogProps) {
                     <FormItem className="px-1">
                       <FormLabel>
                         {register.status === RegisterStatus.OPEN
-                          ? "Close"
-                          : "Open"}{" "}
-                        Balance
+                          ? t("Close")
+                          : t("Open")}{" "}
+                        {t("Balance")}
                       </FormLabel>
                       <FormControl>
                         <NumberInput min={0} step={0.01} {...field} />
@@ -142,7 +147,7 @@ function OpenCloseModal({ open, onOpenChange, register }: RegisterDialogProps) {
                 variant="outline"
                 onClick={() => onOpenChange(false)}
               >
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button
                 type="submit"
@@ -150,11 +155,11 @@ function OpenCloseModal({ open, onOpenChange, register }: RegisterDialogProps) {
               >
                 {register?.status === RegisterStatus.OPEN
                   ? openRegister.isPending
-                    ? "Closing..."
-                    : "Close Register"
+                    ? t("Closing") + "..."
+                    : t("Close Register")
                   : closeRegister.isPending
-                  ? "Opening..."
-                  : "Open Register"}
+                  ? t("Opening") + "..."
+                  : t("Open Register")}
               </Button>
             </DialogFooter>
           </form>

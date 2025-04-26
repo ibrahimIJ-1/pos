@@ -21,8 +21,10 @@ import { FileDown, Printer, UserPlus } from "lucide-react";
 import { reportsApi } from "@/lib/api";
 import { format, subMonths } from "date-fns";
 import { useCustomerReports } from "@/lib/reports-service";
+import { useTranslations } from "next-intl";
 
 export default function CustomerReports() {
+  const t = useTranslations();
   const [fromDate, setFromDate] = useState<Date>(subMonths(new Date(), 3));
   const [toDate, setToDate] = useState<Date>(new Date());
 
@@ -62,9 +64,9 @@ export default function CustomerReports() {
         <CardHeader>
           <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
             <div>
-              <CardTitle>Customer Report</CardTitle>
+              <CardTitle>{t("Customer Report")}</CardTitle>
               <CardDescription>
-                Analyze customer purchasing patterns and behavior
+                {t("Analyze customer purchasing patterns and behavior")}
               </CardDescription>
             </div>
 
@@ -73,12 +75,12 @@ export default function CustomerReports() {
                 <DateInput
                   date={fromDate}
                   onDateChange={(val) => setFromDate(val!)}
-                  placeholder="From Date"
+                  placeholder={t("From Date")}
                 />
                 <DateInput
                   date={toDate}
                   onDateChange={(val) => setToDate(val!)}
-                  placeholder="To Date"
+                  placeholder={t("To Date")}
                 />
               </div>
 
@@ -96,7 +98,7 @@ export default function CustomerReports() {
         <CardContent>
           {isLoading ? (
             <div className="flex justify-center items-center h-40">
-              <p>Loading customer data...</p>
+              <p>{t("Loading customer data")}...</p>
             </div>
           ) : data ? (
             <div className="space-y-8">
@@ -104,14 +106,14 @@ export default function CustomerReports() {
                 <Card>
                   <CardContent className="p-6">
                     <div className="text-sm text-muted-foreground">
-                      Total Customers
+                      {t("Total Customers")}
                     </div>
                     <div className="text-2xl font-bold">
                       {data.totalCustomers || 0}
                     </div>
                     <div className="flex items-center gap-2 text-xs mt-1 text-muted-foreground">
                       <UserPlus className="h-3 w-3" />
-                      <span>{data.newCustomers || 0} new in this period</span>
+                      <span>{data.newCustomers || 0} {t("new in this period")}</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -119,7 +121,7 @@ export default function CustomerReports() {
                 <Card>
                   <CardContent className="p-6">
                     <div className="text-sm text-muted-foreground">
-                      Average Purchase Value
+                      {t("Average Purchase Value")}
                     </div>
                     <div className="text-2xl font-bold">
                       ${data.averagePurchaseValue?.toFixed(2) || "0.00"}
@@ -130,7 +132,7 @@ export default function CustomerReports() {
                 <Card>
                   <CardContent className="p-6">
                     <div className="text-sm text-muted-foreground">
-                      Customer Retention Rate
+                      {t("Customer Retention Rate")}
                     </div>
                     <div className="text-2xl font-bold">
                       {data.customerRetentionRate?.toFixed(1) || "0"}%
@@ -140,15 +142,15 @@ export default function CustomerReports() {
               </div>
 
               <div>
-                <h3 className="font-medium mb-4">Top Customers</h3>
-                <Table>
+                <h3 className="font-medium mb-4">{t("Top Customers")}</h3>
+                <Table dir={t("dir") as "rtl" | "ltr"}>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Customer</TableHead>
-                      <TableHead>Purchases</TableHead>
-                      <TableHead>Total Spend</TableHead>
-                      <TableHead>Average Order Value</TableHead>
-                      <TableHead>Last Purchase</TableHead>
+                      <TableHead className="rtl:text-start">{t("Customer")}</TableHead>
+                      <TableHead className="rtl:text-start">{t("Purchases")}</TableHead>
+                      <TableHead className="rtl:text-start">{t("Total Spend")}</TableHead>
+                      <TableHead className="rtl:text-start">{t("Average Order Value")}</TableHead>
+                      <TableHead className="rtl:text-start">{t("Last Purchase")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -175,16 +177,16 @@ export default function CustomerReports() {
 
               <div>
                 <h3 className="font-medium mb-4">
-                  Customer Purchasing by Location
+                  {t("Customer Purchasing by Location")}
                 </h3>
-                <Table>
+                <Table dir={t("dir") as "rtl" | "ltr"}>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Region</TableHead>
-                      <TableHead>Customers</TableHead>
-                      <TableHead>Orders</TableHead>
-                      <TableHead>Revenue</TableHead>
-                      <TableHead>Average Order Value</TableHead>
+                      <TableHead className="rtl:text-start">{t("Region")}</TableHead>
+                      <TableHead className="rtl:text-start">{t("Customers")}</TableHead>
+                      <TableHead className="rtl:text-start">{t("Orders")}</TableHead>
+                      <TableHead className="rtl:text-start">{t("Revenue")}</TableHead>
+                      <TableHead className="rtl:text-start">{t("Average Order Value")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -207,7 +209,7 @@ export default function CustomerReports() {
             </div>
           ) : (
             <div className="flex justify-center items-center h-40">
-              <p>No customer data available for the selected period</p>
+              <p>{t("No customer data available for the selected period")}</p>
             </div>
           )}
         </CardContent>

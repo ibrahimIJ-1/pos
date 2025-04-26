@@ -19,8 +19,10 @@ import { ColumnDef } from "@tanstack/react-table";
 import { DiscountDialog } from "./DiscountDialog";
 import { Branch, Discount, DiscountType } from "@prisma/client";
 import { useDeleteDiscount, useDiscounts } from "@/lib/discounts-service";
+import { useTranslations } from "next-intl";
 
-export const DiscountDataTable = ({branches}:{branches:Branch[]}) => {
+export const DiscountDataTable = ({ branches }: { branches: Branch[] }) => {
+  const t = useTranslations();
   const { toast } = useToast();
   const { data: discounts = [] } = useDiscounts();
   const deleteDiscount = useDeleteDiscount();
@@ -47,17 +49,19 @@ export const DiscountDataTable = ({branches}:{branches:Branch[]}) => {
       deleteDiscount.mutate(selectedDiscount.id, {
         onSuccess: () => {
           toast({
-            title: "Discount deleted",
-            description: `Discount "${selectedDiscount.name}" successfully deleted`,
+            title: t("Discount deleted"),
+            description: `${t("Discount")} "${selectedDiscount.name}" ${t(
+              "successfully deleted"
+            )}`,
           });
           setIsDeleteDialogOpen(false);
           setSelectedDiscount(null);
         },
         onError: (error) => {
           toast({
-            title: "Error",
-            description: `Failed to delete discount: ${
-              error instanceof Error ? error.message : "Unknown error"
+            title: t("Error"),
+            description: `${t("Failed to delete discount")}: ${
+              error instanceof Error ? error.message : t("Unknown error")
             }`,
             variant: "destructive",
           });
@@ -87,7 +91,7 @@ export const DiscountDataTable = ({branches}:{branches:Branch[]}) => {
     if (!discount.isActive) {
       return (
         <Badge variant="outline" className="bg-gray-100">
-          Inactive
+          {t("Inactive")}
         </Badge>
       );
     }
@@ -95,7 +99,7 @@ export const DiscountDataTable = ({branches}:{branches:Branch[]}) => {
     if (now < startDate) {
       return (
         <Badge variant="outline" className="bg-blue-100 text-blue-800">
-          Scheduled
+          {t("Scheduled")}
         </Badge>
       );
     }
@@ -103,7 +107,7 @@ export const DiscountDataTable = ({branches}:{branches:Branch[]}) => {
     if (endDate && now > endDate) {
       return (
         <Badge variant="outline" className="bg-gray-100">
-          Expired
+          {t("Expired")}
         </Badge>
       );
     }
@@ -111,14 +115,14 @@ export const DiscountDataTable = ({branches}:{branches:Branch[]}) => {
     if (discount.maxUses && discount.currentUses >= discount.maxUses) {
       return (
         <Badge variant="outline" className="bg-gray-100">
-          Max Uses Reached
+          {t("Max Uses Reached")}
         </Badge>
       );
     }
 
     return (
       <Badge variant="outline" className="bg-green-100 text-green-800">
-        Active
+        {t("Active")}
       </Badge>
     );
   };
@@ -126,24 +130,24 @@ export const DiscountDataTable = ({branches}:{branches:Branch[]}) => {
   const columns: ColumnDef<Discount>[] = [
     {
       accessorKey: "name",
-      header: "Name",
+      header: t("Name"),
       cell: ({ row }) => (
         <span className="font-medium">{row.original.name}</span>
       ),
     },
     {
       accessorKey: "code",
-      header: "Code",
+      header: t("Code"),
       cell: ({ row }) =>
         row.original.code ? (
           <Badge variant="outline">{row.original.code}</Badge>
         ) : (
-          <span className="text-muted-foreground text-sm">No code</span>
+          <span className="text-muted-foreground text-sm">{t("No code")}</span>
         ),
     },
     {
       accessorKey: "type",
-      header: "Type",
+      header: t("Type"),
       cell: ({ row }) => (
         <div className="flex items-center gap-1">
           {row.original.type === DiscountType.PERCENTAGE ? (
@@ -162,7 +166,7 @@ export const DiscountDataTable = ({branches}:{branches:Branch[]}) => {
     },
     {
       accessorKey: "validity",
-      header: "Validity",
+      header: t("Validity"),
       cell: ({ row }) => (
         <div className="flex items-center gap-1">
           <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -177,7 +181,7 @@ export const DiscountDataTable = ({branches}:{branches:Branch[]}) => {
     },
     {
       accessorKey: "status",
-      header: "Status",
+      header: t("Status"),
       cell: ({ row }) => getDiscountStatusBadge(row.original),
     },
     {
@@ -188,7 +192,7 @@ export const DiscountDataTable = ({branches}:{branches:Branch[]}) => {
             variant="ghost"
             size="icon"
             onClick={() => handleEdit(row.original)}
-            title="Edit discount"
+            title={t("Edit discount")}
           >
             <Edit className="h-4 w-4" />
           </Button>
@@ -197,7 +201,7 @@ export const DiscountDataTable = ({branches}:{branches:Branch[]}) => {
             size="icon"
             className="text-muted-foreground hover:text-destructive"
             onClick={() => handleDelete(row.original)}
-            title="Delete discount"
+            title={t("Delete discount")}
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -209,10 +213,10 @@ export const DiscountDataTable = ({branches}:{branches:Branch[]}) => {
   return (
     <>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">Discounts</h2>
+        <h2 className="text-lg font-semibold">{t("Discounts")}</h2>
         <Button onClick={() => setIsAddDialogOpen(true)} className="gap-2">
           <Plus className="h-4 w-4" />
-          Add Discount
+          {t("Add Discount")}
         </Button>
       </div>
 
@@ -220,12 +224,12 @@ export const DiscountDataTable = ({branches}:{branches:Branch[]}) => {
         columns={columns}
         data={discounts as any}
         filterColumn="name"
-        filterPlaceholder="Filter discounts..."
+        filterPlaceholder={t("Filter discounts") + "..."}
       />
 
       {/* Add Discount Dialog */}
       <DiscountDialog
-      branches={branches}
+        branches={branches}
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
         mode="create"
@@ -234,7 +238,7 @@ export const DiscountDataTable = ({branches}:{branches:Branch[]}) => {
       {/* Edit Discount Dialog */}
       {selectedDiscount && (
         <DiscountDialog
-        branches={branches}
+          branches={branches}
           open={isEditDialogOpen}
           onOpenChange={setIsEditDialogOpen}
           mode="edit"
@@ -247,22 +251,22 @@ export const DiscountDataTable = ({branches}:{branches:Branch[]}) => {
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
       >
-        <AlertDialogContent>
+        <AlertDialogContent dir={t("dir")}>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete the discount{" "}
+            <AlertDialogTitle className="rtl:text-start">{t("Are you sure")}?</AlertDialogTitle>
+            <AlertDialogDescription className="rtl:text-start">
+              {t("This will permanently delete the discount")}{" "}
               <span className="font-medium">{selectedDiscount?.name}</span>.
-              This action cannot be undone.
+              {t("This action cannot be undone")}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {deleteDiscount.isPending ? "Deleting..." : "Delete"}
+              {deleteDiscount.isPending ? t("Deleting") + "..." : t("Delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

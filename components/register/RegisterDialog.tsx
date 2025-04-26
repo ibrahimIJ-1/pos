@@ -34,17 +34,7 @@ import {
 } from "../ui/select";
 import { useBranches } from "@/lib/branches-service";
 import { useCreateRegister, useUpdateRegister } from "@/lib/registers-service";
-
-const registerSchema = z.object({
-  id: z.string().min(3, { message: "Serial Number must be at least 3 characters" }),
-  name: z.string().min(3, { message: "Name must be at least 3 characters" }),
-  openBalance: z.number().min(0, { message: "Value must be 0 or more" }),
-  branchId: z
-    .string()
-    .min(3, { message: "Branch must be at least 3 characters" }),
-});
-
-type RegisterFormValues = z.infer<typeof registerSchema>;
+import { useTranslations } from "next-intl";
 
 interface RegisterDialogProps {
   open: boolean;
@@ -59,6 +49,21 @@ export function RegisterDialog({
   mode,
   register,
 }: RegisterDialogProps) {
+  const t = useTranslations();
+  const registerSchema = z.object({
+    id: z
+      .string()
+      .min(3, { message: t("Serial Number must be at least 3 characters") }),
+    name: z
+      .string()
+      .min(3, { message: t("Name must be at least 3 characters") }),
+    openBalance: z.number().min(0, { message: t("Value must be 0 or more") }),
+    branchId: z
+      .string()
+      .min(3, { message: t("Branch must be at least 3 characters") }),
+  });
+
+  type RegisterFormValues = z.infer<typeof registerSchema>;
   const { data: branches } = useBranches();
   const createRegister = useCreateRegister();
   const updateRegister = useUpdateRegister();
@@ -127,23 +132,26 @@ export function RegisterDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
-          <DialogTitle>
-            {mode === "create" ? "Create Register" : "Edit Register"}
+          <DialogTitle className="rtl:text-start">
+            {mode === "create" ? t("Create Register") : t("Edit Register")}
           </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <ScrollArea className="h-auto p-4">
+            <ScrollArea className="h-auto p-4" dir={t("dir") as "rtl" | "ltr"}>
               <div className="space-y-4">
                 <FormField
                   control={form.control}
                   name="id"
                   render={({ field }) => (
                     <FormItem className="px-1">
-                      <FormLabel>Serial Number</FormLabel>
+                      <FormLabel>{t("Serial Number")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter the Mac-Address" {...field} />
+                        <Input
+                          placeholder={t("Enter the SN")}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -155,10 +163,10 @@ export function RegisterDialog({
                   name="name"
                   render={({ field }) => (
                     <FormItem className="px-1">
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel>{t("Name")}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Enter the Register Name"
+                          placeholder={t("Enter the Register Name")}
                           {...field}
                         />
                       </FormControl>
@@ -171,14 +179,15 @@ export function RegisterDialog({
                   name="branchId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Branch</FormLabel>
+                      <FormLabel>{t("Branch")}</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        dir={t("dir") as "rtl" | "ltr"}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select a branch" />
+                            <SelectValue placeholder={t("Select a branch")} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -198,7 +207,7 @@ export function RegisterDialog({
                   name="openBalance"
                   render={({ field }) => (
                     <FormItem className="px-1">
-                      <FormLabel>Open Balance</FormLabel>
+                      <FormLabel>{t("Open Balance")}</FormLabel>
                       <FormControl>
                         <NumberInput min={0} step={0.01} {...field} />
                       </FormControl>
@@ -216,7 +225,7 @@ export function RegisterDialog({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
               >
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button
                 type="submit"
@@ -224,11 +233,11 @@ export function RegisterDialog({
               >
                 {mode === "create"
                   ? createRegister.isPending
-                    ? "Creating..."
-                    : "Create Register"
+                    ? t("Creating") + "..."
+                    : t("Create Register")
                   : updateRegister.isPending
-                  ? "Updating..."
-                  : "Update Register"}
+                  ? t("Updating") + "..."
+                  : t("Update Register")}
               </Button>
             </DialogFooter>
           </form>

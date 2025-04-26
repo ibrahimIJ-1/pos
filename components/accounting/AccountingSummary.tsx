@@ -15,11 +15,12 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAccountingSummary } from "@/lib/reports-service";
+import { useTranslations } from "next-intl";
 
 export function AccountingSummary() {
   const [period, setPeriod] = React.useState<"day" | "week" | "month">("day");
   const { data, isLoading } = useAccountingSummary(period);
-
+  const t = useTranslations();
   const renderSummaryCard = (
     title: string,
     value: number,
@@ -28,27 +29,25 @@ export function AccountingSummary() {
     colorClass: string
   ) => {
     return (
-      <Card>
+      <Card dir={t("dir")}>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">{title}</CardTitle>
+          <CardTitle className="text-sm font-medium">{t(title)}</CardTitle>
           <div className={`p-2 rounded-full ${colorClass}`}>{icon}</div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">
-            ${value.toFixed(2)}
-          </div>
-          <p className="text-xs text-muted-foreground">{description}</p>
+          <div className="text-2xl font-bold">${value.toFixed(2)}</div>
+          <p className="text-xs text-muted-foreground">{t(description)}</p>
         </CardContent>
       </Card>
     );
   };
 
   return (
-    <Card className="col-span-3">
+    <Card className="col-span-3" dir={t("dir")}>
       <CardHeader>
-        <CardTitle>Financial Summary</CardTitle>
+        <CardTitle>{t("Financial Summary")}</CardTitle>
         <CardDescription>
-          Overview of your business financial performance
+          {t("Overview of your business financial performance")}
         </CardDescription>
       </CardHeader>
       <CardContent className="p-6">
@@ -59,9 +58,9 @@ export function AccountingSummary() {
           }
         >
           <TabsList className="grid w-full grid-cols-3 mb-4">
-            <TabsTrigger value="day">Today</TabsTrigger>
-            <TabsTrigger value="week">This Week</TabsTrigger>
-            <TabsTrigger value="month">This Month</TabsTrigger>
+            <TabsTrigger value="day">{t("Today")}</TabsTrigger>
+            <TabsTrigger value="week">{t("This Week")}</TabsTrigger>
+            <TabsTrigger value="month">{t("This Month")}</TabsTrigger>
           </TabsList>
 
           {["day", "week", "month"].map((p) => (
@@ -85,7 +84,7 @@ export function AccountingSummary() {
                   {renderSummaryCard(
                     "Total Sales",
                     data.sales,
-                    `${data.transactionCount} transactions`,
+                    `${data.transactionCount} ${t("transactions")}`,
                     <ShoppingCartIcon className="h-4 w-4 text-white" />,
                     "bg-green-500"
                   )}
@@ -112,11 +111,13 @@ export function AccountingSummary() {
                   )}
 
                   {/* Payment Methods Breakdown */}
-                  <Card className="col-span-full mt-4">
+                  <Card className="col-span-full mt-4" dir={t("dir")}>
                     <CardHeader>
-                      <CardTitle className="text-md">Payment Methods</CardTitle>
+                      <CardTitle className="text-md">
+                        {t("Payment Methods")}
+                      </CardTitle>
                       <CardDescription>
-                        Breakdown by payment type
+                        {t("Breakdown by payment type")}
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -141,7 +142,7 @@ export function AccountingSummary() {
                   </Card>
                 </div>
               ) : (
-                <p>No data available.</p>
+                <p>{t("No data available")}.</p>
               )}
             </TabsContent>
           ))}

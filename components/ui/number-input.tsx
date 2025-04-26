@@ -66,7 +66,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
             type="button"
             variant="outline"
             size="icon"
-            className="rounded-r-none"
+            className="ltr:rounded-r-none rtl:rounded-l-none"
             onClick={decrement}
             disabled={(value??0) <= min}
           >
@@ -92,7 +92,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
             type="button"
             variant="outline"
             size="icon"
-            className="rounded-l-none"
+            className="ltr:rounded-l-none rtl:rounded-r-none"
             onClick={increment}
             disabled={(value??0) >= max}
           >

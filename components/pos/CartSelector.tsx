@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React from "react";
 import {
@@ -24,7 +24,8 @@ function CartSelector() {
     handleDuplicateCart,
     handleRemoveCart,
     handleAddCart,
-    clearCart
+    clearCart,
+    trans
   } = usePOS();
   return (
     <div className="flex gap-1 items-center">
@@ -33,20 +34,22 @@ function CartSelector() {
           <Button variant="outline" size="sm" className="h-7 px-2">
             <List className="h-4 w-4 mr-1" />
             {multiCart && (
-              <span>Cart #{getShortCartId(multiCart.activeCartId ?? "")}</span>
+              <span>
+                {trans("Cart")} #{getShortCartId(multiCart.activeCartId ?? "")}
+              </span>
             )}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="p-0 w-64" align="start">
           <div className="p-3 border-b">
-            <h3 className="font-medium">Manage Carts</h3>
+            <h3 className="font-medium">{trans("Manage Carts")}</h3>
             <p className="text-sm text-muted-foreground">
-              Switch between or create new carts
+              {trans("Switch between or create new carts")}
             </p>
           </div>
 
           {multiCart && (
-            <ScrollArea className="max-h-64">
+            <ScrollArea className="max-h-64" dir={trans("dir") as "rtl" | "ltr"}>
               <div className="p-1">
                 {Object.keys(multiCart.carts).map((cartId) => (
                   <div
@@ -64,10 +67,10 @@ function CartSelector() {
                       <ShoppingCart className="h-4 w-4" />
                       <div>
                         <div className="font-medium">
-                          Cart #{getShortCartId(cartId)}
+                          {trans("Cart")} #{getShortCartId(cartId)}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          {getCartItemCount(cartId)} items | $
+                          {getCartItemCount(cartId)} {trans("items")} | $
                           {/* {multiCart?.carts[cartId]?.items.toFixed(
                                           2
                                         )} */}
@@ -81,7 +84,7 @@ function CartSelector() {
                         size="icon"
                         className="h-7 w-7"
                         onClick={() => handleDuplicateCart(cartId)}
-                        title="Duplicate cart"
+                        title={trans("Duplicate cart")}
                       >
                         <Copy className="h-3.5 w-3.5" />
                       </Button>
@@ -92,7 +95,7 @@ function CartSelector() {
                           size="icon"
                           className="h-7 w-7 text-muted-foreground hover:text-destructive"
                           onClick={() => handleRemoveCart(cartId)}
-                          title="Remove cart"
+                          title={trans("Remove cart")}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
@@ -111,7 +114,7 @@ function CartSelector() {
               onClick={handleAddCart}
             >
               <Plus className="h-4 w-4 mr-2" />
-              New Cart
+              {trans("New Cart")}
             </Button>
           </div>
         </PopoverContent>
@@ -124,7 +127,7 @@ function CartSelector() {
         disabled={(cart?.items as CartItem[])?.length === 0}
       >
         <Trash2 className="h-4 w-4 mr-1" />
-        Clear
+        {trans("Clear")}
       </Button>
     </div>
   );

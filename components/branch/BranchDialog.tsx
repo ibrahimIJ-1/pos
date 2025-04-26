@@ -26,15 +26,7 @@ import { NumberInput } from "@/components/ui/number-input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Branch } from "@prisma/client";
 import { useCreateBranch, useUpdateBranch } from "@/lib/branches-service";
-
-const branchSchema = z.object({
-  name: z.string().min(3, { message: "Name must be at least 3 characters" }),
-  address: z
-    .string()
-    .min(3, { message: "Address must be at least 3 characters" }),
-});
-
-type BranchFormValues = z.infer<typeof branchSchema>;
+import { useTranslations } from "next-intl";
 
 interface BranchDialogProps {
   open: boolean;
@@ -49,6 +41,17 @@ export function BranchDialog({
   mode,
   branch,
 }: BranchDialogProps) {
+  const t = useTranslations();
+  const branchSchema = z.object({
+    name: z
+      .string()
+      .min(3, { message: t("Name must be at least 3 characters") }),
+    address: z
+      .string()
+      .min(3, { message: t("Address must be at least 3 characters") }),
+  });
+
+  type BranchFormValues = z.infer<typeof branchSchema>;
   const createBranch = useCreateBranch();
   const updateBranch = useUpdateBranch();
 
@@ -64,7 +67,7 @@ export function BranchDialog({
     if (open && mode === "edit" && branch) {
       form.reset({
         name: branch.name,
-        address: branch.address??undefined,
+        address: branch.address ?? undefined,
       });
     } else if (open && mode === "create") {
       form.reset({
@@ -75,7 +78,6 @@ export function BranchDialog({
   }, [open, mode, branch, form]);
 
   const onSubmit = (values: BranchFormValues) => {
-    
     if (mode === "create") {
       createBranch.mutate(
         {
@@ -108,23 +110,26 @@ export function BranchDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
-          <DialogTitle>
-            {mode === "create" ? "Create Branch" : "Edit Branch"}
+          <DialogTitle className="rtl:text-start">
+            {mode === "create" ? t("Create Branch") : t("Edit Branch")}
           </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <ScrollArea className="h-auto p-4">
+            <ScrollArea className="h-auto p-4" dir={t("dir") as "rtl" | "ltr"}>
               <div className="space-y-4">
-              <FormField
+                <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem className="px-1">
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel>{t("Name")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter the Branch Name" {...field} />
+                        <Input
+                          placeholder={t("Enter the Branch Name")}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -135,9 +140,12 @@ export function BranchDialog({
                   name="address"
                   render={({ field }) => (
                     <FormItem className="px-1">
-                      <FormLabel>Address</FormLabel>
+                      <FormLabel>{t("Address")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter the Address" {...field} />
+                        <Input
+                          placeholder={t("Enter the Address")}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -153,7 +161,7 @@ export function BranchDialog({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
               >
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button
                 type="submit"
@@ -161,11 +169,11 @@ export function BranchDialog({
               >
                 {mode === "create"
                   ? createBranch.isPending
-                    ? "Creating..."
-                    : "Create Branch"
+                    ? t("Creating") + "..."
+                    : t("Create Branch")
                   : updateBranch.isPending
-                  ? "Updating..."
-                  : "Update Branch"}
+                  ? t("Updating") + "..."
+                  : t("Update Branch")}
               </Button>
             </DialogFooter>
           </form>

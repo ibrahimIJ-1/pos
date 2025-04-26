@@ -21,8 +21,10 @@ import { DiscountDataTable } from "@/components/discount/DiscountDataTable";
 import { Branch } from "@prisma/client";
 import { useDiscounts } from "@/lib/discounts-service";
 import { useBranches } from "@/lib/branches-service";
+import { useTranslations } from "next-intl";
 
 export default function Discounts() {
+  const t = useTranslations();
   const { toast } = useToast();
   const { data: discounts = [], isLoading, refetch } = useDiscounts();
   const { data: branches = [], isLoading: isBranchLoading } = useBranches();
@@ -32,8 +34,8 @@ export default function Discounts() {
   const handleRefresh = () => {
     refetch();
     toast({
-      title: "Refreshed",
-      description: "Discounts list has been refreshed",
+      title: t("Refreshed"),
+      description: t("Discounts list has been refreshed"),
     });
   };
 
@@ -48,14 +50,14 @@ export default function Discounts() {
     <div className="container max-w-7xl mx-auto p-4">
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Discounts & Promotions</h1>
+          <h1 className="text-2xl font-bold">{t("Discounts & Promotions")}</h1>
 
           <div className="flex space-x-2">
             <Button
               variant="outline"
               size="icon"
               onClick={handleRefresh}
-              title="Refresh discounts"
+              title={t("Refresh discounts")}
             >
               <RefreshCw className="h-4 w-4" />
             </Button>
@@ -69,7 +71,7 @@ export default function Discounts() {
                 className="gap-2"
               >
                 <Plus className="h-4 w-4" />
-                Add Discount
+                {t("Add Discount")}
               </Button>
             </PermissionGuard>
           </div>
@@ -79,9 +81,9 @@ export default function Discounts() {
           <div className="lg:col-span-1 space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Filter Discounts</CardTitle>
+                <CardTitle>{t("Filter Discounts")}</CardTitle>
                 <CardDescription>
-                  Search for discounts by name or code
+                  {t("Search for discounts by name or code")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -90,7 +92,7 @@ export default function Discounts() {
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                       type="search"
-                      placeholder="Search discounts..."
+                      placeholder={t("Search discounts")+"..."}
                       className="pl-8"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
@@ -102,20 +104,20 @@ export default function Discounts() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Discount Stats</CardTitle>
-                <CardDescription>Quick overview of discounts</CardDescription>
+                <CardTitle>{t("Discount Stats")}</CardTitle>
+                <CardDescription>{t("Quick overview of discounts")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">
-                      Total Discounts
+                      {t("Total Discounts")}
                     </span>
                     <span className="font-medium">{discounts.length}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">
-                      Active Discounts
+                      {t("Active Discounts")}
                     </span>
                     <span className="font-medium">
                       {discounts.filter((d) => d.isActive).length}
@@ -130,16 +132,16 @@ export default function Discounts() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle>All Discounts</CardTitle>
+                  <CardTitle>{t("All Discounts")}</CardTitle>
                   <CardDescription>
                     {isLoading
-                      ? "Loading discounts..."
-                      : `Showing ${filteredDiscounts.length} of ${discounts.length} discounts`}
+                      ? t("Loading discounts")+"..."
+                      : `${t("Showing")} ${filteredDiscounts.length} ${t("of")} ${discounts.length} ${t("discounts")}`}
                   </CardDescription>
                 </div>
               </CardHeader>
               <CardContent>
-                <DiscountDataTable branches={branches as unknown as Branch[]}/>
+                <DiscountDataTable branches={branches as unknown as Branch[]} />
               </CardContent>
             </Card>
           </div>

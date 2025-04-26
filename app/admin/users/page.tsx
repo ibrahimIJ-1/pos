@@ -69,6 +69,7 @@ import { updateUser, updateUserPassword } from "@/actions/users/update-user";
 import { deleteUserById } from "@/actions/users/delete-user";
 import { Branch } from "@prisma/client";
 import { useBranches } from "@/lib/branches-service";
+import { useTranslations } from "next-intl";
 
 // Define the shape of our user
 interface UserData {
@@ -84,40 +85,6 @@ interface UserData {
 }
 
 // Schema for adding/editing users
-const userFormSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }),
-  password: z
-    .string()
-    .min(6, {
-      message: "Password must be at least 6 characters.",
-    })
-    .optional(),
-  roles: z.array(z.string()).min(1, {
-    message: "Please select at least one role.",
-  }),
-  active: z.boolean().default(true),
-  branches: z.array(z.string()).min(1, "At least one branch must be selected"),
-});
-
-// Schema for changing password
-const passwordFormSchema = z
-  .object({
-    password: z.string().min(6, {
-      message: "Password must be at least 6 characters.",
-    }),
-    confirmPassword: z.string().min(6, {
-      message: "Password must be at least 6 characters.",
-    }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
 
 const roleBadgeColors: Record<string, string> = {
   [UserRole.ADMIN]: "bg-red-500 hover:bg-red-600",
@@ -130,6 +97,43 @@ const roleBadgeColors: Record<string, string> = {
 };
 
 export default function UsersPage() {
+  const t = useTranslations();
+  const userFormSchema = z.object({
+    name: z.string().min(2, {
+      message: t("Name must be at least 2 characters"),
+    }),
+    email: z.string().email({
+      message: t("Please enter a valid email address"),
+    }),
+    password: z
+      .string()
+      .min(6, {
+        message: t("Password must be at least 6 characters"),
+      })
+      .optional(),
+    roles: z.array(z.string()).min(1, {
+      message: t("Please select at least one role"),
+    }),
+    active: z.boolean().default(true),
+    branches: z
+      .array(z.string())
+      .min(1, t("At least one branch must be selected")),
+  });
+
+  // Schema for changing password
+  const passwordFormSchema = z
+    .object({
+      password: z.string().min(6, {
+        message: t("Password must be at least 6 characters"),
+      }),
+      confirmPassword: z.string().min(6, {
+        message: t("Password must be at least 6 characters"),
+      }),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t("Passwords don't match"),
+      path: ["confirmPassword"],
+    });
   const { toast } = useToast();
   const [data, setData] = useState<UserData[]>([]);
   const { checkPermission } = usePermissions(UserRole.ADMIN);
@@ -186,8 +190,8 @@ export default function UsersPage() {
     } catch (error) {
       console.error("Error fetching users:", error);
       toast({
-        title: "Error",
-        description: "Failed to fetch users",
+        title: t("Error"),
+        description: t("Failed to fetch users"),
         variant: "destructive",
       });
     } finally {
@@ -198,8 +202,8 @@ export default function UsersPage() {
   const onAddUser = async (values: z.infer<typeof userFormSchema>) => {
     try {
       toast({
-        title: "Creating user",
-        description: "Please wait...",
+        title: t("Creating user"),
+        description: t("Please wait") + "...",
       });
 
       const response = await createNewUser(
@@ -214,8 +218,10 @@ export default function UsersPage() {
       setData([...data, response]);
 
       toast({
-        title: "User created",
-        description: `User ${values.name} was successfully created.`,
+        title: t("User created"),
+        description: `${t("User")} ${values.name} ${t(
+          "was successfully created"
+        )}.`,
       });
 
       setOpenAddDialog(false);
@@ -223,8 +229,8 @@ export default function UsersPage() {
     } catch (error) {
       console.error("Error creating user:", error);
       toast({
-        title: "Error",
-        description: "Failed to create user",
+        title: t("Error"),
+        description: t("Failed to create user"),
         variant: "destructive",
       });
     }
@@ -236,8 +242,8 @@ export default function UsersPage() {
 
     try {
       toast({
-        title: "Updating user",
-        description: "Please wait...",
+        title: t("Updating user"),
+        description: t("Please wait") + "...",
       });
 
       const response = await updateUser({
@@ -256,16 +262,18 @@ export default function UsersPage() {
       );
 
       toast({
-        title: "User updated",
-        description: `User ${values.name} was successfully updated.`,
+        title: t("User updated"),
+        description: `${t("User")} ${values.name} ${t(
+          "was successfully updated"
+        )}.`,
       });
 
       setOpenEditDialog(false);
     } catch (error) {
       console.error("Error updating user:", error);
       toast({
-        title: "Error",
-        description: "Failed to update user",
+        title: t("Error"),
+        description: t("Failed to update user"),
         variant: "destructive",
       });
     }
@@ -279,8 +287,8 @@ export default function UsersPage() {
 
     try {
       toast({
-        title: "Updating password",
-        description: "Please wait...",
+        title: t("Updating password"),
+        description: t("Please wait") + "...",
       });
 
       await updateUserPassword({
@@ -289,8 +297,8 @@ export default function UsersPage() {
       });
 
       toast({
-        title: "Password updated",
-        description: `Password for ${selectedUser.name} was successfully updated.`,
+        title: t("Password updated"),
+        description: `${t("Password for")} ${selectedUser.name} ${t("was successfully updated")}.`,
       });
 
       setOpenPasswordDialog(false);
@@ -298,8 +306,8 @@ export default function UsersPage() {
     } catch (error) {
       console.error("Error updating password:", error);
       toast({
-        title: "Error",
-        description: "Failed to update password",
+        title: t("Error"),
+        description: t("Failed to update password"),
         variant: "destructive",
       });
     }
@@ -309,11 +317,11 @@ export default function UsersPage() {
   const toggleUserStatus = async (user: UserData) => {
     try {
       const newStatus = !(user.active ?? true);
-      const action = newStatus ? "Activating" : "Deactivating";
+      const action = newStatus ? t("Activating") : t("Deactivating");
 
       toast({
-        title: `${action} user`,
-        description: "Please wait...",
+        title: `${action} ${t("user")}`,
+        description: t("Please wait") + "...",
       });
 
       const response = await updateUser({
@@ -328,18 +336,18 @@ export default function UsersPage() {
       setData(data.map((u) => (u.id === user.id ? response : u)));
 
       toast({
-        title: `User ${newStatus ? "activated" : "deactivated"}`,
-        description: `User ${user.name} was successfully ${
-          newStatus ? "activated" : "deactivated"
+        title: `${t("User")} ${newStatus ? t("activated") : t("deactivated")}`,
+        description: `${t("User")} ${user.name} ${t("was successfully")} ${
+newStatus ? t("activated") : t("deactivated")
         }.`,
       });
     } catch (error) {
       console.error("Error toggling user status:", error);
       toast({
-        title: "Error",
-        description: `Failed to ${
-          user.active ? "deactivate" : "activate"
-        } user`,
+        title: t("Error"),
+        description: `${t("Failed to")} ${
+          user.active ? t("deactivate") : t("activate")
+        } ${t("user")}`,
         variant: "destructive",
       });
     }
@@ -349,8 +357,8 @@ export default function UsersPage() {
   const deleteUser = async (user: UserData) => {
     try {
       toast({
-        title: "Deleting user",
-        description: "Please wait...",
+        title: t("Deleting user"),
+        description: t("Please wait") + "...",
       });
 
       await deleteUserById(user.id);
@@ -359,14 +367,16 @@ export default function UsersPage() {
       setData(data.filter((u) => u.id !== user.id));
 
       toast({
-        title: "User deleted",
-        description: `User ${user.name} was successfully deleted.`,
+        title: t("User deleted"),
+        description: `${t("User")} ${user.name} ${t(
+          "was successfully deleted"
+        )}.`,
       });
     } catch (error) {
       console.error("Error deleting user:", error);
       toast({
-        title: "Error",
-        description: "Failed to delete user",
+        title: t("Error"),
+        description: t("Failed to delete user"),
         variant: "destructive",
       });
     }
@@ -408,7 +418,7 @@ export default function UsersPage() {
             className="flex items-center cursor-pointer"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Name
+            {t("Name")}
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </div>
         );
@@ -430,7 +440,7 @@ export default function UsersPage() {
                   variant="outline"
                   className="text-red-500 border-red-500"
                 >
-                  Inactive
+                  {t("Inactive")}
                 </Badge>
               )}
             </div>
@@ -440,11 +450,11 @@ export default function UsersPage() {
     },
     {
       accessorKey: "email",
-      header: "Email",
+      header: t("Email"),
     },
     {
       accessorKey: "roles",
-      header: "Roles",
+      header: t("Roles"),
       cell: ({ row }) => {
         const roles = row.getValue("roles") as { id: string; name: string }[];
 
@@ -472,34 +482,34 @@ export default function UsersPage() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
+                <span className="sr-only">{t("Open menu")}</span>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuLabel>{t("Actions")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
 
               {checkPermission(Permission.EDIT_USERS) && (
                 <>
                   <DropdownMenuItem onClick={() => handleEditUser(user)}>
                     <UserCog className="mr-2 h-4 w-4" />
-                    Edit user
+                    {t("Edit user")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleChangePassword(user)}>
                     <KeyRound className="mr-2 h-4 w-4" />
-                    Change password
+                    {t("Change password")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => toggleUserStatus(user)}>
                     {user.active === false ? (
                       <>
                         <Unlock className="mr-2 h-4 w-4" />
-                        Activate user
+                        {t("Activate user")}
                       </>
                     ) : (
                       <>
                         <Lock className="mr-2 h-4 w-4" />
-                        Deactivate user
+                        {t("Deactivate user")}
                       </>
                     )}
                   </DropdownMenuItem>
@@ -511,24 +521,27 @@ export default function UsersPage() {
                   <AlertDialogTrigger asChild>
                     <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                       <Trash className="mr-2 h-4 w-4" />
-                      Delete user
+                      {t("Delete user")}
                     </DropdownMenuItem>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This action cannot be undone. This will permanently
-                        delete the user and remove their data from our servers.
+                      <AlertDialogTitle className="rtl:text-start">
+                        {t("Are you sure")}?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription className="rtl:text-start">
+                        {t("This action cannot be undone")}.{" "}
+                        {t("This will permanently delete the user and remove their data from our servers")}
+                        .
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
                       <AlertDialogAction
                         className="bg-red-500 hover:bg-red-600"
                         onClick={() => deleteUser(user)}
                       >
-                        Delete
+                        {t("Delete")}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
@@ -544,21 +557,22 @@ export default function UsersPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">Users</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t("Users")}</h1>
         {checkPermission(Permission.CREATE_USER) && (
           <Dialog open={openAddDialog} onOpenChange={setOpenAddDialog}>
             <DialogTrigger asChild>
               <Button className="flex items-center gap-1">
                 <UserPlus className="h-4 w-4" />
-                <span>Add User</span>
+                <span>{t("Add User")}</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
-                <DialogTitle>Add New User</DialogTitle>
-                <DialogDescription>
-                  Create a new user account to give someone access to the
-                  system.
+                <DialogTitle className="rtl:text-start">
+                  {t("Add New User")}
+                </DialogTitle>
+                <DialogDescription className="rtl:text-start">
+                  {t("Create a new user account to give someone access to the system")}.
                 </DialogDescription>
               </DialogHeader>
               <Form {...addForm}>
@@ -571,7 +585,7 @@ export default function UsersPage() {
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Name</FormLabel>
+                        <FormLabel>{t("Name")}</FormLabel>
                         <FormControl>
                           <Input placeholder="John Doe" {...field} />
                         </FormControl>
@@ -584,7 +598,7 @@ export default function UsersPage() {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email</FormLabel>
+                        <FormLabel>{t("Email")}</FormLabel>
                         <FormControl>
                           <Input placeholder="john@example.com" {...field} />
                         </FormControl>
@@ -597,7 +611,7 @@ export default function UsersPage() {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Password</FormLabel>
+                        <FormLabel>{t("Password")}</FormLabel>
                         <FormControl>
                           <Input
                             type="password"
@@ -614,7 +628,7 @@ export default function UsersPage() {
                     name="branches"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Select Branches</FormLabel>
+                        <FormLabel>{t("Select Branches")}</FormLabel>
                         <div className="border rounded-md p-2 max-h-40 overflow-y-auto space-y-2">
                           {branches?.map((branch) => (
                             <div
@@ -652,9 +666,9 @@ export default function UsersPage() {
                     render={() => (
                       <FormItem>
                         <div className="mb-4">
-                          <FormLabel>Roles</FormLabel>
+                          <FormLabel>{t("Roles")}</FormLabel>
                           <FormDescription>
-                            Select the roles for this user
+                            {t("Select the roles for this user")}
                           </FormDescription>
                         </div>
                         <div className="grid grid-cols-2 gap-3">
@@ -702,7 +716,7 @@ export default function UsersPage() {
                     )}
                   />
                   <DialogFooter>
-                    <Button type="submit">Create User</Button>
+                    <Button type="submit">{t("Create User")}</Button>
                   </DialogFooter>
                 </form>
               </Form>
@@ -719,9 +733,9 @@ export default function UsersPage() {
           className="mb-6"
         >
           <TabsList>
-            <TabsTrigger value="all">All Users</TabsTrigger>
-            <TabsTrigger value="active">Active</TabsTrigger>
-            <TabsTrigger value="inactive">Inactive</TabsTrigger>
+            <TabsTrigger value="all">{t("All Users")}</TabsTrigger>
+            <TabsTrigger value="active">{t("Active")}</TabsTrigger>
+            <TabsTrigger value="inactive">{t("Inactive")}</TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -733,7 +747,7 @@ export default function UsersPage() {
             return true;
           })}
           filterColumn="name"
-          filterPlaceholder="Filter users..."
+          filterPlaceholder={t("Filter users") + "..."}
         />
       </div>
 
@@ -741,9 +755,9 @@ export default function UsersPage() {
       <Dialog open={openEditDialog} onOpenChange={setOpenEditDialog}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Edit User</DialogTitle>
-            <DialogDescription>
-              Update user details and roles.
+            <DialogTitle className="rtl:text-start">{t("Edit User")}</DialogTitle>
+            <DialogDescription className="rtl:text-start">
+              {t("Update user details and roles")}.
             </DialogDescription>
           </DialogHeader>
           {selectedUser && (
@@ -757,7 +771,7 @@ export default function UsersPage() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel>{t("Name")}</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -770,7 +784,7 @@ export default function UsersPage() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>{t("Email")}</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -783,7 +797,7 @@ export default function UsersPage() {
                   name="branches"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Select Branches</FormLabel>
+                      <FormLabel>{t("Select Branches")}</FormLabel>
                       <div className="border rounded-md p-2 max-h-40 overflow-y-auto space-y-2">
                         {branches?.map((branch) => (
                           <div
@@ -821,9 +835,11 @@ export default function UsersPage() {
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
-                        <FormLabel className="text-base">User Status</FormLabel>
+                        <FormLabel className="text-base">
+                          {t("User Status")}
+                        </FormLabel>
                         <FormDescription>
-                          {field.value ? "User is active" : "User is inactive"}
+                          {field.value ? t("User is active") : t("User is inactive")}
                         </FormDescription>
                       </div>
                       <FormControl>
@@ -842,9 +858,9 @@ export default function UsersPage() {
                   render={() => (
                     <FormItem>
                       <div className="mb-4">
-                        <FormLabel>Roles</FormLabel>
-                        <FormDescription>
-                          Select the roles for this user
+                        <FormLabel>{t("Roles")}</FormLabel>
+                        <FormDescription className="rtl:text-start">
+                          {t("Select the roles for this user")}
                         </FormDescription>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
@@ -890,7 +906,7 @@ export default function UsersPage() {
                   )}
                 />
                 <DialogFooter>
-                  <Button type="submit">Save Changes</Button>
+                  <Button type="submit">{t("Save Changes")}</Button>
                 </DialogFooter>
               </form>
             </Form>
@@ -902,11 +918,13 @@ export default function UsersPage() {
       <Dialog open={openPasswordDialog} onOpenChange={setOpenPasswordDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Change Password</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="rtl:text-start">
+              {t("Change Password")}
+            </DialogTitle>
+            <DialogDescription className="rtl:text-start">
               {selectedUser
-                ? `Update password for ${selectedUser.name}`
-                : "Update user password"}
+                ? `${t("Update password for")} ${selectedUser.name}`
+                : t("Update user password")}
             </DialogDescription>
           </DialogHeader>
           <Form {...passwordForm}>
@@ -919,7 +937,7 @@ export default function UsersPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>New Password</FormLabel>
+                    <FormLabel>{t("New Password")}</FormLabel>
                     <FormControl>
                       <Input type="password" placeholder="••••••" {...field} />
                     </FormControl>
@@ -932,7 +950,7 @@ export default function UsersPage() {
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
+                    <FormLabel>{t("Confirm Password")}</FormLabel>
                     <FormControl>
                       <Input type="password" placeholder="••••••" {...field} />
                     </FormControl>
@@ -941,7 +959,7 @@ export default function UsersPage() {
                 )}
               />
               <DialogFooter>
-                <Button type="submit">Update Password</Button>
+                <Button type="submit">{t("Update Password")}</Button>
               </DialogFooter>
             </form>
           </Form>

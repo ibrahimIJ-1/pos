@@ -25,6 +25,7 @@ import {
 import { DataTablePagination } from "./pagination";
 import { DataTableViewOptions } from "./view-options";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -43,6 +44,7 @@ export function DataTable<TData, TValue>({
   className,
   tableClassName,
 }: DataTableProps<TData, TValue>) {
+  const t = useTranslations();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -69,7 +71,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className={cn("space-y-4", className)}>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between rtl:flex-row-reverse">
         {filterColumn && (
           <Input
             placeholder={filterPlaceholder}
@@ -89,7 +91,7 @@ export function DataTable<TData, TValue>({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} className="text-start">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -125,7 +127,7 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  {t("No results")}.
                 </TableCell>
               </TableRow>
             )}

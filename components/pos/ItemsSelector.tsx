@@ -17,6 +17,7 @@ function ItemsSelector() {
     addItemToCart,
     inputRef,
     showImage,
+    trans
   } = usePOS();
 
   const filteredProducts = products.filter(
@@ -34,7 +35,7 @@ function ItemsSelector() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Search products..."
+            placeholder={trans("Search products")+"..."}
             className="pl-10 pr-2 h-11 neon-input border-neon-purple/30 text-base"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -45,7 +46,7 @@ function ItemsSelector() {
           className="neon-border h-11 w-full sm:w-auto px-4"
         >
           <Barcode className="h-5 w-5 sm:mr-2" />
-          <span className="hidden sm:inline">Scan</span>
+          <span className="hidden sm:inline">{trans("Scan")}</span>
         </Button>
       </div>
 
@@ -71,7 +72,7 @@ function ItemsSelector() {
                   />
                   {product.stock <= (product.low_stock_threshold || 0) && (
                     <div className="absolute top-1 right-1 bg-destructive/90 text-destructive-foreground text-[0.6rem] px-2 py-1 rounded-sm sm:text-xs sm:top-2 sm:right-2">
-                      Low Stock
+                      {trans("Low Stock")}
                     </div>
                   )}
                 </div>
@@ -87,7 +88,7 @@ function ItemsSelector() {
                     ${product.price.toFixed(2)}
                   </span>
                   <span className="text-xs text-muted-foreground shrink-0">
-                    {product.stock} in stock
+                    {product.stock} {trans("in stock")}
                   </span>
                 </div>
               </CardContent>
@@ -96,7 +97,7 @@ function ItemsSelector() {
           {filteredProducts.length === 0 && (
             <div className="col-span-full flex flex-col items-center justify-center h-40 text-muted-foreground">
               <Search className="h-10 w-10 mb-2" />
-              <p>No products found</p>
+              <p>{trans("No products found")}</p>
             </div>
           )}
         </div>

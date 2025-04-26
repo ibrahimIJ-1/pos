@@ -18,12 +18,15 @@ function CustomerSelector() {
     setIsCustomerDialogOpen,
     customers,
     handleCustomerSelect,
+    trans
   } = usePOS();
   return (
     <Dialog open={isCustomerDialogOpen} onOpenChange={setIsCustomerDialogOpen}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" dir={trans("dir") as "rtl" | "ltr"}>
         <DialogHeader>
-          <DialogTitle>Select Customer</DialogTitle>
+          <DialogTitle className="rtl:text-start">
+            {trans("Select Customer")}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -31,7 +34,7 @@ function CustomerSelector() {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search customers..."
+              placeholder={trans("Search customers") + "..."}
               className="pl-8 neon-input"
             />
           </div>
@@ -63,11 +66,11 @@ function CustomerSelector() {
             variant="outline"
             onClick={() => setIsCustomerDialogOpen(false)}
           >
-            Cancel
+            {trans("Cancel")}
           </Button>
           <Button variant="outline" className="gap-2">
             <Plus className="h-4 w-4" />
-            New Customer
+            {trans("New Customer")}
           </Button>
         </DialogFooter>
       </DialogContent>

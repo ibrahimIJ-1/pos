@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { CustomerForm } from "./CustomerForm";
 import { Customer } from "@prisma/client";
+import { useTranslations } from "next-intl";
 
 interface CustomerDialogProps {
   customer?: Customer;
@@ -21,12 +22,13 @@ export function CustomerDialog({
   onOpenChange,
   onSuccess,
 }: CustomerDialogProps) {
+  const t = useTranslations();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>
-            {customer ? "Edit Customer" : "Add New Customer"}
+          <DialogTitle className="text-start">
+            {customer ? t("Edit Customer") : t("Add New Customer")}
           </DialogTitle>
         </DialogHeader>
         <CustomerForm

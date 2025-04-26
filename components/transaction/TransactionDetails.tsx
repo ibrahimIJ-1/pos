@@ -9,12 +9,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTransaction } from "@/lib/transactions-service";
+import { useTranslations } from "next-intl";
 
 interface TransactionDetailsProps {
   id: string;
 }
 
 export function TransactionDetails({ id }: TransactionDetailsProps) {
+  const t = useTranslations();
   const { data: transaction, isLoading, error } = useTransaction(id);
 
   if (isLoading) {
@@ -35,11 +37,11 @@ export function TransactionDetails({ id }: TransactionDetailsProps) {
 
   if (error || !transaction) {
     return (
-      <Card className="border-destructive">
+      <Card className="border-destructive" dir={t("dir")}>
         <CardHeader>
-          <CardTitle>Error</CardTitle>
+          <CardTitle>{t("Error")}</CardTitle>
           <CardDescription>
-            Could not load transaction details. Please try again.
+            {t("Could not load transaction details, Please try again")}.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -79,40 +81,40 @@ export function TransactionDetails({ id }: TransactionDetailsProps) {
   };
 
   return (
-    <Card>
+    <Card dir={t("dir")}>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-xl">Transaction Details</CardTitle>
+          <CardTitle className="text-xl">{t("Transaction Details")}</CardTitle>
           <Badge className={getTransactionTypeColor(transaction.type)}>
-            {transaction.type}
+            {t(transaction.type)}
           </Badge>
         </div>
         <CardDescription>
-          Transaction #{transaction.id} - Created on{" "}
+          {t("Transaction")} #{transaction.id} - {t("Created on")}{" "}
           {transaction.created_at.toString()}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Amount</p>
+            <p className="text-sm font-medium text-muted-foreground">{t("Amount")}</p>
             <p className="text-xl font-semibold">
               ${Math.abs(Number(transaction.amount)).toFixed(2)}
             </p>
           </div>
           <div>
             <p className="text-sm font-medium text-muted-foreground">
-              Payment Method
+              {t("Payment Method")}
             </p>
             <Badge className={getPaymentMethodColor(transaction.paymentMethod)}>
-              {transaction.paymentMethod}
+              {t(transaction.paymentMethod)}
             </Badge>
           </div>
         </div>
 
         <div>
           <p className="text-sm font-medium text-muted-foreground">
-            Description
+            {t("Description")}
           </p>
           <p>{transaction.description}</p>
         </div>
@@ -120,20 +122,28 @@ export function TransactionDetails({ id }: TransactionDetailsProps) {
         {transaction.referenceId && (
           <div>
             <p className="text-sm font-medium text-muted-foreground">
-              Reference ID
+              {t("Reference ID")}
             </p>
             <p>{transaction.referenceId}</p>
           </div>
         )}
 
         <div>
-          <p className="text-sm font-medium text-muted-foreground">Cashier</p>
-          <p>ID: {transaction.cashierId}</p>
+          <p className="text-sm font-medium text-muted-foreground">
+            {t("Cashier")}
+          </p>
+          <p>
+            {t("ID")}: {transaction.cashierId}
+          </p>
         </div>
 
         <div>
-          <p className="text-sm font-medium text-muted-foreground">Register</p>
-          <p>ID: {transaction.registerId}</p>
+          <p className="text-sm font-medium text-muted-foreground">
+            {t("Register")}
+          </p>
+          <p>
+            {t("ID")}: {transaction.registerId}
+          </p>
         </div>
       </CardContent>
     </Card>

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { format } from "date-fns";
 import { Percent, Tag, Search, Calendar } from "lucide-react";
 import { DiscountType } from "@prisma/client";
 import { usePOSDiscounts } from "@/lib/discounts-service";
+import { usePOS } from "@/providers/POSProvider";
 
 interface DiscountSelectorProps {
   open: boolean;
@@ -28,6 +29,7 @@ export function DiscountSelector({
   onOpenChange,
   onSelectDiscount,
 }: DiscountSelectorProps) {
+  const { trans } = usePOS();
   const { data: discounts = [], isLoading } = usePOSDiscounts();
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -70,7 +72,9 @@ export function DiscountSelector({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Apply Discount</DialogTitle>
+          <DialogTitle className="rtl:text-start">
+            {trans("Apply Discount")}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -78,7 +82,7 @@ export function DiscountSelector({
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search discounts..."
+              placeholder={trans("Search discounts") + "..."}
               className="pl-8"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -118,17 +122,18 @@ export function DiscountSelector({
                       <div className="flex items-center gap-1 ml-2">
                         <Calendar className="h-3 w-3" />
                         <span>
-                          Valid until:{" "}
+                          {trans("Valid until")}:{" "}
                           {discount.endDate
                             ? format(new Date(discount.endDate), "MMM d")
-                            : "No end date"}
+                            : trans("No end date")}
                         </span>
                       </div>
                     </div>
 
                     {discount.minPurchaseAmount && (
                       <span className="text-xs text-muted-foreground">
-                        Min. purchase: ${discount.minPurchaseAmount.toFixed(2)}
+                        {trans("Min")}. {trans("purchase")}: $
+                        {discount.minPurchaseAmount.toFixed(2)}
                       </span>
                     )}
                   </Button>
@@ -136,10 +141,10 @@ export function DiscountSelector({
               ) : (
                 <div className="p-4 text-center text-muted-foreground">
                   {isLoading
-                    ? "Loading discounts..."
+                    ? trans("Loading discounts") + "..."
                     : searchTerm
-                    ? `No discounts found matching "${searchTerm}"`
-                    : "No active discounts available"}
+                    ? `${trans("No discounts found matching")} "${searchTerm}"`
+                    : trans("No active discounts available")}
                 </div>
               )}
             </div>
@@ -148,7 +153,7 @@ export function DiscountSelector({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {trans("Cancel")}
           </Button>
         </DialogFooter>
       </DialogContent>
