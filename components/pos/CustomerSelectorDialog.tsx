@@ -12,6 +12,7 @@ function CustomerSelectorDialog() {
     isCustomerDialogOpen,
     setIsCustomerDialogOpen,
     removeCustomer,
+    trans
   } = usePOS();
   return (
     <>
@@ -51,7 +52,7 @@ function CustomerSelectorDialog() {
             onClick={() => setIsCustomerDialogOpen(true)}
           >
             <User className="h-4 w-4 mr-2" />
-            Add Customer
+            {trans("Add Customer")}
           </Button>
         )}
       </div>

@@ -26,6 +26,7 @@ model User {
   branchId              String?               @map("branch_id")
   mainBranch            Branch?               @relation("MainBranch", fields: [branchId], references: [id])
   branches              Branch[]              @relation("UserBranches")
+  lang                  String                @default("en")
 
   // Optional: if you filter by active status frequently
   // @@index([active])

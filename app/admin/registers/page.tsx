@@ -20,8 +20,10 @@ import { RegisterDialog } from "@/components/register/RegisterDialog";
 import { RegisterDataTable } from "@/components/register/RegisterDataTable";
 import { Register } from "@prisma/client";
 import { useRegisters } from "@/lib/registers-service";
+import { useTranslations } from "next-intl";
 
 export default function Registers() {
+  const t = useTranslations();
   const { toast } = useToast();
   const { data: registers = [], isLoading, refetch } = useRegisters();
 
@@ -31,8 +33,8 @@ export default function Registers() {
   const handleRefresh = () => {
     refetch();
     toast({
-      title: "Refreshed",
-      description: "Registers list has been refreshed",
+      title: t("Refreshed"),
+      description: t("Registers list has been refreshed"),
     });
   };
 
@@ -44,14 +46,14 @@ export default function Registers() {
     <div className="container max-w-7xl mx-auto p-4">
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Register Devices</h1>
+          <h1 className="text-2xl font-bold">{t("Register Devices")}</h1>
 
           <div className="flex space-x-2">
             <Button
               variant="outline"
               size="icon"
               onClick={handleRefresh}
-              title="Refresh registers"
+              title={t("Refresh registers")}
             >
               <RefreshCw className="h-4 w-4" />
             </Button>
@@ -62,8 +64,8 @@ export default function Registers() {
           <div className="lg:col-span-1 space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Filter Registers</CardTitle>
-                <CardDescription>Search for registers by name</CardDescription>
+                <CardTitle>{t("Filter Registers")}</CardTitle>
+                <CardDescription>{t("Search for registers by name")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -71,7 +73,7 @@ export default function Registers() {
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                       type="search"
-                      placeholder="Search register..."
+                      placeholder={t("Search register")+"..."}
                       className="pl-8"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
@@ -83,20 +85,20 @@ export default function Registers() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Register Stats</CardTitle>
-                <CardDescription>Quick overview of registers</CardDescription>
+                <CardTitle>{t("Register Stats")}</CardTitle>
+                <CardDescription>{t("Quick overview of registers")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">
-                      Total Registers
+                      {t("Total Registers")}
                     </span>
                     <span className="font-medium">{(registers as Register[]).length}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">
-                      Opened Registers
+                      {t("Opened Registers")}
                     </span>
                     <span className="font-medium">
                       {(registers as Register[]).filter((d) => d.status === 'OPEN').length}
@@ -104,7 +106,7 @@ export default function Registers() {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">
-                      Closed Registers
+                      {t("Closed Registers")}
                     </span>
                     <span className="font-medium">
                       {(registers as Register[]).filter((d) => d.status === 'CLOSED').length}
@@ -119,11 +121,11 @@ export default function Registers() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle>All Registers</CardTitle>
+                  <CardTitle>{t("All Registers")}</CardTitle>
                   <CardDescription>
                     {isLoading
-                      ? "Loading registers..."
-                      : `Showing ${filteredRegisters.length} of ${(registers as Register[]).length} registers`}
+                      ? t("Loading registers")+"..."
+                      : `${t("Showing")} ${filteredRegisters.length} ${t("of")} ${(registers as Register[]).length} ${t("registers")}`}
                   </CardDescription>
                 </div>
               </CardHeader>

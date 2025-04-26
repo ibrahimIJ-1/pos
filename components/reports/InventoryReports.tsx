@@ -20,8 +20,10 @@ import { FileDown, Printer, AlertTriangle } from "lucide-react";
 import { reportsApi } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import { useInventoryReports } from "@/lib/reports-service";
+import { useTranslations } from "next-intl";
 
 export default function InventoryReports() {
+  const t = useTranslations();
   const [showLowStock, setShowLowStock] = useState(false);
 
   // Fetch inventory report data
@@ -59,9 +61,11 @@ export default function InventoryReports() {
   };
 
   const getStockStatus = (current: number, threshold: number) => {
-    if (current <= 0) return { label: "Out of Stock", variant: "destructive" };
-    if (current <= threshold) return { label: "Low Stock", variant: "warning" };
-    return { label: "In Stock", variant: "success" };
+    if (current <= 0)
+      return { label: t("Out of Stock"), variant: "destructive" };
+    if (current <= threshold)
+      return { label: t("Low Stock"), variant: "warning" };
+    return { label: t("In Stock"), variant: "success" };
   };
 
   return (
@@ -70,8 +74,10 @@ export default function InventoryReports() {
         <CardHeader>
           <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
             <div>
-              <CardTitle>Inventory Report</CardTitle>
-              <CardDescription>Manage and track your inventory</CardDescription>
+              <CardTitle>{t("Inventory Report")}</CardTitle>
+              <CardDescription>
+                {t("Manage and track your inventory")}
+              </CardDescription>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -82,8 +88,8 @@ export default function InventoryReports() {
               >
                 <AlertTriangle className="h-4 w-4" />
                 {showLowStock
-                  ? "Showing Low Stock Only"
-                  : "Show Low Stock Only"}
+                  ? t("Showing Low Stock Only")
+                  : t("Show Low Stock Only")}
               </Button>
 
               <div className="flex gap-2">
@@ -100,7 +106,7 @@ export default function InventoryReports() {
         <CardContent>
           {isLoading ? (
             <div className="flex justify-center items-center h-40">
-              <p>Loading inventory data...</p>
+              <p>{t("Loading inventory data")}...</p>
             </div>
           ) : data ? (
             <div className="space-y-8">
@@ -108,7 +114,7 @@ export default function InventoryReports() {
                 <Card>
                   <CardContent className="p-6">
                     <div className="text-sm text-muted-foreground">
-                      Total Products
+                      {t("Total Products")}
                     </div>
                     <div className="text-2xl font-bold">
                       {data.totalProducts || 0}
@@ -116,10 +122,10 @@ export default function InventoryReports() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card dir={t("dir") as "rtl" | "ltr"}>
                   <CardContent className="p-6">
                     <div className="text-sm text-muted-foreground">
-                      Low Stock Items
+                      {t("Low Stock Items")}
                     </div>
                     <div className="text-2xl font-bold">
                       {data.lowStockCount || 0}
@@ -130,7 +136,7 @@ export default function InventoryReports() {
                 <Card>
                   <CardContent className="p-6">
                     <div className="text-sm text-muted-foreground">
-                      Out of Stock Items
+                      {t("Out of Stock Items")}
                     </div>
                     <div className="text-2xl font-bold">
                       {data.outOfStockCount || 0}
@@ -140,16 +146,16 @@ export default function InventoryReports() {
               </div>
 
               <div>
-                <h3 className="font-medium mb-4">Inventory Status</h3>
-                <Table>
+                <h3 className="font-medium mb-4">{t("Inventory Status")}</h3>
+                <Table dir={t("dir") as "rtl" | "ltr"}>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Product</TableHead>
-                      <TableHead>SKU</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Current Stock</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Restock Value</TableHead>
+                      <TableHead className="rtl:text-start">{t("Product")}</TableHead>
+                      <TableHead className="rtl:text-start">{t("SKU")}</TableHead>
+                      <TableHead className="rtl:text-start">{t("Category")}</TableHead>
+                      <TableHead className="rtl:text-start">{t("Current Stock")}</TableHead>
+                      <TableHead className="rtl:text-start">{t("Status")}</TableHead>
+                      <TableHead className="rtl:text-start">{t("Restock Value")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -189,16 +195,16 @@ export default function InventoryReports() {
               </div>
 
               <div>
-                <h3 className="font-medium mb-4">Inventory Value</h3>
-                <Table>
+                <h3 className="font-medium mb-4">{t("Inventory Value")}</h3>
+                <Table dir={t("dir") as "rtl" | "ltr"}>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Product Count</TableHead>
-                      <TableHead>Total Stock</TableHead>
-                      <TableHead>Cost Value</TableHead>
-                      <TableHead>Retail Value</TableHead>
-                      <TableHead>Potential Profit</TableHead>
+                      <TableHead className="rtl:text-start">{t("Category")}</TableHead>
+                      <TableHead className="rtl:text-start">{t("Product Count")}</TableHead>
+                      <TableHead className="rtl:text-start">{t("Total Stock")}</TableHead>
+                      <TableHead className="rtl:text-start">{t("Cost Value")}</TableHead>
+                      <TableHead className="rtl:text-start">{t("Retail Value")}</TableHead>
+                      <TableHead className="rtl:text-start">{t("Potential Profit")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -226,7 +232,7 @@ export default function InventoryReports() {
             <>
               <pre>{data}</pre>
               <div className="flex justify-center items-center h-40">
-                <p>No inventory data available</p>
+                <p>{t("No inventory data available")}</p>
               </div>
             </>
           )}

@@ -25,17 +25,21 @@ import {
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
-const formSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z
-    .string()
-    .min(6, { message: "Password must be at least 6 characters" }),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import { useTranslations } from "next-intl";
 
 export default function LoginPage() {
+  const t = useTranslations();
+  const formSchema = z.object({
+    email: z
+      .string()
+      .email({ message: t("Please enter a valid email address") }),
+    password: z
+      .string()
+      .min(6, { message: t("Password must be at least 6 characters") }),
+  });
+
+  type FormValues = z.infer<typeof formSchema>;
+
   const { userLogin, isLoading, user } = useAuth();
   const navigate = useRouter();
 
@@ -61,9 +65,9 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-700 to-blue-900 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Login</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t("Login")}</CardTitle>
           <CardDescription>
-            Enter your credentials to access your account
+            {t("Enter your credentials to access your account")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -74,7 +78,7 @@ export default function LoginPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>{t("Email")}</FormLabel>
                     <FormControl>
                       <Input placeholder="your.email@example.com" {...field} />
                     </FormControl>
@@ -87,7 +91,7 @@ export default function LoginPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>{t("Password")}</FormLabel>
                     <FormControl>
                       <Input type="password" placeholder="******" {...field} />
                     </FormControl>
@@ -96,7 +100,7 @@ export default function LoginPage() {
                 )}
               />
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Login"}
+                {isLoading ? t("Logging in") + "..." : t("Login")}
               </Button>
             </form>
           </Form>
@@ -110,7 +114,7 @@ export default function LoginPage() {
           </div> */}
           <Link href="/" className="w-full">
             <Button variant="outline" className="w-full">
-              Back to Home
+              {t("Back to Home")}
             </Button>
           </Link>
         </CardFooter>

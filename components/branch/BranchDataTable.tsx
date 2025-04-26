@@ -26,8 +26,10 @@ import { BranchDialog } from "./BranchDialog";
 import { Branch } from "@prisma/client";
 import ActivateDeactivateModal from "./ActivateDeactivateModal";
 import { useBranches, useDeleteBranch } from "@/lib/branches-service";
+import { useTranslations } from "next-intl";
 
 export const BranchDataTable = () => {
+  const t = useTranslations()
   const { toast } = useToast();
   const { data: branches = [] } = useBranches();
   const deleteBranch = useDeleteBranch();
@@ -54,17 +56,17 @@ export const BranchDataTable = () => {
       deleteBranch.mutate(selectedBranch.id, {
         onSuccess: () => {
           toast({
-            title: "Branch deleted",
-            description: `Branch "${selectedBranch.name}" successfully deleted`,
+            title: t("Branch deleted"),
+            description: `${t("Branch")} "${selectedBranch.name}" ${t("successfully deleted")}`,
           });
           setIsDeleteDialogOpen(false);
           setSelectedBranch(null);
         },
         onError: (error) => {
           toast({
-            title: "Error",
-            description: `Failed to delete branch: ${
-              error instanceof Error ? error.message : "Unknown error"
+            title: t("Error"),
+            description: `${t("Failed to delete branch")}: ${
+              error instanceof Error ? error.message : t("Unknown error")
             }`,
             variant: "destructive",
           });
@@ -86,7 +88,7 @@ export const BranchDataTable = () => {
           className="bg-gray-100"
           key={Math.random() * 1000}
         >
-          Deactivate
+          {t("Deactivate")}
         </Badge>
       );
     } else {
@@ -96,7 +98,7 @@ export const BranchDataTable = () => {
           className="bg-green-100 text-green-800"
           key={Math.random() * 1000}
         >
-          Activate
+          {t("Activate")}
         </Badge>
       );
     }
@@ -129,32 +131,32 @@ export const BranchDataTable = () => {
 
     {
       accessorKey: "name",
-      header: "Name",
+      header: t("Name"),
       cell: ({ row }) =>
         row.original.name ? (
           <Badge variant="outline">{row.original.name}</Badge>
         ) : (
-          <span className="text-muted-foreground text-sm">No name</span>
+          <span className="text-muted-foreground text-sm">{t("No name")}</span>
         ),
     },
     {
       accessorKey: "address",
-      header: "Address",
+      header: t("Address"),
       cell: ({ row }) =>
         row.original.name ? (
           <Badge variant="outline">{row.original.address}</Badge>
         ) : (
-          <span className="text-muted-foreground text-sm">No Address</span>
+          <span className="text-muted-foreground text-sm">{t("No Address")}</span>
         ),
     },
     {
       accessorKey: "status",
-      header: "Status",
+      header: t("Status"),
       cell: ({ row }) => getBranchStatusBadge(row.original),
     },
     {
       accessorKey: "lock",
-      header: "Lock/Unlock",
+      header: t("Lock/Unlock"),
       cell: ({ row }) => getBranchStatusToggle(row.original),
     },
     {
@@ -165,7 +167,7 @@ export const BranchDataTable = () => {
             variant="ghost"
             size="icon"
             onClick={() => handleEdit(row.original)}
-            title="Edit branch"
+            title={t("Edit branch")}
           >
             <Edit className="h-4 w-4" />
           </Button>
@@ -174,7 +176,7 @@ export const BranchDataTable = () => {
             size="icon"
             className="text-muted-foreground hover:text-destructive"
             onClick={() => handleDelete(row.original)}
-            title="Delete branch"
+            title={t("Delete branch")}
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -186,10 +188,10 @@ export const BranchDataTable = () => {
   return (
     <>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">Branches</h2>
+        <h2 className="text-lg font-semibold">{t("Branches")}</h2>
         <Button onClick={() => setIsAddDialogOpen(true)} className="gap-2">
           <Plus className="h-4 w-4" />
-          Add Branch
+          {t("Add Branch")}
         </Button>
       </div>
 
@@ -197,7 +199,7 @@ export const BranchDataTable = () => {
         columns={columns}
         data={branches as any}
         filterColumn="name"
-        filterPlaceholder="Filter branches..."
+        filterPlaceholder={t("Filter branches")+"..."}
       />
 
       {/* Add Branch Dialog */}
@@ -232,20 +234,19 @@ export const BranchDataTable = () => {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete the branch{" "}
-              <span className="font-medium">{selectedBranch?.name}</span>. This
-              action cannot be undone.
+            <AlertDialogTitle className="rtl:text-start">{t("Are you sure")}?</AlertDialogTitle>
+            <AlertDialogDescription className="rtl:text-start">
+              {t("This will permanently delete the branch")}{" "}
+              <span className="font-medium">{selectedBranch?.name}</span>. {t("This action cannot be undone")}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {deleteBranch.isPending ? "Deleting..." : "Delete"}
+              {deleteBranch.isPending ? t("Deleting")+"..." : t("Delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

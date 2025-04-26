@@ -25,14 +25,15 @@ function PaymentDialog() {
     setCashReceived,
     calculateChange,
     createSaleMutation,
-    handleCompleteSale
+    handleCompleteSale,
+    trans
   } = usePOS();
 
   return (
     <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
-      <DialogContent className="sm:max-w-md border-neon-purple/30">
+      <DialogContent className="sm:max-w-md border-neon-purple/30" dir={trans("dir")}>
         <DialogHeader>
-          <DialogTitle>Payment</DialogTitle>
+          <DialogTitle className="rtl:text-start">{trans("Payment")}</DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-4">
@@ -47,7 +48,7 @@ function PaymentDialog() {
               onClick={() => setPaymentMethod("credit_card")}
             >
               <CreditCard className="h-4 w-4" />
-              Credit Card
+              {trans("Credit Card")}
             </Button>
             <Button
               variant={paymentMethod === "cash" ? "default" : "outline"}
@@ -59,13 +60,13 @@ function PaymentDialog() {
               onClick={() => setPaymentMethod("cash")}
             >
               <DollarSign className="h-4 w-4" />
-              Cash
+              {trans("Cash")}
             </Button>
           </div>
 
           {paymentMethod === "cash" && (
             <div className="space-y-2">
-              <label className="text-sm font-medium">Cash Received</label>
+              <label className="text-sm font-medium">{trans("Cash Received")}</label>
               <NumberInput
                 min={cart?.totalAmount}
                 step={1}
@@ -75,7 +76,7 @@ function PaymentDialog() {
               />
 
               <div className="flex justify-between font-medium">
-                <span>Change</span>
+                <span>{trans("Change")}</span>
                 <span>${calculateChange().toFixed(2)}</span>
               </div>
             </div>
@@ -83,7 +84,7 @@ function PaymentDialog() {
 
           <div className="bg-muted rounded-md p-3 space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Items</span>
+              <span className="text-muted-foreground">{trans("Items")}</span>
               <span>
                 {(cart?.items as CartItem[])?.reduce(
                   (acc, item) => acc + item.quantity,
@@ -93,12 +94,12 @@ function PaymentDialog() {
             </div>
             {(cart?.discountTotal ?? 0) > 0 && (
               <div className="flex justify-between text-sm text-green-600">
-                <span>Discount</span>
+                <span>{trans("Discount")}</span>
                 <span>-${cart?.discountTotal.toFixed(2) || 0}</span>
               </div>
             )}
             <div className="flex justify-between font-bold">
-              <span>Total</span>
+              <span>{trans("Total")}</span>
               <span>${cart?.totalAmount?.toFixed(2) || "0.00"}</span>
             </div>
           </div>
@@ -109,7 +110,7 @@ function PaymentDialog() {
             variant="outline"
             onClick={() => setIsPaymentDialogOpen(false)}
           >
-            Cancel
+            {trans("Cancel")}
           </Button>
           <Button
             onClick={handleCompleteSale}
@@ -117,7 +118,7 @@ function PaymentDialog() {
             className="gap-2 bg-neon-purple hover:bg-neon-purple/90"
           >
             <Wallet className="h-4 w-4" />
-            {createSaleMutation.isPending ? "Processing..." : "Complete Sale"}
+            {createSaleMutation.isPending ? trans("Processing")+"..." : trans("Complete Sale")}
           </Button>
         </DialogFooter>
       </DialogContent>

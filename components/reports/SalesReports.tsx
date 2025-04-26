@@ -46,8 +46,10 @@ import {
 } from "date-fns";
 import { LineChart, BarChart } from "@/components/ui/chart";
 import { useSalesReports } from "@/lib/reports-service";
+import { useTranslations } from "next-intl";
 
 export default function SalesReports() {
+  const t = useTranslations();
   const [dateRange, setDateRange] = useState<
     "day" | "week" | "month" | "custom"
   >("week");
@@ -120,10 +122,11 @@ export default function SalesReports() {
         <CardHeader>
           <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
             <div>
-              <CardTitle>Sales Performance Analysis</CardTitle>
+              <CardTitle>{t("Sales Performance Analysis")}</CardTitle>
               <CardDescription>
-                Comprehensive analysis of sales trends, patterns, and
-                performance metrics
+                {t(
+                  "Comprehensive analysis of sales trends, patterns, and performance metrics"
+                )}
               </CardDescription>
             </div>
 
@@ -138,10 +141,10 @@ export default function SalesReports() {
                   <SelectValue placeholder="Date Range" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="day">Today</SelectItem>
-                  <SelectItem value="week">This Week</SelectItem>
-                  <SelectItem value="month">This Month</SelectItem>
-                  <SelectItem value="custom">Custom</SelectItem>
+                  <SelectItem value="day">{t("Today")}</SelectItem>
+                  <SelectItem value="week">{t("This Week")}</SelectItem>
+                  <SelectItem value="month">{t("This Month")}</SelectItem>
+                  <SelectItem value="custom">{t("Custom")}</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -150,12 +153,12 @@ export default function SalesReports() {
                   <DateInput
                     date={fromDate}
                     onDateChange={(val) => setFromDate(val!)}
-                    placeholder="From Date"
+                    placeholder={t("From Date")}
                   />
                   <DateInput
                     date={toDate}
                     onDateChange={(val) => setToDate(val!)}
-                    placeholder="To Date"
+                    placeholder={t("To Date")}
                   />
                 </div>
               )}
@@ -174,7 +177,7 @@ export default function SalesReports() {
         <CardContent>
           {isLoading ? (
             <div className="flex justify-center items-center h-40">
-              <p>Loading sales data...</p>
+              <p>{t("Loading sales data")}...</p>
             </div>
           ) : data ? (
             <div className="space-y-8">
@@ -183,7 +186,7 @@ export default function SalesReports() {
                   <CardContent className="p-6">
                     <div className="flex justify-between items-center mb-2">
                       <div className="text-sm text-muted-foreground">
-                        Total Sales
+                        {t("Total Sales")}
                       </div>
                       <TrendingUp className="h-4 w-4 text-green-500" />
                     </div>
@@ -203,7 +206,8 @@ export default function SalesReports() {
                         ) : (
                           <ArrowDownRight className="h-3 w-3 mr-1" />
                         )}
-                        {Math.abs(data.salesGrowth)}% from previous period
+                        {Math.abs(data.salesGrowth)}%{" "}
+                        {t("from previous period")}
                       </div>
                     )}
                   </CardContent>
@@ -213,7 +217,7 @@ export default function SalesReports() {
                   <CardContent className="p-6">
                     <div className="flex justify-between items-center mb-2">
                       <div className="text-sm text-muted-foreground">
-                        Total Transactions
+                        {t("Total Transactions")}
                       </div>
                       <ShoppingBag className="h-4 w-4 text-blue-500" />
                     </div>
@@ -233,18 +237,18 @@ export default function SalesReports() {
                         ) : (
                           <ArrowDownRight className="h-3 w-3 mr-1" />
                         )}
-                        {Math.abs(data.transactionsGrowth)}% from previous
-                        period
+                        {Math.abs(data.transactionsGrowth)}%{" "}
+                        {t("from previous period")}
                       </div>
                     )}
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card dir={t("dir") as "rtl" | "ltr"}>
                   <CardContent className="p-6">
                     <div className="flex justify-between items-center mb-2">
                       <div className="text-sm text-muted-foreground">
-                        Average Transaction Value
+                        {t("Average Transaction Value")}
                       </div>
                       <CalendarRange className="h-4 w-4 text-purple-500" />
                     </div>
@@ -264,19 +268,19 @@ export default function SalesReports() {
                         ) : (
                           <ArrowDownRight className="h-3 w-3 mr-1" />
                         )}
-                        {Math.abs(data.avgTransactionGrowth)}% from previous
-                        period
+                        {Math.abs(data.avgTransactionGrowth)}%{" "}
+                        {t("from previous period")}
                       </div>
                     )}
                   </CardContent>
                 </Card>
               </div>
 
-              <Card>
+              <Card dir={t("dir") as "rtl" | "ltr"}>
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-center">
-                    <CardTitle className="text-lg">
-                      Hourly Sales Trend
+                    <CardTitle className="text-lg rtl:text-start">
+                      {t("Hourly Sales Trend")}
                     </CardTitle>
                     <div className="flex gap-2">
                       <Button
@@ -284,14 +288,14 @@ export default function SalesReports() {
                         size="sm"
                         onClick={() => setChartType("bar")}
                       >
-                        <BarChart3 className="h-4 w-4 mr-1" /> Bar
+                        <BarChart3 className="h-4 w-4 mr-1" /> {t("Bar")}
                       </Button>
                       <Button
                         variant={chartType === "line" ? "default" : "outline"}
                         size="sm"
                         onClick={() => setChartType("line")}
                       >
-                        <TrendingUp className="h-4 w-4 mr-1" /> Line
+                        <TrendingUp className="h-4 w-4 mr-1" /> {t("Line")}
                       </Button>
                     </div>
                   </div>
@@ -299,6 +303,7 @@ export default function SalesReports() {
                 <CardContent className="max-h-[300px]">
                   {chartType === "bar" ? (
                     <BarChart
+                      dir={t("dir") as "rtl" | "ltr"}
                       data={getChartData()}
                       className="max-h-[300px] w-full"
                       index="name"
@@ -319,6 +324,7 @@ export default function SalesReports() {
                     </BarChart>
                   ) : (
                     <LineChart
+                      dir={t("dir") as "rtl" | "ltr"}
                       data={getChartData()}
                       index="name"
                       className="max-h-[300px] w-full"
@@ -342,20 +348,28 @@ export default function SalesReports() {
               </Card>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
+                <Card dir={t("dir") as "rtl" | "ltr"}>
                   <CardHeader>
-                    <CardTitle className="text-lg">
-                      Sales by Payment Method
+                    <CardTitle className="text-lg rtl:text-start">
+                      {t("Sales by Payment Method")}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <Table>
+                    <Table dir={t("dir") as "rtl" | "ltr"}>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Payment Method</TableHead>
-                          <TableHead>Transactions</TableHead>
-                          <TableHead>Total</TableHead>
-                          <TableHead>% of Sales</TableHead>
+                          <TableHead className="rtl:text-start">
+                            {t("Payment Method")}
+                          </TableHead>
+                          <TableHead className="rtl:text-start">
+                            {t("Transactions")}
+                          </TableHead>
+                          <TableHead className="rtl:text-start">
+                            {t("Total")}
+                          </TableHead>
+                          <TableHead className="rtl:text-start">
+                            % {t("of Sales")}
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -376,18 +390,28 @@ export default function SalesReports() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card dir={t("dir") as "rtl" | "ltr"}>
                   <CardHeader>
-                    <CardTitle className="text-lg">Sales by Category</CardTitle>
+                    <CardTitle className="text-lg rtl:text-start">
+                      {t("Sales by Category")}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <Table>
+                    <Table dir={t("dir") as "rtl" | "ltr"}>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Category</TableHead>
-                          <TableHead>Sales</TableHead>
-                          <TableHead>% of Total</TableHead>
-                          <TableHead>Growth</TableHead>
+                          <TableHead className="rtl:text-start">
+                            {t("Category")}
+                          </TableHead>
+                          <TableHead className="rtl:text-start">
+                            {t("Sales")}
+                          </TableHead>
+                          <TableHead className="rtl:text-start">
+                            % {t("of Total")}
+                          </TableHead>
+                          <TableHead className="rtl:text-start">
+                            {t("Growth")}
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -425,21 +449,31 @@ export default function SalesReports() {
               </div>
 
               <div className="grid grid-cols-1 gap-6">
-                <Card>
+                <Card dir={t("dir") as "rtl" | "ltr"}>
                   <CardHeader>
-                    <CardTitle className="text-lg">
-                      Top Selling Products
+                    <CardTitle className="text-lg rtl:text-start">
+                      {t("Top Selling Products")}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <Table>
+                    <Table dir={t("dir") as "rtl" | "ltr"}>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Product</TableHead>
-                          <TableHead>Category</TableHead>
-                          <TableHead>Quantity Sold</TableHead>
-                          <TableHead>Revenue</TableHead>
-                          <TableHead>Avg Price</TableHead>
+                          <TableHead className="rtl:text-start">
+                            {t("Product")}
+                          </TableHead>
+                          <TableHead className="rtl:text-start">
+                            {t("Category")}
+                          </TableHead>
+                          <TableHead className="rtl:text-start">
+                            {t("Quantity Sold")}
+                          </TableHead>
+                          <TableHead className="rtl:text-start">
+                            {t("Revenue")}
+                          </TableHead>
+                          <TableHead className="rtl:text-start">
+                            {t("Avg Price")}
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -467,19 +501,31 @@ export default function SalesReports() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card dir={t("dir") as "rtl" | "ltr"}>
                   <CardHeader>
-                    <CardTitle className="text-lg">Sales by Employee</CardTitle>
+                    <CardTitle className="text-lg rtl:text-start">
+                      {t("Sales by Employee")}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <Table>
+                    <Table dir={t("dir") as "rtl" | "ltr"}>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Employee</TableHead>
-                          <TableHead>Sales</TableHead>
-                          <TableHead>Transactions</TableHead>
-                          <TableHead>Avg Transaction</TableHead>
-                          <TableHead>% of Total</TableHead>
+                          <TableHead className="rtl:text-start">
+                            {t("Employee")}
+                          </TableHead>
+                          <TableHead className="rtl:text-start">
+                            {t("Sales")}
+                          </TableHead>
+                          <TableHead className="rtl:text-start">
+                            {t("Transactions")}
+                          </TableHead>
+                          <TableHead className="rtl:text-start">
+                            {t("Avg Transaction")}
+                          </TableHead>
+                          <TableHead className="rtl:text-start">
+                            % {t("of Total")}
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -514,7 +560,7 @@ export default function SalesReports() {
             </div>
           ) : (
             <div className="flex justify-center items-center h-40">
-              <p>No sales data available for the selected period</p>
+              <p>{t("No sales data available for the selected period")}</p>
             </div>
           )}
         </CardContent>

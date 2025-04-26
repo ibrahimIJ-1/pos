@@ -14,8 +14,10 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RegisterTransaction } from "@prisma/client";
 import { useTransactions } from "@/lib/transactions-service";
+import { useTranslations } from "next-intl";
 
 export default function Transactions() {
+  const t = useTranslations();
   const { data: transactions, isLoading, error } = useTransactions();
   const [selectedTransaction, setSelectedTransaction] = useState<string | null>(
     null
@@ -66,19 +68,19 @@ export default function Transactions() {
     },
     {
       accessorKey: "type",
-      header: "Type",
+      header: t("Type"),
       cell: ({ row }) => {
         const type: string = row.getValue("type");
         return (
           <Badge className={getTransactionTypeColor(type)}>
-            {type.replace("_", " ").toUpperCase()}
+            {t(type.replace("_", " ").toUpperCase())}
           </Badge>
         );
       },
     },
     {
       accessorKey: "amount",
-      header: "Amount",
+      header: t("Amount"),
       cell: ({ row }) => {
         const amount = parseFloat(row.getValue("amount"));
         // Format as currency
@@ -96,21 +98,21 @@ export default function Transactions() {
     },
     {
       accessorKey: "paymentMethod",
-      header: "Payment Method",
+      header: t("Payment Method"),
       cell: ({ row }) => {
         const method: string = row.getValue("paymentMethod");
         return (
-          <Badge className={getPaymentMethodColor(method)}>{method}</Badge>
+          <Badge className={getPaymentMethodColor(method)}>{t(method)}</Badge>
         );
       },
     },
     {
       accessorKey: "description",
-      header: "Description",
+      header: t("Description"),
     },
     {
       accessorKey: "created_at",
-      header: "Date",
+      header: t("Date"),
       cell: ({ row }) => {
         const date: string = row.getValue("created_at");
         return <div>{date}</div>;
@@ -125,7 +127,7 @@ export default function Transactions() {
             variant="ghost"
             onClick={() => setSelectedTransaction(transaction.id)}
           >
-            View
+            {t("View")}
           </Button>
         );
       },
@@ -146,24 +148,28 @@ export default function Transactions() {
   }, [transactions, searchQuery]);
 
   if (error) {
-    return <div>Error loading transactions: {error.message}</div>;
+    return (
+      <div>
+        {t("Error loading transactions")}: {error.message}
+      </div>
+    );
   }
 
   return (
     <div className="container mx-auto p-4 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Financial Management</h1>
+        <h1 className="text-3xl font-bold">{t("Financial Management")}</h1>
         <Button onClick={() => setDialogOpen(true)}>
-          <PlusIcon className="mr-2 h-4 w-4" /> Add Transaction
+          <PlusIcon className="mr-2 h-4 w-4" /> {t("Add Transaction")}
         </Button>
       </div>
 
       <Tabs defaultValue="summary">
         <TabsList>
-          <TabsTrigger value="summary">Financial Summary</TabsTrigger>
-          <TabsTrigger value="transactions">Transactions List</TabsTrigger>
+          <TabsTrigger value="summary">{t("Financial Summary")}</TabsTrigger>
+          <TabsTrigger value="transactions">{t("Transactions List")}</TabsTrigger>
           {selectedTransaction && (
-            <TabsTrigger value="details">Transaction Details</TabsTrigger>
+            <TabsTrigger value="details">{t("Transaction Details")}</TabsTrigger>
           )}
         </TabsList>
 
@@ -172,13 +178,13 @@ export default function Transactions() {
         </TabsContent>
 
         <TabsContent value="transactions" className="pt-4">
-          <Card>
+          <Card dir={t("dir")}>
             <CardHeader>
-              <CardTitle>Transactions History</CardTitle>
+              <CardTitle>{t("Transactions History")}</CardTitle>
               <div className="flex items-center">
                 <SearchIcon className="h-4 w-4 mr-2" />
                 <Input
-                  placeholder="Search transactions..."
+                  placeholder={t("Search transactions")+"..."}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="max-w-sm neon-input transition-shadow duration-300"
@@ -188,12 +194,12 @@ export default function Transactions() {
             <CardContent>
               <DataTable
                 columns={columns}
-                data={(filteredTransactions as any)}
+                data={filteredTransactions as any}
                 filterColumn="description"
-                filterPlaceholder="Filter by description..."
+                filterPlaceholder={t("Filter by description")+"..."}
               />
               {isLoading && (
-                <div className="mt-4 text-center">Loading transactions...</div>
+                <div className="mt-4 text-center">{t("Loading transactions")}...</div>
               )}
             </CardContent>
           </Card>

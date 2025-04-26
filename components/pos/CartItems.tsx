@@ -16,20 +16,20 @@ import { Button } from "../ui/button";
 import { Minus, Plus, ShoppingCart, Trash } from "lucide-react";
 
 function CartItems() {
-  const { cart, cartOps, updateCartItemQuantity } = usePOS();
+  const { cart, cartOps, updateCartItemQuantity,trans } = usePOS();
   return (
-    <ScrollArea className="h-[calc(100vh-26rem)]">
+    <ScrollArea className="h-[calc(100vh-26rem)]" dir={trans("dir") as "rtl" | "ltr"}>
       {((cart?.items as CartItem[])?.length
         ? (cart?.items as CartItem[]).length
         : 0) > 0 ? (
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Item</TableHead>
-              <TableHead className="text-right">Price</TableHead>
-              <TableHead className="text-center">Qty</TableHead>
-              <TableHead className="text-right">Total</TableHead>
-              <TableHead className="text-right">Clear</TableHead>
+              <TableHead className="rtl:text-start">{trans("Item")}</TableHead>
+              <TableHead className="text-right rtl:text-start">{trans("Price")}</TableHead>
+              <TableHead className="text-center rtl:text-start">{trans("Qty")}</TableHead>
+              <TableHead className="text-right rtl:text-start">{trans("Total")}</TableHead>
+              <TableHead className="text-right rtl:text-start">{trans("Clear")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -89,8 +89,8 @@ function CartItems() {
       ) : (
         <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
           <ShoppingCart className="h-10 w-10 mb-2" />
-          <p>No items in cart</p>
-          <p className="text-sm">Add products by clicking on them</p>
+          <p>{trans("No items in cart")}</p>
+          <p className="text-sm">{trans("Add products by clicking on them")}</p>
         </div>
       )}
     </ScrollArea>

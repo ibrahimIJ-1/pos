@@ -14,12 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "@/hooks/use-toast";
 import { useCloseBranch, useOpenBranch } from "@/lib/branches-service";
-
-const branchSchema = z.object({
-  id: z.string().min(3, { message: "Name must be at least 3 characters" }),
-});
-
-type ToggleFormValues = z.infer<typeof branchSchema>;
+import { useTranslations } from "next-intl";
 
 interface BranchDialogProps {
   open: boolean;
@@ -31,6 +26,12 @@ function ActivateDeactivateModal({
   onOpenChange,
   branch,
 }: BranchDialogProps) {
+  const t = useTranslations();
+  const branchSchema = z.object({
+    id: z.string().min(3, { message: t("Name must be at least 3 characters") }),
+  });
+
+  type ToggleFormValues = z.infer<typeof branchSchema>;
   const openBranch = useOpenBranch();
   const closeBranch = useCloseBranch();
 
@@ -49,16 +50,18 @@ function ActivateDeactivateModal({
         {
           onSuccess: () => {
             toast({
-              title: "Branch Switched",
-              description: `Branch "${branch.name}" successfully Switched`,
+              title: t("Branch Switched"),
+              description: `${t("Branch")} "${branch.name}" ${t(
+                "successfully Switched"
+              )}`,
             });
             onOpenChange(false);
           },
           onError: (error: any) => {
             toast({
-              title: "Error",
-              description: `Failed to Switch branch: ${
-                error instanceof Error ? error.message : "Unknown error"
+              title: t("Error"),
+              description: `${t("Failed to Switch branch")}: ${
+                error instanceof Error ? error.message : t("Unknown error")
               }`,
               variant: "destructive",
             });
@@ -73,16 +76,18 @@ function ActivateDeactivateModal({
         {
           onSuccess: () => {
             toast({
-              title: "Branch Switched",
-              description: `Branch "${branch.name}" successfully Switched`,
+              title: t("Branch Switched"),
+              description: `${t("Branch")} "${branch.name}" ${t(
+                "successfully Switched"
+              )}`,
             });
             onOpenChange(false);
           },
           onError: (error: any) => {
             toast({
-              title: "Error",
-              description: `Failed to Switch branch: ${
-                error instanceof Error ? error.message : "Unknown error"
+              title: t("Error"),
+              description: `${t("Failed to Switch branch")}: ${
+                error instanceof Error ? error.message : t("Unknown error")
               }`,
               variant: "destructive",
             });
@@ -95,8 +100,8 @@ function ActivateDeactivateModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
-          <DialogTitle>
-            {branch.isActive === true ? "Close Branch" : "Open Branch"}
+          <DialogTitle className="rtl:text-start">
+            {branch.isActive === true ? t("Close Branch") : t("Open Branch")}
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
@@ -107,7 +112,7 @@ function ActivateDeactivateModal({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
               >
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button
                 type="submit"
@@ -115,11 +120,11 @@ function ActivateDeactivateModal({
               >
                 {branch?.isActive === true
                   ? openBranch.isPending
-                    ? "Closing..."
-                    : "Close Register"
+                    ? t("Closing") + "..."
+                    : t("Close Register")
                   : closeBranch.isPending
-                  ? "Opening..."
-                  : "Open Register"}
+                  ? t("Opening") + "..."
+                  : t("Open Register")}
               </Button>
             </DialogFooter>
           </form>

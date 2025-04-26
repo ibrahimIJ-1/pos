@@ -43,36 +43,10 @@ import {
 } from "@prisma/client";
 import { useProducts } from "@/lib/products-service";
 import { useCreateDiscount, useUpdateDiscount } from "@/lib/discounts-service";
+import { useTranslations } from "next-intl";
+import { discountFormSchema } from "./DiscountForm";
 
-const discountSchema = z.object({
-  name: z.string().min(3, { message: "Name must be at least 3 characters" }),
-  code: z.string().optional(),
-  type: z.enum(["PERCENTAGE", "FIXED", "BUY_X_GET_Y"]),
-  value: z.coerce
-    .number()
-    .min(0, { message: "Value must be positive" })
-    .refine((val) => val <= 100 || val === 0, {
-      message: "Percentage cannot exceed 100%",
-      path: ["value"],
-    }),
-  minPurchaseAmount: z.coerce.number().optional(),
-  appliesTo: z.enum([
-    "ENTIRE_ORDER",
-    "SPECIFIC_PRODUCTS",
-    "SPECIFIC_CATEGORIES",
-  ]),
-  productIds: z.array(z.string()).optional(),
-  categoryIds: z.array(z.string()).optional(),
-  buyXQuantity: z.coerce.number().optional(),
-  getYQuantity: z.coerce.number().optional(),
-  startDate: z.date(),
-  endDate: z.date().optional(),
-  maxUses: z.coerce.number().optional(),
-  isActive: z.boolean(),
-  branches: z.array(z.string()).min(1, "At least one branch must be selected"),
-});
-
-type DiscountFormValues = z.infer<typeof discountSchema>;
+type DiscountFormValues = z.infer<ReturnType<typeof discountFormSchema>>;
 
 interface DiscountDialogProps {
   open: boolean;
@@ -89,6 +63,8 @@ export function DiscountDialog({
   discount,
   branches,
 }: DiscountDialogProps) {
+  const t = useTranslations();
+  const discountSchema = discountFormSchema();
   const [selectedAppliesTo, setSelectedAppliesTo] =
     useState<DiscountAppliesTo>("ENTIRE_ORDER");
   const { data: products = [] } = useProducts();
@@ -269,23 +245,29 @@ export function DiscountDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
-          <DialogTitle>
-            {mode === "create" ? "Create Discount" : "Edit Discount"}
+          <DialogTitle className="rtl:text-start">
+            {mode === "create" ? t("Create Discount") : t("Edit Discount")}
           </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <ScrollArea className="h-[60vh] pr-4">
+            <ScrollArea
+              className="h-[60vh] ltr:pr-4 rtl:pl-4"
+              dir={t("dir") as "rtl" | "ltr"}
+            >
               <div className="space-y-4">
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel>{t("Name")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Summer Sale 20% Off" {...field} />
+                        <Input
+                          placeholder={t("Summer Sale 20% Off")}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -297,9 +279,11 @@ export function DiscountDialog({
                   name="code"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Code (Optional)</FormLabel>
+                      <FormLabel>
+                        {t("Code")} ({t("Optional")})
+                      </FormLabel>
                       <FormControl>
-                        <Input placeholder="SUMMER20" {...field} />
+                        <Input placeholder={t("SUMMER20")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -312,23 +296,25 @@ export function DiscountDialog({
                     name="type"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Discount Type</FormLabel>
+                        <FormLabel>{t("Discount Type")}</FormLabel>
                         <Select
                           onValueChange={handleTypeChange}
                           defaultValue={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select type" />
+                              <SelectValue placeholder={t("Select type")} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             <SelectItem value="PERCENTAGE">
-                              Percentage
+                              {t("Percentage")}
                             </SelectItem>
-                            <SelectItem value="FIXED">Fixed Amount</SelectItem>
+                            <SelectItem value="FIXED">
+                              {t("Fixed Amount")}
+                            </SelectItem>
                             <SelectItem value="BUY_X_GET_Y">
-                              Buy X Get Y Free
+                              {t("Buy X Get Y Free")}
                             </SelectItem>
                           </SelectContent>
                         </Select>
@@ -344,10 +330,10 @@ export function DiscountDialog({
                       <FormItem>
                         <FormLabel>
                           {form.watch("type") === "PERCENTAGE"
-                            ? "Percentage (%)"
+                            ? t("Percentage") + " (%)"
                             : form.watch("type") === "FIXED"
-                            ? "Amount ($)"
-                            : "Discount % on Y items"}
+                            ? t("Amount") + " ($)"
+                            : t("Discount % on Y items")}
                         </FormLabel>
                         <FormControl>
                           <NumberInput
@@ -377,7 +363,7 @@ export function DiscountDialog({
                       name="buyXQuantity"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Buy Quantity (X)</FormLabel>
+                          <FormLabel>{t("Buy Quantity")} (X)</FormLabel>
                           <FormControl>
                             <NumberInput min={1} step={1} {...field} />
                           </FormControl>
@@ -391,7 +377,7 @@ export function DiscountDialog({
                       name="getYQuantity"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Get Free Quantity (Y)</FormLabel>
+                          <FormLabel>{t("Get Free Quantity")} (Y)</FormLabel>
                           <FormControl>
                             <NumberInput min={1} step={1} {...field} />
                           </FormControl>
@@ -407,7 +393,9 @@ export function DiscountDialog({
                   name="minPurchaseAmount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Minimum Purchase Amount (Optional)</FormLabel>
+                      <FormLabel>
+                        {t("Minimum Purchase Amount")} ({t("Optional")})
+                      </FormLabel>
                       <FormControl>
                         <NumberInput
                           min={0}
@@ -425,7 +413,7 @@ export function DiscountDialog({
                   name="branches"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Select Branches</FormLabel>
+                      <FormLabel>{t("Select Branches")}</FormLabel>
                       <div className="border rounded-md p-2 max-h-40 overflow-y-auto space-y-2">
                         {branches.map((branch) => (
                           <div
@@ -463,7 +451,7 @@ export function DiscountDialog({
                   name="appliesTo"
                   render={() => (
                     <FormItem>
-                      <FormLabel>Applies To</FormLabel>
+                      <FormLabel>{t("Applies To")}</FormLabel>
                       <Tabs
                         value={selectedAppliesTo}
                         onValueChange={handleAppliesChange}
@@ -471,19 +459,19 @@ export function DiscountDialog({
                       >
                         <TabsList className="grid grid-cols-3 w-full">
                           <TabsTrigger value="ENTIRE_ORDER">
-                            Entire Order
+                            {t("Entire Order")}
                           </TabsTrigger>
                           <TabsTrigger
                             value="SPECIFIC_PRODUCTS"
                             disabled={form.watch("type") === "BUY_X_GET_Y"}
                           >
-                            Products
+                            {t("Products")}
                           </TabsTrigger>
                           <TabsTrigger
                             value="SPECIFIC_CATEGORIES"
                             disabled={form.watch("type") === "BUY_X_GET_Y"}
                           >
-                            Categories
+                            {t("Categories")}
                           </TabsTrigger>
                         </TabsList>
                       </Tabs>
@@ -498,7 +486,7 @@ export function DiscountDialog({
                     name="productIds"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Select Products</FormLabel>
+                        <FormLabel>{t("Select Products")}</FormLabel>
                         <div className="border rounded-md p-2 max-h-40 overflow-y-auto space-y-2">
                           {(products as Product[]).map((product) => (
                             <div
@@ -545,7 +533,7 @@ export function DiscountDialog({
                     name="categoryIds"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Categories</FormLabel>
+                        <FormLabel>{t("Categories")}</FormLabel>
                         <FormControl>
                           <div className="space-y-2">
                             {uniqueCategories
@@ -597,7 +585,7 @@ export function DiscountDialog({
                     name="startDate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Start Date</FormLabel>
+                        <FormLabel>{t("Start Date")}</FormLabel>
                         <FormControl>
                           <DateInput
                             date={field.value}
@@ -614,7 +602,9 @@ export function DiscountDialog({
                     name="endDate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>End Date (Optional)</FormLabel>
+                        <FormLabel>
+                          {t("End Date")} ({t("Optional")})
+                        </FormLabel>
                         <FormControl>
                           <DateInput
                             date={field.value}
@@ -632,12 +622,14 @@ export function DiscountDialog({
                   name="maxUses"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Maximum Uses (Optional)</FormLabel>
+                      <FormLabel>
+                        {t("Maximum Uses")} ({t("Optional")})
+                      </FormLabel>
                       <FormControl>
                         <NumberInput
                           min={0}
                           step={1}
-                          placeholder="No limit"
+                          placeholder={t("No limit")}
                           {...field}
                         />
                       </FormControl>
@@ -652,9 +644,11 @@ export function DiscountDialog({
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
-                        <FormLabel className="text-base">Active</FormLabel>
+                        <FormLabel className="text-base">
+                          {t("Active")}
+                        </FormLabel>
                         <p className="text-sm text-muted-foreground">
-                          Make this discount active and available for use
+                          {t("Make this discount active and available for use")}
                         </p>
                       </div>
                       <FormControl>
@@ -676,7 +670,7 @@ export function DiscountDialog({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
               >
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button
                 type="submit"
@@ -684,11 +678,11 @@ export function DiscountDialog({
               >
                 {mode === "create"
                   ? createDiscount.isPending
-                    ? "Creating..."
-                    : "Create Discount"
+                    ? t("Creating") + "..."
+                    : t("Create Discount")
                   : updateDiscount.isPending
-                  ? "Updating..."
-                  : "Update Discount"}
+                  ? t("Updating") + "..."
+                  : t("Update Discount")}
               </Button>
             </DialogFooter>
           </form>

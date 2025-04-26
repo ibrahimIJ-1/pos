@@ -19,8 +19,10 @@ import { Plus, Search, RefreshCw } from "lucide-react";
 import { BranchDialog } from "@/components/branch/BranchDialog";
 import { BranchDataTable } from "@/components/branch/BranchDataTable";
 import { useBranches } from "@/lib/branches-service";
+import { useTranslations } from "next-intl";
 
 export default function Branches() {
+  const t = useTranslations()
   const { toast } = useToast();
   const { data: branches = [], isLoading, refetch } = useBranches();
 
@@ -30,8 +32,8 @@ export default function Branches() {
   const handleRefresh = () => {
     refetch();
     toast({
-      title: "Refreshed",
-      description: "Branches list has been refreshed",
+      title: t("Refreshed"),
+      description: t("Branches list has been refreshed"),
     });
   };
 
@@ -43,14 +45,14 @@ export default function Branches() {
     <div className="container max-w-7xl mx-auto p-4">
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Branch Devices</h1>
+          <h1 className="text-2xl font-bold">{t("Branch Devices")}</h1>
 
           <div className="flex space-x-2">
             <Button
               variant="outline"
               size="icon"
               onClick={handleRefresh}
-              title="Refresh branches"
+              title={t("Refresh branches")}
             >
               <RefreshCw className="h-4 w-4" />
             </Button>
@@ -64,7 +66,7 @@ export default function Branches() {
                 className="gap-2"
               >
                 <Plus className="h-4 w-4" />
-                Add Branch
+                {t("Add Branch")}
               </Button>
             </PermissionGuard>
           </div>
@@ -74,8 +76,8 @@ export default function Branches() {
           <div className="lg:col-span-1 space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Filter Branches</CardTitle>
-                <CardDescription>Search for branches by name</CardDescription>
+                <CardTitle>{t("Filter Branches")}</CardTitle>
+                <CardDescription>{t("Search for branches by name")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -83,7 +85,7 @@ export default function Branches() {
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                       type="search"
-                      placeholder="Search branch..."
+                      placeholder={t("Search branch")+"..."}
                       className="pl-8"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
@@ -95,20 +97,20 @@ export default function Branches() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Branch Stats</CardTitle>
-                <CardDescription>Quick overview of branches</CardDescription>
+                <CardTitle>{t("Branch Stats")}</CardTitle>
+                <CardDescription>{t("Quick overview of branches")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">
-                      Total Branches
+                      {t("Total Branches")}
                     </span>
                     <span className="font-medium">{branches.length}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">
-                      Opened Branches
+                      {t("Opened Branches")}
                     </span>
                     <span className="font-medium">
                       {branches.filter((d) => d.isActive === true).length}
@@ -116,7 +118,7 @@ export default function Branches() {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">
-                      Closed Branches
+                      {t("Closed Branches")}
                     </span>
                     <span className="font-medium">
                       {branches.filter((d) => d.isActive === false).length}
@@ -131,11 +133,11 @@ export default function Branches() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle>All Branches</CardTitle>
+                  <CardTitle>{t("All Branches")}</CardTitle>
                   <CardDescription>
                     {isLoading
-                      ? "Loading branches..."
-                      : `Showing ${filteredBranches.length} of ${branches.length} branches`}
+                      ? t("Loading branches")+"..."
+                      : `${t("Showing")} ${filteredBranches.length} ${t("of")} ${branches.length} ${t("branches")}`}
                   </CardDescription>
                 </div>
               </CardHeader>

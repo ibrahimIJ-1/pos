@@ -49,6 +49,7 @@ import { updateUser } from "@/actions/users/update-user";
 import { updateUserAdditionalPermissions } from "@/actions/auth/permissions/update-user-additional-permissions";
 import { updateRole } from "@/actions/auth/roles/update-role";
 import { deleteRole } from "@/actions/auth/roles/delete-role";
+import { useTranslations } from "next-intl";
 
 interface User {
   id: string;
@@ -60,6 +61,7 @@ interface User {
 }
 
 export function RolePermissionManager() {
+  const t = useTranslations();
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [selectedRoleForEdit, setSelectedRoleForEdit] = useState<string | null>(
@@ -114,7 +116,7 @@ export function RolePermissionManager() {
       }
     } catch (error) {
       console.error("Error fetching users:", error);
-      toast.error("Failed to fetch users");
+      toast.error(t("Failed to fetch users"));
     } finally {
       setLoadingUsers(false);
     }
@@ -128,10 +130,10 @@ export function RolePermissionManager() {
       );
     } catch (error) {
       console.error(
-        `Error fetching additional permissions for user ${userId}:`,
+        `${t("Error fetching additional permissions for user")} ${userId}:`,
         error
       );
-      toast.error("Failed to fetch user permissions");
+      toast.error(t("Failed to fetch user permissions"));
     }
   };
 
@@ -149,7 +151,7 @@ export function RolePermissionManager() {
       // Find the role object by name
       const roleObj = roles.find((r) => r.name === role);
       if (!roleObj) {
-        toast.error(`Role ${role} not found`);
+        toast.error(`${t("Role")} ${role} ${t("not found")}`);
         return;
       }
 
@@ -167,11 +169,11 @@ export function RolePermissionManager() {
         roles: [...currentRoles, role],
       });
 
-      toast.success(`Added ${role} role to ${selectedUser.name}`);
+      toast.success(`${t("Added")} ${role} ${t("role to")} ${selectedUser.name}`);
       fetchUsers(); // Refresh all users
     } catch (error) {
       console.error("Error adding role:", error);
-      toast.error("Failed to add role");
+      toast.error(t("Failed to add role"));
     } finally {
       setSavingUser(false);
     }
@@ -188,7 +190,7 @@ export function RolePermissionManager() {
 
       // Check if this would remove all roles
       if (currentRoles.length <= 1) {
-        toast.error("User must have at least one role");
+        toast.error(t("User must have at least one role"));
         return;
       }
 
@@ -200,11 +202,11 @@ export function RolePermissionManager() {
         roles: currentRoles.filter((r) => r !== role),
       });
 
-      toast.success(`Removed ${role} role from ${selectedUser.name}`);
+      toast.success(`${t("Removed")} ${role} ${t("role from")} ${selectedUser.name}`);
       fetchUsers(); // Refresh all users
     } catch (error) {
       console.error("Error removing role:", error);
-      toast.error("Failed to remove role");
+      toast.error(t("Failed to remove role"));
     } finally {
       setSavingUser(false);
     }
@@ -229,11 +231,11 @@ export function RolePermissionManager() {
         userAdditionalPermissions
       );
 
-      toast.success(`Updated permissions for ${selectedUser.name}`);
+      toast.success(`${t("Updated permissions for")} ${selectedUser.name}`);
       fetchUsers(); // Refresh all users
     } catch (error) {
       console.error("Error saving user permissions:", error);
-      toast.error("Failed to save user permissions");
+      toast.error(t("Failed to save user permissions"));
     } finally {
       setSavingUser(false);
     }
@@ -241,7 +243,7 @@ export function RolePermissionManager() {
 
   const handleRoleCreated = (roleName: string) => {
     // Refresh roles
-    toast.success(`New role "${roleName}" created`);
+    toast.success(`${t("New role")} "${roleName}" ${t("created")}`);
     // The useRolesPermissions hook will automatically refresh
   };
 
@@ -271,7 +273,7 @@ export function RolePermissionManager() {
 
     // Don't allow editing built-in roles
     if (Object.values(UserRole).includes(selectedRoleForEdit as UserRole)) {
-      toast.error("Built-in roles cannot be modified");
+      toast.error(t("Built-in roles cannot be modified"));
       return;
     }
 
@@ -292,12 +294,12 @@ export function RolePermissionManager() {
 
       setRolePermissionsForEdit(tempPermissions);
       setIsEditingPermissions(false);
-      toast.success(`Role "${selectedRoleForEdit}" permissions updated`);
+      toast.success(`${t("Role")} "${selectedRoleForEdit}" ${t("permissions updated")}`);
 
       // The useRolesPermissions hook will automatically refresh
     } catch (error) {
       console.error("Error updating role:", error);
-      toast.error("Failed to update role permissions");
+      toast.error(t("Failed to update role permissions"));
     } finally {
       setSavingRole(false);
     }
@@ -319,7 +321,7 @@ export function RolePermissionManager() {
         setSelectedRoleId(null);
       }
 
-      toast.success(`Role "${pendingDeleteRole.name}" deleted successfully`);
+      toast.success(`${t("Role")} "${pendingDeleteRole.name}" ${t("deleted successfully")}`);
 
       // The useRolesPermissions hook will automatically refresh
     } catch (error: any) {
@@ -328,10 +330,10 @@ export function RolePermissionManager() {
       // Check if error is due to role being assigned to users
       if (error.response?.data?.error?.includes("assigned to users")) {
         toast.error(
-          `Cannot delete role: it is assigned to ${error.response.data.userCount} user(s)`
+          `${t("Cannot delete role, it is assigned to")} ${error.response.data.userCount} ${t("user/s")}`
         );
       } else {
-        toast.error("Failed to delete role");
+        toast.error(t("Failed to delete role"));
       }
     } finally {
       setShowDeleteConfirm(false);
@@ -343,7 +345,7 @@ export function RolePermissionManager() {
     if (!selectedRoleForEdit) return;
 
     if (Object.values(UserRole).includes(selectedRoleForEdit as UserRole)) {
-      toast.error("Built-in roles cannot be modified");
+      toast.error(t("Built-in roles cannot be modified"));
       return;
     }
 
@@ -430,13 +432,13 @@ export function RolePermissionManager() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Role & Permission Management</CardTitle>
-          <CardDescription>Loading data...</CardDescription>
+          <CardTitle>{t("Role & Permission Management")}</CardTitle>
+          <CardDescription>{t("Loading data")}...</CardDescription>
         </CardHeader>
         <CardContent className="flex items-center justify-center p-10">
           <div className="flex flex-col items-center gap-2">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p>Loading roles and permissions...</p>
+            <p>{t("Loading roles and permissions")}...</p>
           </div>
         </CardContent>
       </Card>
@@ -448,19 +450,19 @@ export function RolePermissionManager() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Role & Permission Management</CardTitle>
-          <CardDescription>An error occurred</CardDescription>
+          <CardTitle className="rtl:text-start">{t("Role & Permission Management")}</CardTitle>
+          <CardDescription className="rtl:text-start">{t("An error occurred")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="p-4 bg-destructive/10 text-destructive rounded-md">
-            Failed to load roles and permissions. Please try again later.
+            {t("Failed to load roles and permissions")}. {t("Please try again later")}.
           </div>
           <Button
             variant="outline"
             className="mt-4"
             onClick={() => window.location.reload()}
           >
-            Reload page
+            {t("Reload page")}
           </Button>
         </CardContent>
       </Card>
@@ -468,30 +470,30 @@ export function RolePermissionManager() {
   }
 
   return (
-    <Card className="neon-card neon-border">
+    <Card className="neon-card neon-border" dir={t("dir")}>
       <CardHeader>
-        <CardTitle>Role & Permission Management</CardTitle>
-        <CardDescription>
-          Manage user roles and additional permissions
+        <CardTitle className="rtl:text-start">{t("Role & Permission Management")}</CardTitle>
+        <CardDescription className="rtl:text-start">
+          {t("Manage user roles and additional permissions")}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="users">
+        <Tabs defaultValue="users" dir={t("dir") as "ltr" | "rtl"}>
           <TabsList className="mb-4">
             <TabsTrigger value="users" className="flex items-center gap-1">
               <UserCog className="h-4 w-4" />
-              <span>User Roles</span>
+              <span>{t("User Roles")}</span>
             </TabsTrigger>
             <TabsTrigger
               value="permissions"
               className="flex items-center gap-1"
             >
               <Shield className="h-4 w-4" />
-              <span>Permissions</span>
+              <span>{t("Permissions")}</span>
             </TabsTrigger>
             <TabsTrigger value="roles" className="flex items-center gap-1">
               <Settings className="h-4 w-4" />
-              <span>Manage Roles</span>
+              <span>{t("Manage Roles")}</span>
             </TabsTrigger>
           </TabsList>
 
@@ -499,10 +501,10 @@ export function RolePermissionManager() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Select User</CardTitle>
+                  <CardTitle className="text-lg">{t("Select User")}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ScrollArea className="h-[400px] pr-4">
+                  <ScrollArea className="h-[400px] ltr:pr-4 rtl:pl-4" dir={t("dir") as "ltr" | "rtl"}>
                     <div className="space-y-2">
                       {users.map((user) => (
                         <div
@@ -540,18 +542,18 @@ export function RolePermissionManager() {
 
               <Card className="md:col-span-2">
                 <CardHeader>
-                  <CardTitle className="text-lg">User Roles</CardTitle>
+                  <CardTitle className="text-lg">{t("User Roles")}</CardTitle>
                   <CardDescription>
                     {selectedUser
-                      ? `Manage roles for ${selectedUser.name}`
-                      : "Select a user to manage their roles"}
+                      ? `${t("Manage roles for")} ${selectedUser.name}`
+                      : t("Select a user to manage their roles")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {selectedUser ? (
                     <div className="space-y-4">
                       <div>
-                        <Label>Current Roles</Label>
+                        <Label>{t("Current Roles")}</Label>
                         <div className="mt-2 flex flex-wrap gap-2">
                           {selectedUser.roles.map((role) => (
                             <div
@@ -575,12 +577,13 @@ export function RolePermissionManager() {
 
                       <div className="flex gap-2 items-end">
                         <div className="space-y-2 flex-1">
-                          <Label htmlFor="add-role">Add Role</Label>
+                          <Label htmlFor="add-role">{t("Add Role")}</Label>
                           <Select
                             onValueChange={(value) => handleAddRole(value)}
+                            dir={t("dir") as "ltr" | "rtl"}
                           >
                             <SelectTrigger id="add-role" className="w-full">
-                              <SelectValue placeholder="Select role to add" />
+                              <SelectValue placeholder={t("Select role to add")} />
                             </SelectTrigger>
                             <SelectContent>
                               {availableRoles
@@ -608,13 +611,13 @@ export function RolePermissionManager() {
                           ) : (
                             <Plus className="h-4 w-4" />
                           )}
-                          <span>Add</span>
+                          <span>{t("Add")}</span>
                         </Button>
                       </div>
                     </div>
                   ) : (
                     <div className="h-[200px] flex items-center justify-center text-muted-foreground">
-                      Select a user to manage their roles
+                      {t("Select a user to manage their roles")}
                     </div>
                   )}
                 </CardContent>
@@ -628,11 +631,10 @@ export function RolePermissionManager() {
                 <div className="mb-4 flex justify-between items-center">
                   <div>
                     <h3 className="text-lg font-medium mb-1">
-                      Additional Permissions for {selectedUser.name}
+                      {t("Additional Permissions for")} {selectedUser.name}
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      Grant additional permissions beyond those provided by
-                      roles
+                      {t("Grant additional permissions beyond those provided by roles")}
                     </p>
                   </div>
                   <Button onClick={saveUserPermissions} disabled={savingUser}>
@@ -641,7 +643,7 @@ export function RolePermissionManager() {
                     ) : (
                       <Save className="h-4 w-4 mr-2" />
                     )}
-                    Save Permissions
+                    {t("Save Permissions")}
                   </Button>
                 </div>
 
@@ -682,7 +684,7 @@ export function RolePermissionManager() {
                                   </Label>
                                   {fromRole && (
                                     <p className="text-xs text-muted-foreground">
-                                      From role:{" "}
+                                      {t("From role")}:{" "}
                                       {selectedUser.roles
                                         .filter((role) => {
                                           const roleObj = roles.find(
@@ -708,30 +710,30 @@ export function RolePermissionManager() {
               </div>
             ) : (
               <div className="h-[200px] flex items-center justify-center text-muted-foreground">
-                Select a user to manage their permissions
+                {t("Select a user to manage their permissions")}
               </div>
             )}
           </TabsContent>
 
           <TabsContent value="roles" className="space-y-4">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium">Manage Roles</h3>
+              <h3 className="text-lg font-medium">{t("Manage Roles")}</h3>
               <Button
                 onClick={() => setIsCreateRoleDialogOpen(true)}
                 className="flex items-center gap-1"
               >
                 <Plus className="h-4 w-4" />
-                <span>Create Role</span>
+                <span>{t("Create Role")}</span>
               </Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Select Role</CardTitle>
+                  <CardTitle className="text-lg rtl:text-start">{t("Select Role")}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ScrollArea className="h-[400px] pr-4">
+                  <ScrollArea className="h-[400px] ltr:pr-4 rtl:pl-4" dir={t("dir") as "ltr" | "rtl"}>
                     <div className="space-y-2">
                       {roles.map((role) => (
                         <div
@@ -749,8 +751,8 @@ export function RolePermissionManager() {
                             <div className="font-medium">{role.name}</div>
                             <div className="text-xs opacity-90">
                               {isBuiltInRole(role.name)
-                                ? "Built-in role"
-                                : "Custom role"}
+                                ? t("Built-in role")
+                                : t("Custom role")}
                             </div>
                           </div>
 
@@ -775,17 +777,17 @@ export function RolePermissionManager() {
                 <CardHeader>
                   <div className="flex justify-between items-center">
                     <div>
-                      <CardTitle className="text-lg">
-                        Role Permissions
+                      <CardTitle className="text-lg rtl:text-start">
+                        {t("Role Permissions")}
                       </CardTitle>
-                      <CardDescription>
+                      <CardDescription className="rtl:text-start">
                         {selectedRoleForEdit
-                          ? `Manage permissions for ${selectedRoleForEdit} role${
+                          ? `${t("Manage permissions for")} ${selectedRoleForEdit} ${t("role")}${
                               isBuiltInRole(selectedRoleForEdit)
-                                ? " (read-only)"
+                                ? " ("+t("read-only")+")"
                                 : ""
                             }`
-                          : "Select a role to manage its permissions"}
+                          : t("Select a role to manage its permissions")}
                       </CardDescription>
                     </div>
 
@@ -806,7 +808,7 @@ export function RolePermissionManager() {
                                 ) : (
                                   <Save className="h-4 w-4" />
                                 )}
-                                <span>Save</span>
+                                <span>{t("Save")}</span>
                               </Button>
                               <Button
                                 onClick={cancelEditingPermissions}
@@ -816,7 +818,7 @@ export function RolePermissionManager() {
                                 disabled={savingRole}
                               >
                                 <X className="h-4 w-4" />
-                                <span>Cancel</span>
+                                <span>{t("Cancel")}</span>
                               </Button>
                             </>
                           ) : (
@@ -827,7 +829,7 @@ export function RolePermissionManager() {
                               className="flex items-center gap-1"
                             >
                               <RefreshCcw className="h-4 w-4" />
-                              <span>Edit</span>
+                              <span>{t("Edit")}</span>
                             </Button>
                           )}
                         </div>
@@ -837,7 +839,7 @@ export function RolePermissionManager() {
                 <CardContent>
                   {selectedRoleForEdit ? (
                     <div className="space-y-4">
-                      <ScrollArea className="h-[350px] pr-4">
+                      <ScrollArea className="h-[350px] ltr:pr-4 rtl:pl-4" dir={t("dir") as "ltr" | "rtl"}>
                         <div className="space-y-6">
                           {Object.entries(permissionGroups).map(
                             ([groupName, permissions]) => (
@@ -893,7 +895,7 @@ export function RolePermissionManager() {
                     </div>
                   ) : (
                     <div className="h-[200px] flex items-center justify-center text-muted-foreground">
-                      Select a role to manage its permissions
+                      {t("Select a role to manage its permissions")}
                     </div>
                   )}
                 </CardContent>
@@ -912,16 +914,16 @@ export function RolePermissionManager() {
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete the role &quot;
-              {pendingDeleteRole?.name}&quot;. This action cannot be undone.
+            <AlertDialogTitle className="rtl:text-start">{t("Are you sure")}?</AlertDialogTitle>
+            <AlertDialogDescription className="rtl:text-start">
+              {t("This will permanently delete the role")} &quot;
+              {pendingDeleteRole?.name}&quot;. {t("This action cannot be undone")}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={executeDeleteRole}>
-              Delete
+              {t("Delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

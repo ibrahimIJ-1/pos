@@ -9,6 +9,7 @@ import {
   SaleItem,
 } from "@prisma/client";
 import { UseMutationResult } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { Dispatch, SetStateAction } from "react";
 
 export interface POSContextType {
@@ -63,4 +64,5 @@ export interface POSContextType {
   addItemToCart: (product: any) => void;
   inputRef: React.RefObject<null>;
   showImage: boolean;
+  trans: ReturnType<typeof useTranslations>;
 }

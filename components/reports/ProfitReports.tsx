@@ -35,8 +35,10 @@ import {
   endOfWeek,
 } from "date-fns";
 import { useProfitReports } from "@/lib/reports-service";
+import { useTranslations } from "next-intl";
 
 export default function ProfitReports() {
+  const t = useTranslations();
   const [dateRange, setDateRange] = useState<
     "day" | "week" | "month" | "custom"
   >("month");
@@ -100,9 +102,9 @@ export default function ProfitReports() {
         <CardHeader>
           <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
             <div>
-              <CardTitle>Profit Report</CardTitle>
+              <CardTitle>{t("Profit Report")}</CardTitle>
               <CardDescription>
-                Analyze revenue, costs, and profit margins
+                {t("Analyze revenue, costs, and profit margins")}
               </CardDescription>
             </div>
 
@@ -115,10 +117,10 @@ export default function ProfitReports() {
                   <SelectValue placeholder="Date Range" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="day">Today</SelectItem>
-                  <SelectItem value="week">This Week</SelectItem>
-                  <SelectItem value="month">This Month</SelectItem>
-                  <SelectItem value="custom">Custom</SelectItem>
+                  <SelectItem value="day">{t("Today")}</SelectItem>
+                  <SelectItem value="week">{t("This Week")}</SelectItem>
+                  <SelectItem value="month">{t("This Month")}</SelectItem>
+                  <SelectItem value="custom">{t("Custom")}</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -127,12 +129,12 @@ export default function ProfitReports() {
                   <DateInput
                     date={fromDate}
                     onDateChange={(val) => setFromDate(val!)}
-                    placeholder="From Date"
+                    placeholder={t("From Date")}
                   />
                   <DateInput
                     date={toDate}
                     onDateChange={(val) => setToDate(val!)}
-                    placeholder="To Date"
+                    placeholder={t("To Date")}
                   />
                 </div>
               )}
@@ -151,7 +153,7 @@ export default function ProfitReports() {
         <CardContent>
           {isLoading ? (
             <div className="flex justify-center items-center h-40">
-              <p>Loading profit data...</p>
+              <p>{t("Loading profit data")}...</p>
             </div>
           ) : data ? (
             <div className="space-y-8">
@@ -159,7 +161,7 @@ export default function ProfitReports() {
                 <Card>
                   <CardContent className="p-6">
                     <div className="text-sm text-muted-foreground">
-                      Total Revenue
+                      {t("Total Revenue")}
                     </div>
                     <div className="text-2xl font-bold">
                       ${data.totalRevenue?.toFixed(2) || "0.00"}
@@ -173,7 +175,8 @@ export default function ProfitReports() {
                         }`}
                       >
                         {data.revenueGrowth >= 0 ? "↑" : "↓"}{" "}
-                        {Math.abs(data.revenueGrowth)}% from previous period
+                        {Math.abs(data.revenueGrowth)}%{" "}
+                        {t("from previous period")}
                       </div>
                     )}
                   </CardContent>
@@ -182,7 +185,7 @@ export default function ProfitReports() {
                 <Card>
                   <CardContent className="p-6">
                     <div className="text-sm text-muted-foreground">
-                      Cost of Goods
+                      {t("Cost of Goods")}
                     </div>
                     <div className="text-2xl font-bold">
                       ${data.totalCosts?.toFixed(2) || "0.00"}
@@ -193,7 +196,7 @@ export default function ProfitReports() {
                 <Card>
                   <CardContent className="p-6">
                     <div className="text-sm text-muted-foreground">
-                      Gross Profit
+                      {t("Gross Profit")}
                     </div>
                     <div className="text-2xl font-bold">
                       ${data.grossProfit?.toFixed(2) || "0.00"}
@@ -207,7 +210,8 @@ export default function ProfitReports() {
                         }`}
                       >
                         {data.profitGrowth >= 0 ? "↑" : "↓"}{" "}
-                        {Math.abs(data.profitGrowth)}% from previous period
+                        {Math.abs(data.profitGrowth)}%{" "}
+                        {t("from previous period")}
                       </div>
                     )}
                   </CardContent>
@@ -216,7 +220,7 @@ export default function ProfitReports() {
                 <Card>
                   <CardContent className="p-6">
                     <div className="text-sm text-muted-foreground">
-                      Profit Margin
+                      {t("Profit Margin")}
                     </div>
                     <div className="text-2xl font-bold">
                       {data.profitMargin?.toFixed(1) || "0"}%
@@ -226,15 +230,15 @@ export default function ProfitReports() {
               </div>
 
               <div>
-                <h3 className="font-medium mb-4">Profit by Category</h3>
-                <Table>
+                <h3 className="font-medium mb-4">{t("Profit by Category")}</h3>
+                <Table dir={t("dir") as "rtl" | "ltr"}>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Revenue</TableHead>
-                      <TableHead>Cost</TableHead>
-                      <TableHead>Profit</TableHead>
-                      <TableHead>Margin</TableHead>
+                      <TableHead className="rtl:text-start">{t("Category")}</TableHead>
+                      <TableHead className="rtl:text-start">{t("Revenue")}</TableHead>
+                      <TableHead className="rtl:text-start">{t("Cost")}</TableHead>
+                      <TableHead className="rtl:text-start">{t("Profit")}</TableHead>
+                      <TableHead className="rtl:text-start">{t("Margin")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -254,16 +258,30 @@ export default function ProfitReports() {
               </div>
 
               <div>
-                <h3 className="font-medium mb-4">Most Profitable Products</h3>
-                <Table>
+                <h3 className="font-medium mb-4">
+                  {t("Most Profitable Products")}
+                </h3>
+                <Table dir={t("dir") as "rtl" | "ltr"}>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Product</TableHead>
-                      <TableHead>Units Sold</TableHead>
-                      <TableHead>Revenue</TableHead>
-                      <TableHead>Cost</TableHead>
-                      <TableHead>Profit</TableHead>
-                      <TableHead>Margin</TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Product")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Units Sold")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Revenue")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Cost")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Profit")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Margin")}
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -285,7 +303,7 @@ export default function ProfitReports() {
             </div>
           ) : (
             <div className="flex justify-center items-center h-40">
-              <p>No profit data available for the selected period</p>
+              <p>{t("No profit data available for the selected period")}</p>
             </div>
           )}
         </CardContent>

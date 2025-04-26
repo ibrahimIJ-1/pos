@@ -10,17 +10,19 @@ import CartFooter from "@/components/pos/CartFooter";
 import CartItems from "@/components/pos/CartItems";
 import CustomerSelectorDialog from "./CustomerSelectorDialog";
 import DiscountSelectorDialog from "./DiscountSelectorDialog";
+import { usePOS } from "@/providers/POSProvider";
 
 function FullCart() {
+  const {trans} = usePOS();
   return (
     <div>
-      <Card className="neon-card border-neon-purple/30 dark:border-neon-purple/20 shadow-md">
+      <Card className="neon-card border-neon-purple/30 dark:border-neon-purple/20 shadow-md" dir={trans("dir")}>
         <CardHeader className="pb-3">
-          <CardTitle className="text-xl flex justify-between items-center">
+          <CardTitle className="text-xl flex justify-between items-center rtl:text-start">
             <div className="flex flex-col justify-center items-center gap-2">
               <div className="flex items-center gap-2">
                 <ShoppingCart className="h-5 w-5" />
-                <span>Current Sale</span>
+                <span>{trans("Current Sale")}</span>
               </div>
               <CartSelector />
             </div>

@@ -27,6 +27,7 @@ import {
 import { useRouter } from "next/navigation";
 import { Customer } from "@prisma/client";
 import { useCreateCustomer, useUpdateCustomer } from "@/lib/customers-service";
+import { useTranslations } from "next-intl";
 
 // List of countries for the dropdown
 const countries = [
@@ -82,6 +83,7 @@ export function CustomerForm({
   onCancel,
   id,
 }: CustomerFormProps) {
+  const t = useTranslations();
   const navigate = useRouter();
   const { mutate: createCustomer, isPending } = useCreateCustomer();
   const { mutate: updateCustomer, isPending: isUpdatePending } =
@@ -134,7 +136,7 @@ export function CustomerForm({
         },
         {
           onSuccess: () => {
-            toast.success("Customer saved successfully");
+            toast.success(t("Customer saved successfully"));
             if (onSuccess) {
               onSuccess();
             } else {
@@ -159,7 +161,7 @@ export function CustomerForm({
         },
         {
           onSuccess: () => {
-            toast.success("Customer saved successfully");
+            toast.success(t("Customer saved successfully"));
             if (onSuccess) {
               onSuccess();
             } else {
@@ -181,10 +183,10 @@ export function CustomerForm({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name*</FormLabel>
+                <FormLabel>{t("Name")}*</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Customer name"
+                    placeholder={t("Customer name")}
                     className="neon-input transition-shadow duration-300"
                     {...field}
                   />
@@ -200,7 +202,7 @@ export function CustomerForm({
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>{t("Email")}</FormLabel>
                 <FormControl>
                   <Input
                     type="email"
@@ -220,10 +222,10 @@ export function CustomerForm({
             name="phone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Phone</FormLabel>
+                <FormLabel>{t("Phone")}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Phone number"
+                    placeholder={t("Phone number")}
                     className="neon-input transition-shadow duration-300"
                     {...field}
                   />
@@ -239,10 +241,10 @@ export function CustomerForm({
             name="address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Address</FormLabel>
+                <FormLabel>{t("Address")}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Street address"
+                    placeholder={t("Street address")}
                     className="neon-input transition-shadow duration-300"
                     {...field}
                   />
@@ -258,10 +260,10 @@ export function CustomerForm({
             name="city"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>City</FormLabel>
+                <FormLabel>{t("City")}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="City"
+                    placeholder={t("City")}
                     className="neon-input transition-shadow duration-300"
                     {...field}
                   />
@@ -277,10 +279,12 @@ export function CustomerForm({
             name="state"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>State/Province</FormLabel>
+                <FormLabel>
+                  {t("State")}/{t("Province")}
+                </FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="State or province"
+                    placeholder={t("State or province")}
                     className="neon-input transition-shadow duration-300"
                     {...field}
                   />
@@ -296,10 +300,10 @@ export function CustomerForm({
             name="postal_code"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Postal Code</FormLabel>
+                <FormLabel>{t("Postal Code")}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Postal code"
+                    placeholder={t("Postal code")}
                     className="neon-input transition-shadow duration-300"
                     {...field}
                   />
@@ -315,14 +319,15 @@ export function CustomerForm({
             name="country"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Country</FormLabel>
+                <FormLabel>{t("Country")}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
+                  dir={t("dir") as "rtl" | "ltr"}
                 >
                   <FormControl>
                     <SelectTrigger className="neon-input transition-shadow duration-300">
-                      <SelectValue placeholder="Select a country" />
+                      <SelectValue placeholder={t("Select a country")} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -351,7 +356,7 @@ export function CustomerForm({
                   onCheckedChange={field.onChange}
                 />
               </FormControl>
-              <FormLabel>Tax Exempt</FormLabel>
+              <FormLabel>{t("Tax Exempt")}</FormLabel>
               <FormMessage />
             </FormItem>
           )}
@@ -363,10 +368,10 @@ export function CustomerForm({
           name="notes"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Notes</FormLabel>
+              <FormLabel>{t("Notes")}</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Additional notes about this customer"
+                  placeholder={t("Additional notes about this customer")}
                   className="resize-none neon-input transition-shadow duration-300"
                   {...field}
                 />
@@ -379,11 +384,13 @@ export function CustomerForm({
         <div className="flex justify-end space-x-2 pt-4">
           {onCancel && (
             <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
+              {t("Cancel")}
             </Button>
           )}
           <Button type="submit" disabled={isPending || isUpdatePending}>
-            {isPending || isUpdatePending ? "Saving..." : "Save Customer"}
+            {isPending || isUpdatePending
+              ? t("Saving") + "..."
+              : t("Save Customer")}
           </Button>
         </div>
       </form>

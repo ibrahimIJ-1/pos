@@ -24,6 +24,7 @@ import { BranchProduct, Product } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
 import { generateBarcodeFrontEnd } from "@/lib/utils/barcode-frontend";
 import { useDownloadBarcodePdf } from "@/lib/products-service";
+import { useTranslations } from "next-intl";
 
 interface ProductTableProps {
   data: (Product & { BranchProduct?: BranchProduct[] })[];
@@ -42,6 +43,7 @@ export function ProductTable({
   selectedIds,
   setSelectedIds
 }: ProductTableProps) {
+  const t = useTranslations();
   const download = useDownloadBarcodePdf();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -81,7 +83,7 @@ export function ProductTable({
     },
     {
       accessorKey: "image_url",
-      header: "Image",
+      header: t("Image"),
       cell: ({ row }) => {
         const imageUrl = row.original.image_url || "/placeholder.svg";
         return (
@@ -104,7 +106,7 @@ export function ProductTable({
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             className="p-0 hover:bg-transparent"
           >
-            Name
+            {t("Name")}
             {column.getIsSorted() === "asc" ? (
               <ArrowUp className="ml-2 h-4 w-4" />
             ) : column.getIsSorted() === "desc" ? (
@@ -126,7 +128,7 @@ export function ProductTable({
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             className="p-0 hover:bg-transparent"
           >
-            Barcode
+            {t("Barcode")}
             {column.getIsSorted() === "asc" ? (
               <ArrowUp className="ml-2 h-4 w-4" />
             ) : column.getIsSorted() === "desc" ? (
@@ -208,7 +210,7 @@ export function ProductTable({
     // },
     {
       accessorKey: "category",
-      header: "Category",
+      header: t("Category"),
       cell: ({ row }) => (
         <div className="text-sm">
           {row.getValue("category") ? (
@@ -255,7 +257,7 @@ export function ProductTable({
     // },
     {
       id: "actions",
-      header: "Actions",
+      header: t("Actions"),
       cell: ({ row }) => {
         const product = row.original;
         return (
@@ -324,7 +326,7 @@ export function ProductTable({
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
+                <TableHead key={header.id} className="text-start">
                   {header.isPlaceholder
                     ? null
                     : flexRender(
@@ -355,7 +357,7 @@ export function ProductTable({
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                No products found.
+                {t("No products found")}.
               </TableCell>
             </TableRow>
           )}
@@ -363,7 +365,7 @@ export function ProductTable({
       </Table>
       <div className="flex items-center justify-between px-4 py-4 border-t">
         <div className="flex-1 text-sm text-muted-foreground">
-          Showing {table.getRowModel().rows.length} of {data.length} product(s)
+          {t("Showing")} {table.getRowModel().rows.length} {t("of")} {data.length} {t("product/s")}
         </div>
         <div className="flex items-center space-x-2">
           <Button
@@ -372,7 +374,7 @@ export function ProductTable({
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            Previous
+            {t("Previous")}
           </Button>
           <Button
             variant="outline"
@@ -380,7 +382,7 @@ export function ProductTable({
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
-            Next
+            {t("Next")}
           </Button>
         </div>
       </div>

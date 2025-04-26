@@ -27,43 +27,7 @@ import { ImagePlus, Upload, Plus } from "lucide-react";
 import { Product, BranchProduct, Branch } from "@prisma/client";
 import Decimal from "decimal.js";
 import { useCreateProduct, useUpdateProduct } from "@/lib/products-service";
-
-const productFormSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters."),
-  description: z.string().optional(),
-  sku: z.string().min(1, "SKU is required."),
-  barcode: z.string().optional(),
-  category: z.string().optional(),
-  image_url: z.string().optional(),
-  image_file: z
-    .instanceof(File)
-    .optional()
-    .refine(
-      (file) => file?.size ?? 0 < 0.15 * 1024 * 1024,
-      "File size must be under 150KB"
-    ),
-  branches: z
-    .array(
-      z.object({
-        branchId: z.string().min(1, "Branch is required"),
-        price: z.number().min(0, "Price cannot be negative."),
-        cost: z.number().min(0, "Cost cannot be negative."),
-        taxRate: z
-          .number()
-          .min(0, "Tax rate cannot be negative.")
-          .max(999.99, "Tax rate cannot exceed 999.99%"),
-        stock: z.number().int().min(0, "Stock cannot be negative."),
-        low_stock_threshold: z
-          .number()
-          .int()
-          .min(0, "Threshold cannot be negative."),
-        isActive: z.boolean().default(true),
-      })
-    )
-    .min(1, "At least one branch product is required"),
-});
-
-type ProductFormValues = z.infer<typeof productFormSchema>;
+import { useTranslations } from "next-intl";
 
 interface ProductFormProps {
   product?: Product & {
@@ -80,6 +44,46 @@ export function ProductForm({
   mode,
   branches,
 }: ProductFormProps) {
+  const t = useTranslations();
+  const productFormSchema = z.object({
+    name: z.string().min(2, t("Name must be at least 2 characters") + "."),
+    description: z.string().optional(),
+    sku: z.string().min(1, t("SKU is required") + "."),
+    barcode: z.string().optional(),
+    category: z.string().optional(),
+    image_url: z.string().optional(),
+    image_file: z
+      .instanceof(File)
+      .optional()
+      .refine(
+        (file) => file?.size ?? 0 < 0.15 * 1024 * 1024,
+        t("File size must be under 150KB")
+      ),
+    branches: z
+      .array(
+        z.object({
+          branchId: z.string().min(1, t("Branch is required")),
+          price: z.number().min(0, t("Price cannot be negative") + "."),
+          cost: z.number().min(0, t("Cost cannot be negative") + "."),
+          taxRate: z
+            .number()
+            .min(0, t("Tax rate cannot be negative") + ".")
+            .max(999.99, t("Tax rate cannot exceed") + " 999.99%"),
+          stock: z
+            .number()
+            .int()
+            .min(0, t("Stock cannot be negative") + "."),
+          low_stock_threshold: z
+            .number()
+            .int()
+            .min(0, t("Threshold cannot be negative") + "."),
+          isActive: z.boolean().default(true),
+        })
+      )
+      .min(1, t("At least one branch product is required") + ""),
+  });
+
+  type ProductFormValues = z.infer<typeof productFormSchema>;
   const [imagePreview, setImagePreview] = useState<string | null>(
     product?.image_url || null
   );
@@ -208,7 +212,7 @@ export function ProductForm({
               className="gap-2"
             >
               <Upload className="h-4 w-4" />
-              Upload Image
+              {t("Upload Image")}
             </Button>
           </div>
         </div>
@@ -221,7 +225,7 @@ export function ProductForm({
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>{t("Name")}</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -235,7 +239,7 @@ export function ProductForm({
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>{t("Description")}</FormLabel>
               <FormControl>
                 <Textarea {...field} />
               </FormControl>
@@ -250,7 +254,7 @@ export function ProductForm({
             name="sku"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>SKU</FormLabel>
+                <FormLabel>{t("SKU")}</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -264,7 +268,9 @@ export function ProductForm({
             name="barcode"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Barcode (optional)</FormLabel>
+                <FormLabel>
+                  {t("Barcode")} ({t("optional")})
+                </FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -277,7 +283,9 @@ export function ProductForm({
         {/* Branch Products Section */}
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-xl font-semibold">Branch Availability</h3>
+            <h3 className="text-xl font-semibold">
+              {t("Branch Availability")}
+            </h3>
             <Button
               type="button"
               variant="outline"
@@ -294,15 +302,13 @@ export function ProductForm({
               }
             >
               <Plus className="h-4 w-4 mr-2" />
-              Add Branch
+              {t("Add Branch")}
             </Button>
           </div>
 
           {fields.map((field, index) => {
             const currentBranchId = watch(`branches.${index}.branchId`);
-            const selectedBranches = watch("branches").map(
-              (bp) => bp.branchId
-            );
+            const selectedBranches = watch("branches").map((bp) => bp.branchId);
             const availableBranches = branches.filter(
               (branch) =>
                 branch.id === currentBranchId ||
@@ -312,7 +318,7 @@ export function ProductForm({
             return (
               <div key={field.id} className="space-y-4 p-4 border rounded-lg">
                 <div className="flex justify-between items-center">
-                  <h4 className="font-medium">Branch Details</h4>
+                  <h4 className="font-medium">{t("Branch Details")}</h4>
                   <Button
                     type="button"
                     variant="destructive"
@@ -320,7 +326,7 @@ export function ProductForm({
                     onClick={() => remove(index)}
                     disabled={fields.length === 1}
                   >
-                    Remove
+                    {t("Remove")}
                   </Button>
                 </div>
 
@@ -329,14 +335,15 @@ export function ProductForm({
                   name={`branches.${index}.branchId`}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Branch</FormLabel>
+                      <FormLabel>{t("Branch")}</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
+                        dir={t("dir") as "rtl" | "ltr"}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select branch" />
+                            <SelectValue placeholder={t("Select branch")} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -358,7 +365,7 @@ export function ProductForm({
                     name={`branches.${index}.price`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Price ($)</FormLabel>
+                        <FormLabel>{t("Price")} ($)</FormLabel>
                         <FormControl>
                           <NumberInput
                             min={0}
@@ -377,7 +384,7 @@ export function ProductForm({
                     name={`branches.${index}.cost`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Cost ($)</FormLabel>
+                        <FormLabel>{t("Cost")} ($)</FormLabel>
                         <FormControl>
                           <NumberInput
                             min={0}
@@ -396,7 +403,7 @@ export function ProductForm({
                     name={`branches.${index}.taxRate`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Tax Rate (%)</FormLabel>
+                        <FormLabel>{t("Tax Rate")} (%)</FormLabel>
                         <FormControl>
                           <NumberInput
                             min={0}
@@ -416,7 +423,7 @@ export function ProductForm({
                     name={`branches.${index}.stock`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Current Stock</FormLabel>
+                        <FormLabel>{t("Current Stock")}</FormLabel>
                         <FormControl>
                           <NumberInput
                             min={0}
@@ -435,7 +442,7 @@ export function ProductForm({
                     name={`branches.${index}.low_stock_threshold`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Low Stock Threshold</FormLabel>
+                        <FormLabel>{t("Low Stock Threshold")}</FormLabel>
                         <FormControl>
                           <NumberInput
                             min={0}
@@ -455,13 +462,14 @@ export function ProductForm({
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-center justify-between px-3">
                         {/* <div className="space-y-0.5"> */}
-                          <FormLabel>Active</FormLabel>
-                          {/* <div className="text-sm text-muted-foreground">
+                        <FormLabel>{t("Active")}</FormLabel>
+                        {/* <div className="text-sm text-muted-foreground">
                             Available at this branch
                           </div> */}
                         {/* </div> */}
                         <FormControl>
                           <Switch
+                            dir={t("dir") as "rtl" | "ltr"}
                             checked={field.value}
                             onCheckedChange={field.onChange}
                           />
@@ -480,11 +488,11 @@ export function ProductForm({
           name="category"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Category</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <FormLabel>{t("Category")}</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value} dir={t("dir") as "rtl" | "ltr"}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
+                    <SelectValue placeholder={t("Select category")} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -528,7 +536,7 @@ export function ProductForm({
             createProductMutation.isPending || updateProductMutation.isPending
           }
         >
-          {mode === "create" ? "Create Product" : "Update Product"}
+          {mode === "create" ? t("Create Product") : t("Update Product")}
         </Button>
       </form>
     </Form>

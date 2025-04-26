@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {Permission } from "@/lib/permissions";
 import { createNewRole } from "@/actions/auth/roles/create-role";
+import { useTranslations } from "next-intl";
 
 interface CreateRoleDialogProps {
   open: boolean;
@@ -68,6 +69,7 @@ const permissionGroups = {
 };
 
 export function CreateRoleDialog({ open, onOpenChange, onRoleCreated }: CreateRoleDialogProps) {
+  const t = useTranslations();
   const { toast } = useToast();
   const [roleName, setRoleName] = useState("");
   const [selectedPermissions, setSelectedPermissions] = useState<Permission[]>([]);
@@ -83,8 +85,8 @@ export function CreateRoleDialog({ open, onOpenChange, onRoleCreated }: CreateRo
   const handleSubmit = async () => {
     if (!roleName.trim()) {
       toast({
-        title: "Role name required",
-        description: "Please enter a name for the role",
+        title: t("Role name required"),
+        description: t("Please enter a name for the role"),
         variant: "destructive"
       });
       return;
@@ -92,8 +94,8 @@ export function CreateRoleDialog({ open, onOpenChange, onRoleCreated }: CreateRo
     
     if (selectedPermissions.length === 0) {
       toast({
-        title: "Permissions required",
-        description: "Please select at least one permission for the role",
+        title: t("Permissions required"),
+        description: t("Please select at least one permission for the role"),
         variant: "destructive"
       });
       return;
@@ -102,8 +104,8 @@ export function CreateRoleDialog({ open, onOpenChange, onRoleCreated }: CreateRo
     try {
       const newRoleName = await createNewRole(roleName, selectedPermissions);
       toast({
-        title: "Role created",
-        description: `Role "${newRoleName}" created successfully`
+        title: t("Role created"),
+        description: `${t("Role")} "${newRoleName}" ${t("created successfully")}`
       });
       onRoleCreated(newRoleName.name, selectedPermissions);
       setRoleName("");
@@ -111,8 +113,8 @@ export function CreateRoleDialog({ open, onOpenChange, onRoleCreated }: CreateRo
       onOpenChange(false);
     } catch (error) {
       toast({
-        title: "Error creating role",
-        description: error instanceof Error ? error.message : "Unknown error",
+        title: t("Error creating role"),
+        description: error instanceof Error ? error.message : t("Unknown error"),
         variant: "destructive"
       });
     }
@@ -122,18 +124,18 @@ export function CreateRoleDialog({ open, onOpenChange, onRoleCreated }: CreateRo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md neon-card neon-border">
         <DialogHeader>
-          <DialogTitle>Create New Role</DialogTitle>
-          <DialogDescription>
-            Create a custom role with specific permissions
+          <DialogTitle className="rtl:text-start">{t("Create New Role")}</DialogTitle>
+          <DialogDescription className="rtl:text-start">
+            {t("Create a custom role with specific permissions")}
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="role-name">Role Name</Label>
+            <Label htmlFor="role-name">{t("Role Name")}</Label>
             <Input 
               id="role-name" 
-              placeholder="Enter role name" 
+              placeholder={t("Enter role name")} 
               value={roleName}
               onChange={(e) => setRoleName(e.target.value)}
               className="neon-input"
@@ -141,8 +143,8 @@ export function CreateRoleDialog({ open, onOpenChange, onRoleCreated }: CreateRo
           </div>
           
           <div className="space-y-2">
-            <Label>Permissions</Label>
-            <ScrollArea className="h-[300px] rounded-md border p-4">
+            <Label>{t("Permissions")}</Label>
+            <ScrollArea className="h-[300px] rounded-md border p-4" dir={t("dir") as "rtl" | "ltr"}>
               <div className="space-y-6">
                 {Object.entries(permissionGroups).map(([groupName, permissions]) => (
                   <div key={groupName} className="space-y-2">
@@ -177,13 +179,13 @@ export function CreateRoleDialog({ open, onOpenChange, onRoleCreated }: CreateRo
             variant="outline" 
             onClick={() => onOpenChange(false)}
           >
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button 
             type="button" 
             onClick={handleSubmit}
           >
-            Create Role
+            {t("Create Role")}
           </Button>
         </DialogFooter>
       </DialogContent>

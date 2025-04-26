@@ -14,6 +14,7 @@ function DiscountSelectorDialog() {
     handleApplyDiscount,
     cart,
     handleRemoveDiscount,
+    trans
   } = usePOS();
   return (
     <>
@@ -54,7 +55,7 @@ function DiscountSelectorDialog() {
             disabled={(cart?.items as CartItem[])?.length === 0}
           >
             <Tag className="h-4 w-4 mr-2" />
-            Apply Discount
+            {trans("Apply Discount")}
           </Button>
         )}
       </div>

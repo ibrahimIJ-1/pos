@@ -7,13 +7,14 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-import { toast } from "sonner";
+import { toast, Toaster } from "sonner";
 import login from "@/actions/auth/login";
 import { userRegister } from "@/actions/auth/register";
 import Cookies from "js-cookie";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAllUserPermissions } from "@/actions/users/get-all-permissions";
 import logoutUser from "@/actions/auth/logout";
+import { useTranslations } from "next-intl";
 
 interface User {
   id: string;
@@ -46,6 +47,7 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 );
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const t = useTranslations();
   const queryClient = useQueryClient();
   const getPermissionMutation = useMutation({
     mutationFn: getAllUserPermissions,
@@ -74,13 +76,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setMacLoading(true);
       const response = await fetch("http://localhost:5001/getmac");
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        toast.error(t("Error fetching SN"));
       }
       const macAddress = await response.text();
       setMacAddress(macAddress);
       return macAddress;
     } catch (error) {
-      console.error("Error fetching MAC address:", error);
+      toast.error(t("Error fetching SN"));
       //REMOVE !!!
       setMacAddress("R9NRKD034636377");
       return "R9NRKD034636377";
@@ -101,7 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(JSON.parse(savedUser));
           getPermissions();
         } catch (error) {
-          console.error("Failed to parse user data", error);
+          toast.error(t("Failed to parse user data"));
           removeCredentials();
         }
       }
@@ -115,7 +117,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoading(true);
       const mac = await getMacAddress();
-      if (!mac) throw new Error("You are not eligible to use this software");
+      if (!mac) {
+        toast.error(t("You are not eligible to use this software"));
+        throw new Error("You are not eligible to use this software");
+      }
       const response = await login(email, password, mac);
       const { user, token } = response;
 
@@ -131,9 +136,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       setUser(user);
 
-      toast.success("Successfully logged in");
+      toast.success(t("Successfully logged in"));
     } catch (error: any) {
-      toast.error(error?.message || "Failed to log in");
+      toast.error(t("Failed to log in"));
     } finally {
       setIsLoading(false);
     }
@@ -149,7 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(true);
       const response = await userRegister(name, email, password, role);
 
-      toast.success("Registration successful. You can now log in.");
+      toast.success(t("Registration successful. You can now log in."));
       return response;
     } catch (error) {
       // Error handling is done in the api interceptor
@@ -168,10 +173,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       Cookies.remove("user");
       setUser(null);
 
-      toast.info("You have been logged out");
+      toast.info(t("You have been logged out"));
       return;
     }
-    toast.error("Log out failed");
+    toast.error(t("Log out failed"));
   };
 
   return (

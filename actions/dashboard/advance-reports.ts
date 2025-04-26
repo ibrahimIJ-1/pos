@@ -505,7 +505,7 @@ export const getAdvancedReport = async (
         { label: "New Customers", value: newCustomers },
         { label: "Returning Customers", value: returningCustomers },
         { label: "Retention Rate", value: `${retentionRate.toFixed(1)}%` },
-        { label: "Avg. Spend", value: `$${averagePurchaseValue.toFixed(2)}` },
+        { label: "Avg Spend", value: `$${averagePurchaseValue.toFixed(2)}` },
       ];
 
       return {

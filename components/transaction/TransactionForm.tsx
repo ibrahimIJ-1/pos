@@ -22,38 +22,38 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCreateTransaction } from "@/lib/transactions-service";
+import { useTranslations } from "next-intl";
 
 interface TransactionFormProps {
   onSuccess?: () => void;
 }
 
-const transactionSchema = z.object({
-  type: z.enum(["SALE", "REFUND", "EXPENSE", "CASH_IN", "CASH_OUT"], {
-    required_error: "Please select a transaction type",
-  }),
-  amount: z.coerce
-    .number()
-    .min(0.01, { message: "Amount must be greater than 0" }),
-  paymentMethod: z.enum(
-    ["cash", "credit_card", "debit_card", "bank_transfer", "other"],
-    {
-      required_error: "Please select a payment method",
-    }
-  ),
-  description: z.string().min(3, {
-    message: "Description must be at least 3 characters",
-  }),
-  referenceId: z.string().optional(),
-  registerId: z.string(),
-  cashierId: z.string(),
-});
-
 export default function TransactionForm({ onSuccess }: TransactionFormProps) {
+  const t = useTranslations();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const createTransaction = useCreateTransaction();
   const { getMacAddress, user } = useAuth();
-
+  const transactionSchema = z.object({
+    type: z.enum(["SALE", "REFUND", "EXPENSE", "CASH_IN", "CASH_OUT"], {
+      required_error: t("Please select a transaction type"),
+    }),
+    amount: z.coerce
+      .number()
+      .min(0.01, { message: t("Amount must be greater than 0") }),
+    paymentMethod: z.enum(
+      ["cash", "credit_card", "debit_card", "bank_transfer", "other"],
+      {
+        required_error: t("Please select a payment method"),
+      }
+    ),
+    description: z.string().min(3, {
+      message: t("Description must be at least 3 characters"),
+    }),
+    referenceId: z.string().optional(),
+    registerId: z.string(),
+    cashierId: z.string(),
+  });
   const form = useForm<z.infer<typeof transactionSchema>>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
@@ -89,7 +89,7 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to add transaction. Please try again.",
+        description: t("Failed to add transaction, Please try again"),
         variant: "destructive",
       });
     } finally {
@@ -105,23 +105,24 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
           name="type"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Transaction Type</FormLabel>
+              <FormLabel>{t("Transaction Type")}</FormLabel>
               <Select
                 onValueChange={field.onChange}
                 defaultValue={field.value}
                 disabled={isSubmitting}
+                dir={t("dir") as "rtl" | "ltr"}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select transaction type" />
+                    <SelectValue placeholder={t("Select transaction type")} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="SALE">Sale</SelectItem>
-                  <SelectItem value="REFUND">Refund</SelectItem>
-                  <SelectItem value="EXPENSE">Expense</SelectItem>
-                  <SelectItem value="CASH_IN">Cash In</SelectItem>
-                  <SelectItem value="CASH_OUT">Cash Out</SelectItem>
+                  <SelectItem value="SALE">{t("Sale")}</SelectItem>
+                  <SelectItem value="REFUND">{t("Refund")}</SelectItem>
+                  <SelectItem value="EXPENSE">{t("Expense")}</SelectItem>
+                  <SelectItem value="CASH_IN">{t("Cash In")}</SelectItem>
+                  <SelectItem value="CASH_OUT">{t("Cash Out")}</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -134,7 +135,7 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
           name="amount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Amount</FormLabel>
+              <FormLabel>{t("Amount")}</FormLabel>
               <FormControl>
                 <Input
                   type="number"
@@ -154,23 +155,28 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
           name="paymentMethod"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Payment Method</FormLabel>
+              <FormLabel>{t("Payment Method")}</FormLabel>
               <Select
                 onValueChange={field.onChange}
                 defaultValue={field.value}
                 disabled={isSubmitting}
+                dir={t("dir") as "rtl" | "ltr"}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select payment method" />
+                    <SelectValue placeholder={t("Select payment method")} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="cash">Cash</SelectItem>
-                  <SelectItem value="credit_card">Credit Card</SelectItem>
-                  <SelectItem value="debit_card">Debit Card</SelectItem>
-                  <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="cash">{t("Cash")}</SelectItem>
+                  <SelectItem value="credit_card">
+                    {t("Credit Card")}
+                  </SelectItem>
+                  <SelectItem value="debit_card">{t("Debit Card")}</SelectItem>
+                  <SelectItem value="bank_transfer">
+                    {t("Bank Transfer")}
+                  </SelectItem>
+                  <SelectItem value="other">{t("Other")}</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -183,10 +189,10 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>{t("Description")}</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Transaction description"
+                  placeholder={t("Transaction description")}
                   {...field}
                   disabled={isSubmitting}
                 />
@@ -201,10 +207,12 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
           name="referenceId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Reference ID (Optional)</FormLabel>
+              <FormLabel>
+                {t("Reference ID")} ({t("Optional")})
+              </FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Order or Invoice number"
+                  placeholder={t("Order or Invoice number")}
                   {...field}
                   disabled={isSubmitting}
                 />
@@ -215,7 +223,7 @@ export default function TransactionForm({ onSuccess }: TransactionFormProps) {
         />
 
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Adding Transaction..." : "Add Transaction"}
+          {isSubmitting ? t("Adding Transaction")+"..." : t("Add Transaction")}
         </Button>
       </form>
     </Form>

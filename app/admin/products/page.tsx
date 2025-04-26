@@ -42,8 +42,11 @@ import {
   useUploadProductsTemplate,
 } from "@/lib/products-service";
 import { useBranches } from "@/lib/branches-service";
+import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
 
 export default function Products() {
+  const t = useTranslations();
   const { data: products = [], isLoading } = useProducts();
   const download = useDownloadBarcodePdf();
   const { data: branches = [], isLoading: isBranchLoading } = useBranches();
@@ -88,7 +91,7 @@ export default function Products() {
       deleteProductMutation.mutate(productToDelete.id, {
         onSuccess: () => {
           setIsDeleteDialogOpen(false);
-          toast.success(`${productToDelete.name} deleted successfully`);
+          toast.success(`${productToDelete.name} ${t("deleted successfully")}`);
         },
       });
     }
@@ -121,7 +124,7 @@ export default function Products() {
   const uploadTemplate = (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
-      toast.error("Please select a file");
+      toast.error(t("Please select a file"));
       return;
     }
 
@@ -138,7 +141,7 @@ export default function Products() {
   return (
     <div className="container max-w-7xl mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Inventory Management</h1>
+        <h1 className="text-2xl font-bold">{t("Inventory Management")}</h1>
 
         <div className="flex gap-2 items-center">
           <Button
@@ -148,7 +151,7 @@ export default function Products() {
             className="gap-2"
           >
             <DownloadCloudIcon className="h-4 w-4" />
-            Get Barcodes
+            {t("Get Barcodes")}
           </Button>
           <Button
             variant={"outline"}
@@ -156,7 +159,7 @@ export default function Products() {
             className="gap-2"
           >
             <DownloadIcon className="h-4 w-4" />
-            Get Template
+            {t("Get Template")}
           </Button>
           <Button
             variant={"default"}
@@ -164,11 +167,11 @@ export default function Products() {
             className="gap-2"
           >
             <UploadIcon className="h-4 w-4" />
-            Excel Products
+            {t("Excel Products")}
           </Button>
           <Button onClick={() => setIsCreateOpen(true)} className="gap-2">
             <Plus className="h-4 w-4" />
-            Add Product
+            {t("Add Product")}
           </Button>
         </div>
       </div>
@@ -177,7 +180,7 @@ export default function Products() {
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           type="search"
-          placeholder="Search by name, SKU, barcode or category..."
+          placeholder={t("Search by name, SKU, barcode or category") + "..."}
           className="pl-8 neon-input"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -186,12 +189,12 @@ export default function Products() {
 
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
-          <p>Loading products...</p>
+          <p>{t("Loading products")}...</p>
         </div>
       ) : filteredProducts.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
           <Package className="h-10 w-10 mb-2" />
-          <p>No products found</p>
+          <p>{t("No products found")}</p>
         </div>
       ) : (
         <ProductTable
@@ -208,7 +211,9 @@ export default function Products() {
       <Sheet open={isDetailOpen} onOpenChange={setIsDetailOpen}>
         <SheetContent className="sm:max-w-md">
           <SheetHeader>
-            <SheetTitle>Product Details</SheetTitle>
+            <SheetTitle className={cn("", t("dir") == "rtl" && "text-start")}>
+              {t("Product Details")}
+            </SheetTitle>
           </SheetHeader>
           {selectedProduct && (
             <ProductDetails
@@ -226,7 +231,7 @@ export default function Products() {
       <Sheet open={isEditOpen} onOpenChange={setIsEditOpen}>
         <SheetContent className="sm:max-w-md overflow-y-auto">
           <SheetHeader>
-            <SheetTitle>Edit Product</SheetTitle>
+            <SheetTitle className="rtl:text-start">{t("Edit Product")}</SheetTitle>
           </SheetHeader>
           {selectedProduct && (
             <ProductForm
@@ -243,7 +248,7 @@ export default function Products() {
       <Sheet open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <SheetContent className="sm:max-w-md overflow-y-auto">
           <SheetHeader>
-            <SheetTitle>Add New Product</SheetTitle>
+            <SheetTitle>{t("Add New Product")}</SheetTitle>
           </SheetHeader>
           <ProductForm
             branches={branches}
@@ -260,19 +265,20 @@ export default function Products() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              product &quot;{productToDelete?.name}&quot; from the inventory.
+            <AlertDialogTitle className="rtl:text-start">{t("Are you sure")}?</AlertDialogTitle>
+            <AlertDialogDescription className="rtl:text-start">
+              {t("This action cannot be undone")}.{" "}
+              {t("This will permanently delete the product")} &quot;
+              {productToDelete?.name}&quot; {t("from the inventory")}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {t("Delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -283,10 +289,14 @@ export default function Products() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Upload Products from Excel</AlertDialogTitle>
-            <AlertDialogDescription>
-              Select an Excel file to import products. Make sure the file
-              follows the template format.
+            <AlertDialogTitle className="rtl:text-start">
+              {t("Upload Products from Excel")}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="rtl:text-start">
+              {t(
+                "Select an Excel file to import products, Make sure the file follows the template format"
+              )}
+              .
             </AlertDialogDescription>
           </AlertDialogHeader>
           <form onSubmit={uploadTemplate}>
@@ -299,7 +309,7 @@ export default function Products() {
               />
               {file && (
                 <div className="text-sm text-muted-foreground">
-                  Selected file: {file.name}
+                  {t("Selected file")}: {file.name}
                 </div>
               )}
             </div>
@@ -308,13 +318,15 @@ export default function Products() {
                 type="button"
                 disabled={uploadProductsMutation.isPending}
               >
-                Cancel
+                {t("Cancel")}
               </AlertDialogCancel>
               <AlertDialogAction
                 type="submit"
                 disabled={!file || uploadProductsMutation.isPending}
               >
-                {uploadProductsMutation.isPending ? "Importing..." : "Import"}
+                {uploadProductsMutation.isPending
+                  ? t("Importing") + "..."
+                  : t("Import")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </form>
