@@ -12,7 +12,7 @@ interface InvoicePrintProps {
 }
 
 export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
-  const {trans} = usePOS();
+  const { trans } = usePOS();
   const [printing, setPrinting] = useState(false);
 
   const componentRef = useRef<HTMLDivElement>(null);
@@ -135,6 +135,10 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
       // Prepare the bill data to send to the service
       const billData = {
         Id: data.id, // Invoice ID
+        storeName: data.storeName, // storeName
+        branchName: data.branch?.name, // branchName
+        branchAddress: data.branch?.address, // branchAddress
+        cashierName: data.cashier?.name, // cashierName
         CustomerName: data.customer?.name || "Guest Customer", // Customer name
         CustomerId: data.customerId || "", // Customer ID (optional)
         Date: formatDate(data.date), // Invoice date
@@ -190,7 +194,7 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
           <Button
             variant="outline"
             className="gap-2"
-            onClick={()=>handleDownloadPDF()}
+            onClick={() => handleDownloadPDF()}
           >
             <Download className="h-4 w-4" />
             {trans("Download")}
@@ -212,23 +216,25 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
           {/* Invoice Header */}
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-2xl font-bold text-primary">{trans("Invoice")}</h1>
+              <h1 className="text-2xl font-bold text-primary">
+                {trans("Invoice")}
+              </h1>
               <p className="text-muted-foreground text-sm">#{data.id}</p>
             </div>
             <div className="text-right">
               <div className="mb-2 flex items-center gap-2">
                 <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
                   <span className="text-primary-foreground font-bold text-sm">
-                    POS
+                    {data.storeName}
                   </span>
                 </div>
-                <p className="font-bold text-sm">POS System</p>
+                <p className="font-bold text-sm">{data.branch?.name}</p>
               </div>
               <p className="text-muted-foreground text-xs">
-                123 Business Street
+                {data.branch?.address}
               </p>
               <p className="text-muted-foreground text-xs">
-                contact@possystem.com
+                {data.cashier.name}
               </p>
             </div>
           </div>
@@ -310,12 +316,16 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
             <div className="flex justify-end">
               <div className="w-full md:w-64">
                 <div className="flex justify-between py-1 text-sm">
-                  <span className="text-muted-foreground">{trans("Subtotal")}:</span>
+                  <span className="text-muted-foreground">
+                    {trans("Subtotal")}:
+                  </span>
                   <span>${data.subtotal.toFixed(2)}</span>
                 </div>
                 {data.discountTotal > 0 && (
                   <div className="flex justify-between py-1 text-sm">
-                    <span className="text-muted-foreground">{trans("Discount")}:</span>
+                    <span className="text-muted-foreground">
+                      {trans("Discount")}:
+                    </span>
                     <span className="text-green-600">
                       -${data.discountTotal.toFixed(2)}
                     </span>
@@ -336,7 +346,9 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
           {/* Footer */}
           <div className="text-center text-xs text-muted-foreground pt-4">
             <p>{trans("Thank you for your business")}!</p>
-            <p>{trans("Questions")}? {trans("Contact our customer service")}</p>
+            <p>
+              {trans("Questions")}? {trans("Contact our customer service")}
+            </p>
           </div>
         </div>
       </div>

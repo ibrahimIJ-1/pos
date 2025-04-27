@@ -7,6 +7,7 @@ import { decimalToNumber } from "@/lib/utils";
 import { checkUser } from "../Authorization";
 import { rolePermissions, UserRole } from "@/lib/permissions";
 import { checkUserPermissions } from "../users/check-permissions";
+import { getSettingByName } from "../settings/get-setting-by-name";
 
 export const createNewSale = async (
   {
@@ -83,6 +84,7 @@ export const createNewSale = async (
           select: {
             id: true,
             name: true,
+            address: true,
           },
         },
         items: {
@@ -136,8 +138,11 @@ export const createNewSale = async (
         },
       });
     }
-
-    return decimalToNumber(sale);
+    const storeName = await getSettingByName("storeName");
+    return {
+      ...(decimalToNumber(sale) as Object),
+      storeName: storeName ? storeName.value ?? "POS" : "POS",
+    };
   } catch (error) {
     console.error("Error creating sale:", error);
     throw new Error("Failed to create sale");

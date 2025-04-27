@@ -12,18 +12,10 @@ export const getSettingByName = async (key: string) => {
       },
     });
 
-    if (!setting)
-      return {
-        id: "1",
-        created_at: new Date(),
-        updated_at: new Date(),
-        key: "",
-        value: "0",
-        category: "string",
-      };
+    if (!setting) return null;
     return setting;
   } catch (error) {
     console.error("Error fetching setting:", error);
-    return new Error("Failed to fetch setting");
+    return null;
   }
 };
