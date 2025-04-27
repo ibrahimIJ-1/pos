@@ -26,7 +26,7 @@ export default function LanguageSwitcher() {
 
   return (
     <div className="py-2 px-1">
-      <Select onValueChange={changeLocale} defaultValue={locale}>
+      <Select onValueChange={changeLocale} defaultValue={locale} dir={t("dir") as "rtl" | "ltr"}>
         <SelectTrigger>
           <SelectValue placeholder={t("Select language")} />
         </SelectTrigger>
