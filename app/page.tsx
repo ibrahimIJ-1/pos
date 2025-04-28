@@ -55,7 +55,7 @@ export default function Index() {
       <Card className="w-full max-w-md mx-auto">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-primary">
-            POS Hub
+            Flash POS
           </CardTitle>
           <CardDescription>
             {t("Point of Sale and Admin System")}

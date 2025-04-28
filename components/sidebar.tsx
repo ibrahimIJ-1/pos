@@ -273,7 +273,7 @@ function SheetFooter({ logout }: SheetFooterProps) {
           "justify-between"
         )}
       >
-        <ThemeSwitcher />
+        {/* <ThemeSwitcher /> */}
 
         <Button variant="ghost" size="sm" className="gap-2" onClick={logout}>
           <LogOut className="h-4 w-4" />
