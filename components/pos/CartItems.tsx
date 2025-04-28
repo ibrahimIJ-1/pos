@@ -14,6 +14,7 @@ import { CartItem } from "@prisma/client";
 import { usePOS } from "@/providers/POSProvider";
 import { Button } from "../ui/button";
 import { Minus, Plus, ShoppingCart, Trash } from "lucide-react";
+import Logo from "../Logo";
 
 function CartItems() {
   const { cart, cartOps, updateCartItemQuantity,trans } = usePOS();
@@ -93,6 +94,7 @@ function CartItems() {
           <p className="text-sm">{trans("Add products by clicking on them")}</p>
         </div>
       )}
+      <Logo width={400} className="opacity-15 absolute top-1/2 -translate-x-1/2 left-1/2 pointer-events-none"/>
     </ScrollArea>
   );
 }

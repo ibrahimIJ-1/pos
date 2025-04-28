@@ -16,7 +16,7 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { getSettingByName } from "@/actions/settings/get-setting-by-name";
 import { useTranslations } from "next-intl";
-
+import Logo from "@/components/Logo";
 export default function Index() {
   const t = useTranslations();
   const [isInitilized, setIsInitilized] = useState(true);
@@ -54,8 +54,9 @@ export default function Index() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-700 to-blue-900">
       <Card className="w-full max-w-md mx-auto">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold text-primary">
-            Flash PRO
+          <CardTitle className="text-3xl font-bold text-primary flex justify-center gap-3">
+            <Logo className="animate-pulse-neon"/>
+            
           </CardTitle>
           <CardDescription>
             {t("Point of Sale and Admin System")}

@@ -45,6 +45,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import UserBranchSelector from "./branch/UserBranchSelector";
 import { useTranslations } from "next-intl";
 import LanguageSwitcher from "./language-switcher/LanguageSwitcher";
+import Logo from "./Logo";
 
 interface SidebarProps {
   roles?: (UserRole | string)[] | (UserRole | string);
@@ -207,6 +208,7 @@ export default function Sidebar({
               )}
             >
               <SheetTitle>
+                <Logo width={120} className="mb-3 animate-pulse-neon"/>
                 {t("Dashboard")}
                 <div>
                   <UserBranchSelector />
