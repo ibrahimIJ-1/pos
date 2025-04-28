@@ -91,7 +91,7 @@ export default function POSSidebar({
   return (
     <TooltipProvider delayDuration={100}>
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-        <SheetTrigger asChild className="overflow top-0 ltr:left-0 rtl:right-0">
+        <SheetTrigger asChild className="top-0 ltr:left-0 rtl:right-0">
           <button
             aria-label="Open navigation menu"
             className={cn(
