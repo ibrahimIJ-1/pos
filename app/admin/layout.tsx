@@ -6,19 +6,16 @@ import { ReactNode } from "react";
 
 interface AdminLayoutProps {
   children?: ReactNode;
-  userRoles?: UserRole[] | UserRole;
-  additionalPermissions?: Permission[];
 }
 
-export default function layout({
-  children,
-  additionalPermissions = [],
-}: AdminLayoutProps) {
+export default function Layout({ children }: AdminLayoutProps) {
+  const additionalPermissions: any = [];
+
   return (
-    <ProtectedRoute requiredRoles={["admin", "manager","cashier"]}>
+    <ProtectedRoute requiredRoles={["admin", "manager", "cashier"]}>
       <div className="flex min-h-screen">
         <div className="fixed">
-        <Sidebar additionalPermissions={additionalPermissions} />
+          <Sidebar additionalPermissions={additionalPermissions} />
         </div>
         <main className="flex-1 overflow-y-auto">
           <div className="container py-6">{children}</div>

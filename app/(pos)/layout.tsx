@@ -4,15 +4,14 @@ import POSSidebar from "@/components/PosSidebar";
 
 export default function Layout({
   children,
-  additionalPermissions = [],
 }: Readonly<{
   children: React.ReactNode;
-  additionalPermissions?: Permission[];
 }>) {
+  const additionalPermissions: any[] = [];
   return (
     <POSProvider>
       <div className="fixed">
-      <POSSidebar additionalPermissions={additionalPermissions} />
+        <POSSidebar additionalPermissions={additionalPermissions} />
       </div>
       {children}
     </POSProvider>
