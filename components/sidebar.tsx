@@ -261,14 +261,14 @@ function SheetFooter({}: SheetFooterProps) {
     <div className="flex flex-col">
       <LanguageSwitcher />
 
-      <div
+      {/* <div
         className={cn(
           "flex items-center p-4 border-t neon-border rtl:flex-row-reverse",
           "justify-between"
         )}
       >
-        {/* <ThemeSwitcher /> */}
-      </div>
+        <ThemeSwitcher />
+      </div> */}
     </div>
   );
 }
