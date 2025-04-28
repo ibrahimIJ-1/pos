@@ -12,10 +12,10 @@ export const getSettingByName = async (key: string) => {
       },
     });
 
-    if (!setting) return null;
+    if (!setting) throw new Error(`${key} setting: not found`);
     return setting;
   } catch (error) {
-    console.error("Error fetching setting:", error);
-    return null;
+    console.error(`Error fetching ${key} setting `, error);
+    throw new Error(`Error fetching ${key} setting`);
   }
 };

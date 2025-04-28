@@ -141,7 +141,7 @@ export const createNewSale = async (
     const storeName = await getSettingByName("storeName");
     return {
       ...(decimalToNumber(sale) as Object),
-      storeName: storeName ? storeName.value ?? "POS" : "POS",
+      storeName: storeName ? storeName.value ?? "Flash Pro" : "Flash Pro",
     };
   } catch (error) {
     console.error("Error creating sale:", error);
