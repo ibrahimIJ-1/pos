@@ -22,6 +22,9 @@ export const getAllPOSProducts = async () => {
           some: {
             branchId: reg.branchId,
             isActive: true,
+            stock:{
+              gt:0
+            }
           },
         },
       },
