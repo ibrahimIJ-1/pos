@@ -39,7 +39,7 @@ interface AuthContextType {
     password: string,
     role?: string
   ) => Promise<User>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -174,7 +174,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
 
       toast.info(t("You have been logged out"));
-      return;
+      return ;
     }
     toast.error(t("Log out failed"));
   };
