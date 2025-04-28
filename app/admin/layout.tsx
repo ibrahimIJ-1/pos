@@ -16,7 +16,7 @@ export default function Layout({ children }: AdminLayoutProps) {
     <ProtectedRoute requiredRoles={["admin", "manager", "cashier"]}>
       <div className="flex min-h-screen">
         <main className="flex-1 overflow-y-auto">
-          <div className="container py-6">
+          <div className="">
             <Navbar>
               <Sidebar additionalPermissions={[]} />
             </Navbar>

@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   title: "Flash-PRO",
   description: "POS & store management",
   icons: {
-    icon: '/favicon.ico',
+    icon: "/favicon.ico",
   },
 };
 
@@ -42,7 +42,9 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased neon-card`}
       >
         <NextIntlClientProvider locale={locale}>
-          <AppProviders>{children}</AppProviders>
+          <AppProviders>
+            <div className="container py-6">{children}</div>
+          </AppProviders>
           <Toaster richColors />
         </NextIntlClientProvider>
       </body>

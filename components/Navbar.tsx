@@ -18,7 +18,7 @@ function Navbar({children}:{children:ReactNode}) {
 
   return (
     <div>
-      <div className="flex w-full justify-between shadow-md rounded-t-md bg-blue-50/70 px-3 py-1">
+      <div className="flex w-full justify-between mb-2 shadow-md rounded-t-md bg-blue-50/70 px-3 py-1">
         <div className="flex gap-2 justify-start items-center">
           {children}
           <Logo width={50} />
