@@ -134,7 +134,7 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
 
       // Prepare the bill data to send to the service
       const billData = {
-        Id: data.id, // Invoice ID
+        Id: data.saleNumber, // Invoice ID
         storeName: data.storeName, // storeName
         branchName: data.branch?.name, // branchName
         branchAddress: data.branch?.address, // branchAddress
@@ -219,7 +219,7 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
               <h1 className="text-2xl font-bold text-primary">
                 {trans("Invoice")}
               </h1>
-              <p className="text-muted-foreground text-sm">#{data.id}</p>
+              <p className="text-muted-foreground text-sm">#{data.saleNumber}</p>
             </div>
             <div className="text-right">
               <div className="mb-2 flex items-center gap-2">
