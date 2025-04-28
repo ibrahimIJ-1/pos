@@ -43,7 +43,7 @@ export default async function RootLayout({
       >
         <NextIntlClientProvider locale={locale}>
           <AppProviders>
-            <div className="container py-6">{children}</div>
+            <div className="container py-6 dark:bg-black">{children}</div>
           </AppProviders>
           <Toaster richColors />
         </NextIntlClientProvider>
