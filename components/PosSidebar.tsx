@@ -51,7 +51,7 @@ interface SidebarProps {
   additionalPermissions?: Permission[];
 }
 
-export default function Sidebar({
+export default function POSSidebar({
   roles = UserRole.ADMIN,
   additionalPermissions = [],
 }: SidebarProps) {
@@ -74,96 +74,24 @@ export default function Sidebar({
   };
 
   const sidebarItems = [
-    // {
-    //   icon: <Home className="h-4 w-4" />,
-    //   label: t("Home"),
-    //   href: "/",
-    //   neededPermissions: [],
-    // },
-    {
-      icon: <LayoutDashboard className="h-4 w-4" />,
-      label: t("Dashboard"),
-      href: "/admin",
-      neededPermissions: [],
-    },
-    {
-      icon: <Package className="h-4 w-4" />,
-      label: t("Products"),
-      href: "/admin/products",
-      neededPermissions: rolePermissions[UserRole.MANAGER],
-    },
     {
       icon: <ShoppingCart className="h-4 w-4" />,
       label: t("POS"),
       href: "/pos",
       neededPermissions: rolePermissions[UserRole.CASHIER],
     },
-    {
-      icon: <Users className="h-4 w-4" />,
-      label: t("Customers"),
-      href: "/admin/customers",
-      neededPermissions: rolePermissions[UserRole.MANAGER],
-    },
-    {
-      icon: <Coins className="h-4 w-4" />,
-      label: t("Transactions"),
-      href: "/admin/transactions",
-      neededPermissions: [
-        ...rolePermissions[UserRole.ACCOUNTANT],
-        rolePermissions[UserRole.MANAGER],
-      ],
-    },
-    {
-      icon: <Tag className="h-4 w-4" />,
-      label: t("Discounts"),
-      href: "/admin/discounts",
-      neededPermissions: [
-        ...rolePermissions[UserRole.ACCOUNTANT],
-        rolePermissions[UserRole.MANAGER],
-      ],
-    },
-    {
-      icon: <ComputerIcon className="h-4 w-4" />,
-      label: t("Registers"),
-      href: "/admin/registers",
-      neededPermissions: [
-        ...rolePermissions[UserRole.ACCOUNTANT],
-        rolePermissions[UserRole.MANAGER],
-      ],
-    },
-    {
-      icon: <Receipt className="h-4 w-4" />,
-      label: t("Reports"),
-      href: "/admin/reports",
-      neededPermissions: [
-        ...rolePermissions[UserRole.ACCOUNTANT],
-        rolePermissions[UserRole.MANAGER],
-      ],
-    },
-    {
-      icon: <ListChecks className="h-4 w-4" />,
-      label: t("Users"),
-      href: "/admin/users",
-      neededPermissions: rolePermissions[UserRole.OWNER],
-    },
-    {
-      icon: <GitBranchIcon className="h-4 w-4" />,
-      label: t("Branches"),
-      href: "/admin/branches",
-      neededPermissions: rolePermissions[UserRole.OWNER],
-    },
-    {
-      icon: <Settings className="h-4 w-4" />,
-      label: t("Settings"),
-      href: "/admin/settings",
-      neededPermissions: rolePermissions[UserRole.OWNER],
-    },
+    // {
+    //   icon: <ShoppingCart className="h-4 w-4" />,
+    //   label: t("Refund"),
+    //   href: "/pos",
+    //   neededPermissions: rolePermissions[UserRole.CASHIER],
+    // },
   ];
 
   return (
     <TooltipProvider delayDuration={100}>
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-        <SheetTrigger asChild>
+        <SheetTrigger asChild className="top-0 ltr:left-0 rtl:right-0">
           <button
             aria-label="Open navigation menu"
             className={cn(
@@ -207,7 +135,7 @@ export default function Sidebar({
               )}
             >
               <SheetTitle>
-                {t("Dashboard")}
+                {t("POS System")}
                 <div>
                   <UserBranchSelector />
                 </div>
@@ -215,7 +143,7 @@ export default function Sidebar({
               <SheetDescription
                 className={cn("", t("dir") == "rtl" && "text-start")}
               >
-                {t("Manage your store, products, customers, and more")}.
+                {t("Sale Or Refund your products, make a happy customer")}.
               </SheetDescription>
             </SheetHeader>
             <ScrollArea>

@@ -55,7 +55,7 @@ export default function Index() {
       <Card className="w-full max-w-md mx-auto">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-primary">
-            POS Hub
+            Flash PRO
           </CardTitle>
           <CardDescription>
             {t("Point of Sale and Admin System")}
@@ -78,10 +78,10 @@ export default function Index() {
         <CardFooter className="flex flex-col space-y-4">
           <div className="flex justify-between w-full">
             <Link href="/admin">
-              <Button variant="ghost">{t('Admin Panel')}</Button>
+              <Button variant="ghost">{t("Admin Panel")}</Button>
             </Link>
             <Link href="/pos">
-              <Button variant="ghost">{t('POS System')}</Button>
+              <Button variant="ghost">{t("POS System")}</Button>
             </Link>
           </div>
           {!isInitilized && !checker.isPending && <DatabaseInitializer />}
