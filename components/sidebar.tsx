@@ -68,12 +68,6 @@ export default function Sidebar({
     setIsSidebarOpen(false);
   };
 
-  const handleLogout = () => {
-    // Implement actual logout logic here
-    logout();
-    navigate.push("/auth/login");
-  };
-
   const sidebarItems = [
     // {
     //   icon: <Home className="h-4 w-4" />,
@@ -168,7 +162,7 @@ export default function Sidebar({
           <button
             aria-label="Open navigation menu"
             className={cn(
-              "bg-white peer inline-flex items-start justify-center rounded-md p-2 text-gray-500 hover:bg-white hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 disabled:pointer-events-none data-[state=open]:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[state=open]:bg-gray-800",
+              "bg-transparent peer inline-flex items-start justify-center rounded-md p-2 text-gray-500 hover:bg-white hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 disabled:pointer-events-none data-[state=open]:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[state=open]:bg-gray-800",
               t("dir") == "rtl" && "flex justify-end"
             )}
           >
@@ -208,7 +202,7 @@ export default function Sidebar({
               )}
             >
               <SheetTitle>
-                <Logo width={120} className="mb-3 animate-pulse-neon"/>
+                <Logo width={120} className="mb-3 animate-pulse-neon" />
                 {t("Dashboard")}
                 <div>
                   <UserBranchSelector />
@@ -250,7 +244,7 @@ export default function Sidebar({
                     );
                 })}
               </div>
-              <SheetFooter logout={handleLogout} />
+              <SheetFooter />
             </ScrollArea>
           </div>
         </SheetContent>
@@ -259,11 +253,9 @@ export default function Sidebar({
   );
 }
 
-interface SheetFooterProps {
-  logout: () => void;
-}
+interface SheetFooterProps {}
 
-function SheetFooter({ logout }: SheetFooterProps) {
+function SheetFooter({}: SheetFooterProps) {
   const t = useTranslations();
   return (
     <div className="flex flex-col">
@@ -276,11 +268,6 @@ function SheetFooter({ logout }: SheetFooterProps) {
         )}
       >
         {/* <ThemeSwitcher /> */}
-
-        <Button variant="ghost" size="sm" className="gap-2" onClick={logout}>
-          <LogOut className="h-4 w-4" />
-          <span>{t("Logout")}</span>
-        </Button>
       </div>
     </div>
   );

@@ -68,13 +68,13 @@ export default function POSSidebar({
     setIsSidebarOpen(false);
   };
 
-  const handleLogout = () => {
-    // Implement actual logout logic here
-    logout();
-    navigate.push("/auth/login");
-  };
-
   const sidebarItems = [
+    {
+      icon: <LayoutDashboard className="h-4 w-4" />,
+      label: t("Dashboard"),
+      href: "/admin",
+      neededPermissions: rolePermissions[UserRole.MANAGER],
+    },
     {
       icon: <ShoppingCart className="h-4 w-4" />,
       label: t("POS"),
@@ -138,9 +138,9 @@ export default function POSSidebar({
               <SheetTitle>
                 <Logo width={120} className="mb-3 animate-pulse-neon" />
                 {t("POS System")}
-                <div>
+                {/* <div>
                   <UserBranchSelector />
-                </div>
+                </div> */}
               </SheetTitle>
               <SheetDescription
                 className={cn("", t("dir") == "rtl" && "text-start")}
@@ -178,7 +178,7 @@ export default function POSSidebar({
                     );
                 })}
               </div>
-              <SheetFooter logout={handleLogout} />
+              <SheetFooter />
             </ScrollArea>
           </div>
         </SheetContent>
@@ -187,29 +187,13 @@ export default function POSSidebar({
   );
 }
 
-interface SheetFooterProps {
-  logout: () => void;
-}
+interface SheetFooterProps {}
 
-function SheetFooter({ logout }: SheetFooterProps) {
+function SheetFooter({}: SheetFooterProps) {
   const t = useTranslations();
   return (
     <div className="flex flex-col">
       <LanguageSwitcher />
-
-      <div
-        className={cn(
-          "flex items-center p-4 border-t neon-border rtl:flex-row-reverse",
-          "justify-between"
-        )}
-      >
-        {/* <ThemeSwitcher /> */}
-
-        <Button variant="ghost" size="sm" className="gap-2" onClick={logout}>
-          <LogOut className="h-4 w-4" />
-          <span>{t("Logout")}</span>
-        </Button>
-      </div>
     </div>
   );
 }

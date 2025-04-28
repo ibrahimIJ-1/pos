@@ -3,6 +3,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Sidebar from "@/components/sidebar";
 import { Permission, UserRole } from "@/lib/permissions";
 import { ReactNode } from "react";
+import Navbar from "@/components/Navbar";
 
 interface AdminLayoutProps {
   children?: ReactNode;
@@ -14,11 +15,13 @@ export default function Layout({ children }: AdminLayoutProps) {
   return (
     <ProtectedRoute requiredRoles={["admin", "manager", "cashier"]}>
       <div className="flex min-h-screen">
-        <div className="fixed">
-          <Sidebar additionalPermissions={additionalPermissions} />
-        </div>
         <main className="flex-1 overflow-y-auto">
-          <div className="container py-6">{children}</div>
+          <div className="container py-6">
+            <Navbar>
+              <Sidebar additionalPermissions={[]} />
+            </Navbar>
+            {children}
+          </div>
         </main>
         <Toaster />
       </div>
