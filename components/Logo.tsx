@@ -1,6 +1,6 @@
 import Image from "next/image";
 import React from "react";
-const icon = await import("@/public/logo.png");
+const icon = await import("@/public/logo.svg");
 
 function Logo({
   width = 150,
