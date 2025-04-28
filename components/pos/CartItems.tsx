@@ -88,6 +88,7 @@ function CartItems() {
           </TableBody>
         </Table>
       ) : (
+        
         <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
           <ShoppingCart className="h-10 w-10 mb-2" />
           <p>{trans("No items in cart")}</p>
