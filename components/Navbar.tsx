@@ -19,10 +19,10 @@ function Navbar({children}:{children:ReactNode}) {
 
   return (
     <div>
-      <div className="flex w-full justify-between mb-2 shadow-md rounded-t-md bg-blue-50/70 dark:bg-white px-3 py-1">
+      <div className="flex w-full justify-between mb-2 shadow-md  bg-blue-50/70 dark:bg-white px-3 py-1">
         <div className="flex gap-2 justify-start items-center">
           {children}
-          <Logo width={50} />
+          <Logo width={70} />
         </div>
         <div className="flex gap-2 justify-end items-center">
           <div className="duration-1000 animate-pulse-neon font-semibold text-black">{time.toLocaleTimeString()}</div>

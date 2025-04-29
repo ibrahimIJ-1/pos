@@ -16,7 +16,7 @@ function FullCart() {
   const {trans} = usePOS();
   return (
     <div>
-      <Card className="neon-card border-neon-purple/30 dark:border-neon-purple/20 shadow-md" dir={trans("dir")}>
+      <Card className="neon-card border-neon-purple/30 dark:border-neon-purple/20 shadow-md h-[90vh]" dir={trans("dir")}>
         <CardHeader className="pb-3">
           <CardTitle className="text-xl flex justify-between items-center rtl:text-start">
             <div className="flex flex-col justify-center items-center gap-2">

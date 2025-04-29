@@ -28,7 +28,7 @@ function ItemsSelector() {
   );
 
   return (
-    <div className="lg:col-span-2 space-y-4 h-[95%] flex flex-col">
+    <div className="lg:col-span-2 space-y-4 h-[-webkit-fill-available] flex flex-col">
       {/* Search Bar Section */}
       <div className="flex gap-2 flex-col sm:flex-row">
         <div className="relative flex-1">

@@ -19,7 +19,7 @@ import Logo from "../Logo";
 function CartItems() {
   const { cart, cartOps, updateCartItemQuantity,trans } = usePOS();
   return (
-    <ScrollArea className="h-[calc(100vh-26rem)]" dir={trans("dir") as "rtl" | "ltr"}>
+    <ScrollArea className="h-[calc(90vh-26rem)]" dir={trans("dir") as "rtl" | "ltr"}>
       {((cart?.items as CartItem[])?.length
         ? (cart?.items as CartItem[]).length
         : 0) > 0 ? (
