@@ -37,9 +37,11 @@ export default function Refunds() {
     });
   };
 
-  const filteredRegisters = Array.isArray(refunds)
+  const filteredRegisters: (Refund & { sale: Sale })[] = Array.isArray(refunds)
     ? refunds.filter((refund) =>
-        refund.sale.saleNumber?.toLowerCase().includes(searchTerm.toLowerCase())
+        refund?.sale?.saleNumber
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase())
       )
     : [];
 
