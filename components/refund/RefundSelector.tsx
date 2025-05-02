@@ -22,7 +22,7 @@ function RefundSelector() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder={trans("Search products")+"..."}
+            placeholder={"EX:20250502-0002"}
             className="pl-10 pr-2 h-11 neon-input border-neon-purple/30 text-base"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}

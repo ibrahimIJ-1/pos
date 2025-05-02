@@ -161,7 +161,13 @@ export const RefundDataTable = () => {
 
       <DataTable
         columns={columns}
-        data={refunds as any}
+        data={
+          (refunds ?? []) as (Refund & {
+            sale: Sale;
+            customer: Customer;
+            items: RefundItem[];
+          })[]
+        }
         filterColumn="id"
         filterPlaceholder={t("Filter refunds") + "..."}
       />
