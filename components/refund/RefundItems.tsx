@@ -44,10 +44,10 @@ function RefundItems() {
               key={item.productId}
               className={cn(
                 item.fullQuantity == item.refundedQuantity
-                  ? "bg-pink-100 hover:bg-pink-100"
+                  ? "bg-pink-100 hover:bg-pink-100 dark:bg-pink-800 dark:hover:bg-pink-800 dark:text-white"
                   : (item.fullQuantity ?? 0) > (item.refundedQuantity ?? 0) &&
                     (item.refundedQuantity ?? 0) > 0
-                  ? "bg-yellow-100 hover:bg-yellow-100"
+                  ? "bg-yellow-100 hover:bg-yellow-100 dark:bg-yellow-500 dark:hover:bg-yellow-500 dark:text-white"
                   : ""
               )}
             >
