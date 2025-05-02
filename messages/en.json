@@ -735,5 +735,7 @@
     "PENDING": "PENDING",
     "COMPLETED": "COMPLETED",
     "DECLINED": "DECLINED",
-    "CANCELLED": "CANCELLED"
+    "CANCELLED": "CANCELLED",
+    "Approve": "Approve",
+    "Reject": "Reject"
 }

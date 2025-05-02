@@ -735,5 +735,7 @@
     "PENDING": "معلق",
     "COMPLETED": "مكتمل",
     "DECLINED": "مرفوض",
-    "CANCELLED": "ملغى"
+    "CANCELLED": "ملغى",
+    "Approve": "قبول",
+    "Reject": "رفض"
 }
