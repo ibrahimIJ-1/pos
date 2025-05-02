@@ -37,13 +37,19 @@ export default function Refunds() {
     });
   };
 
-  const filteredRegisters = (
-    refunds as (Refund & {
-      sale: Sale;
-    })[]
-  ).filter((refund) =>
-    refund.sale.saleNumber!.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredRegisters: (Refund & {
+    sale: Sale;
+  })[] = refunds
+    ? (
+        refunds as (Refund & {
+          sale: Sale;
+        })[]
+      )?.filter((refund) =>
+        refund.sale.saleNumber!.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : (refunds as (Refund & {
+        sale: Sale;
+      })[]);
 
   return (
     <div className="container max-w-7xl mx-auto p-4">
