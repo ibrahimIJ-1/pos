@@ -118,6 +118,12 @@ export default function Sidebar({
       ],
     },
     {
+      icon: <Package className="h-4 w-4" />,
+      label: t("Refund Requests"),
+      href: "/admin/refunds",
+      neededPermissions: rolePermissions[UserRole.MANAGER],
+    },
+    {
       icon: <ComputerIcon className="h-4 w-4" />,
       label: t("Registers"),
       href: "/admin/registers",

@@ -32,6 +32,7 @@ import {
   ComputerIcon,
   GitBranchIcon,
   Receipt,
+  ArrowBigLeftDashIcon,
 } from "lucide-react";
 import { usePermissions } from "@/hooks/usePermissions";
 import { UserRole, Permission, rolePermissions } from "@/lib/permissions";
@@ -79,6 +80,12 @@ export default function POSSidebar({
       icon: <ShoppingCart className="h-4 w-4" />,
       label: t("POS"),
       href: "/pos",
+      neededPermissions: rolePermissions[UserRole.CASHIER],
+    },
+    {
+      icon: <ArrowBigLeftDashIcon className="h-4 w-4" />,
+      label: t("Refund"),
+      href: "/refund",
       neededPermissions: rolePermissions[UserRole.CASHIER],
     },
     // {

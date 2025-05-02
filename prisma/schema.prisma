@@ -27,6 +27,7 @@ model User {
   mainBranch            Branch?               @relation("MainBranch", fields: [branchId], references: [id])
   branches              Branch[]              @relation("UserBranches")
   lang                  String                @default("en")
+  Refund                Refund[]              @relation("UserRefunds")
 
   // Optional: if you filter by active status frequently
   // @@index([active])
@@ -86,6 +87,7 @@ model Product {
   // Optional: if you frequently filter active products
   // @@index([active])
   BranchProduct    BranchProduct[]
+  RefundItem       RefundItem[]    @relation("ProductRefunds")
 
   @@index([category])
   @@map("products")
@@ -106,6 +108,7 @@ model Customer {
   created_at  DateTime @default(now()) @map("created_at")
   updated_at  DateTime @updatedAt @map("updated_at")
   sales       Sale[]
+  Refund      Refund[]
 
   @@map("customers")
 }
@@ -134,25 +137,28 @@ model Sale {
   branch           Branch         @relation(fields: [branchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   // Optionally, if you filter by date range:
   // @@index([created_at])
+  Refund           Refund[]
 
   @@index([cashierId])
   @@map("sales")
 }
 
 model SaleItem {
-  id             String   @id @default(uuid())
-  saleId         String   @map("sale_id")
-  sale           Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
-  productId      String   @map("product_id")
-  product        Product  @relation(fields: [productId], references: [id])
-  productName    String   @map("product_name")
-  quantity       Int
-  unitPrice      Decimal  @map("unit_price") @db.Decimal(10, 2)
-  discountAmount Decimal  @map("discount_amount") @db.Decimal(10, 2)
-  taxAmount      Decimal  @map("tax_amount") @db.Decimal(10, 2)
-  subtotal       Decimal  @db.Decimal(10, 2)
-  created_at     DateTime @default(now()) @map("created_at")
-  updated_at     DateTime @updatedAt @map("updated_at")
+  id               String       @id @default(uuid())
+  refundedQuantity Int          @default(0)
+  saleId           String       @map("sale_id")
+  sale             Sale         @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  productId        String       @map("product_id")
+  product          Product      @relation(fields: [productId], references: [id])
+  productName      String       @map("product_name")
+  quantity         Int
+  unitPrice        Decimal      @map("unit_price") @db.Decimal(10, 2)
+  discountAmount   Decimal      @map("discount_amount") @db.Decimal(10, 2)
+  taxAmount        Decimal      @map("tax_amount") @db.Decimal(10, 2)
+  subtotal         Decimal      @db.Decimal(10, 2)
+  created_at       DateTime     @default(now()) @map("created_at")
+  updated_at       DateTime     @updatedAt @map("updated_at")
+  RefundItem       RefundItem[]
 
   @@index([saleId])
   @@map("sale_items")
@@ -176,6 +182,7 @@ model Register {
   branch           Branch                @relation(fields: [branchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   // Optional: if you filter by status:
   // @@index([status])
+  Refund           Refund[]
 
   @@map("registers")
 }
@@ -221,6 +228,7 @@ model Discount {
   created_at        DateTime          @default(now()) @map("created_at")
   updated_at        DateTime          @updatedAt @map("updated_at")
   sales             SaleDiscount[]    @relation("DiscountSales")
+  refunds           RefundDiscount[]  @relation("DiscountRefunds")
   branches          Branch[]          @relation("DiscountBranches")
 
   @@index([isActive, startDate, endDate])
@@ -300,6 +308,7 @@ model Branch {
   Cart                Cart[]
   mainBranchUsers     User[]                @relation("MainBranch")
   users               User[]                @relation("UserBranches")
+  Refund              Refund[]
 
   @@map("branches")
 }
@@ -321,6 +330,72 @@ model BranchProduct {
 
   @@unique([productId, branchId])
   @@map("branch_products")
+}
+
+model Refund {
+  id               String           @id @default(uuid())
+  saleId           String           @map("sale_id")
+  sale             Sale             @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  customerId       String?          @map("customer_id")
+  customer         Customer?        @relation(fields: [customerId], references: [id])
+  cashierId        String           @map("cashier_id")
+  cashier          User             @relation("UserRefunds", fields: [cashierId], references: [id])
+  subtotal         Decimal          @db.Decimal(10, 2)
+  taxTotal         Decimal          @map("tax_total") @db.Decimal(10, 2)
+  discountTotal    Decimal          @map("discount_total") @db.Decimal(10, 2)
+  totalAmount      Decimal          @map("total_amount") @db.Decimal(10, 2)
+  paymentMethod    String           @map("payment_method")
+  paymentStatus    String           @map("payment_status")
+  notes            String?          @db.Text
+  reason           String?
+  status           RefundStatus     @default(PENDING)
+  created_at       DateTime?        @default(now()) @map("created_at")
+  updated_at       DateTime?        @updatedAt @map("updated_at")
+  items            RefundItem[]
+  discountsApplied RefundDiscount[] @relation("RefundDiscounts")
+  register         Register?        @relation(fields: [registerId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  registerId       String?          @map("register_id")
+  branchId         String           @map("branch_id")
+  branch           Branch           @relation(fields: [branchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([branchId, status])
+  @@index([cashierId])
+  @@map("refunds")
+}
+
+model RefundItem {
+  id             String   @id @default(uuid())
+  refundId       String   @map("refund_id")
+  refund         Refund   @relation(fields: [refundId], references: [id], onDelete: Cascade)
+  productId      String   @map("product_id")
+  product        Product  @relation("ProductRefunds", fields: [productId], references: [id])
+  productName    String   @map("product_name")
+  quantity       Int
+  unitPrice      Decimal  @map("unit_price") @db.Decimal(10, 2)
+  discountAmount Decimal  @map("discount_amount") @db.Decimal(10, 2)
+  taxAmount      Decimal  @map("tax_amount") @db.Decimal(10, 2)
+  subtotal       Decimal  @db.Decimal(10, 2)
+  saleItemId     String   @map("sale_item_id")
+  saleItem       SaleItem @relation(fields: [saleItemId], references: [id])
+  created_at     DateTime @default(now()) @map("created_at")
+  updated_at     DateTime @updatedAt @map("updated_at")
+
+  @@index([refundId])
+  @@index([saleItemId])
+  @@map("refund_items")
+}
+
+model RefundDiscount {
+  id         String   @id @default(uuid())
+  refundId   String   @map("refund_id")
+  refund     Refund   @relation("RefundDiscounts", fields: [refundId], references: [id], onDelete: Cascade)
+  discountId String   @map("discount_id")
+  discount   Discount @relation("DiscountRefunds", fields: [discountId], references: [id])
+  amount     Decimal  @db.Decimal(10, 2)
+  created_at DateTime @default(now()) @map("created_at")
+
+  @@unique([refundId, discountId])
+  @@map("refund_discounts")
 }
 
 // Enums
@@ -347,4 +422,11 @@ enum DiscountAppliesTo {
   ENTIRE_ORDER
   SPECIFIC_PRODUCTS
   SPECIFIC_CATEGORIES
+}
+
+enum RefundStatus {
+  PENDING
+  COMPLETED
+  DECLINED
+  CANCELLED
 }

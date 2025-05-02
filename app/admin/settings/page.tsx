@@ -51,6 +51,7 @@ export default function SettingsPage() {
 
   const [storeSettings, setStoreSettings] = useState({
     storeName: "My Awesome Store",
+    refundDays: "14",
     storeAddress: "123 Main St, Anytown, USA",
     currency: "usd",
     taxEnabled: "true",
@@ -84,6 +85,7 @@ export default function SettingsPage() {
 
         setStoreSettings({
           storeName: storeData.storeName || "My Awesome Store",
+          refundDays: storeData.refundDays || "14",
           storeAddress: storeData.storeAddress || "123 Main St, Anytown, USA",
           currency: storeData.currency || "usd",
           taxEnabled: storeData.taxEnabled || "true",
@@ -120,6 +122,7 @@ export default function SettingsPage() {
         // Store settings
         storeName: { value: storeSettings.storeName, category: "store" },
         storeAddress: { value: storeSettings.storeAddress, category: "store" },
+        refundDays: { value: storeSettings.refundDays, category: "store" },
         currency: { value: storeSettings.currency, category: "store" },
         taxEnabled: { value: storeSettings.taxEnabled, category: "store" },
         productImages: {
@@ -340,6 +343,19 @@ export default function SettingsPage() {
                   value={storeSettings.storeAddress}
                   onChange={(e) =>
                     handleStoreChange("storeAddress", e.target.value)
+                  }
+                  className="neon-input"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="refund-days">{t("Order refund max days")}</Label>
+                <Input
+                type="number"
+                  id="refund-days"
+                  value={storeSettings.refundDays}
+                  onChange={(e) =>
+                    handleStoreChange("refundDays", e.target.value)
                   }
                   className="neon-input"
                 />

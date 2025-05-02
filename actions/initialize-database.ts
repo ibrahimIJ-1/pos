@@ -78,6 +78,7 @@ export const initDatabase = async () => {
     const settingsPayload = {
       DB_INITIALIZED: { value: "1", category: "DB" },
       productImages: { value: "false", category: "store" },
+      refundDays: { value: "14", category: "store" },
     };
 
     await saveSettings(settingsPayload);
