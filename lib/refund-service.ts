@@ -52,10 +52,9 @@ export function useRefundOperations() {
         });
       },
       onSuccess: (data) => {},
-      onError:(error)=>{
-        throw error
-        
-      }
+      onError: (error) => {
+        throw error;
+      },
     }),
     changeStatus: useMutation({
       mutationFn: async ({
@@ -68,7 +67,7 @@ export function useRefundOperations() {
         return changeRefundStatus(refundId, status);
       },
       onSuccess: (data) => {
-        queryClient.setQueryData(["refunds"], data);
+        queryClient.invalidateQueries({ queryKey: ["refunds"] });
       },
     }),
   };
