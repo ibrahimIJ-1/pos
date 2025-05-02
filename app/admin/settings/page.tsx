@@ -34,7 +34,17 @@ import { toast } from "sonner";
 import { DatabaseInitializer } from "@/components/DatabaseInitializer";
 import { UserRoleManager } from "@/components/user-management/UserRoleManager";
 import { useTranslations } from "next-intl";
-
+import Image from "next/image";
+const icon = await import("@/public/logo.svg");
+interface IStoreSettings {
+  storeName: string;
+  refundDays: string;
+  storeAddress: string;
+  currency: string;
+  taxEnabled: string;
+  productImages: string;
+  logo: string | File;
+}
 export default function SettingsPage() {
   const t = useTranslations();
   // For demonstration, assume admin with multiple roles
@@ -49,13 +59,14 @@ export default function SettingsPage() {
     darkMode: "true",
   });
 
-  const [storeSettings, setStoreSettings] = useState({
+  const [storeSettings, setStoreSettings] = useState<IStoreSettings>({
     storeName: "My Awesome Store",
     refundDays: "14",
     storeAddress: "123 Main St, Anytown, USA",
     currency: "usd",
     taxEnabled: "true",
     productImages: "false",
+    logo: "",
   });
 
   const [notificationSettings, setNotificationSettings] = useState({
@@ -66,6 +77,8 @@ export default function SettingsPage() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("general");
+  const [logoFile, setLogoFile] = useState<File | undefined>(undefined);
+  const [logoImage, setLogoImage] = useState<string | null>(null);
 
   // Fetch settings on component mount
   useEffect(() => {
@@ -90,7 +103,11 @@ export default function SettingsPage() {
           currency: storeData.currency || "usd",
           taxEnabled: storeData.taxEnabled || "true",
           productImages: generalData.productImages || "false",
+          logo: storeData.logo || "",
         });
+        if (storeData.logo) {
+          setLogoImage(storeData.logo);
+        }
 
         setNotificationSettings({
           emailNotifications: notificationData.emailNotifications || "true",
@@ -125,6 +142,7 @@ export default function SettingsPage() {
         refundDays: { value: storeSettings.refundDays, category: "store" },
         currency: { value: storeSettings.currency, category: "store" },
         taxEnabled: { value: storeSettings.taxEnabled, category: "store" },
+        logo: { value: storeSettings.logo, category: "store" },
         productImages: {
           value: storeSettings.productImages,
           category: "store",
@@ -166,7 +184,7 @@ export default function SettingsPage() {
   // Handle store settings changes
   const handleStoreChange = (
     key: keyof typeof storeSettings,
-    value: string
+    value: string | File
   ) => {
     setStoreSettings((prev) => ({ ...prev, [key]: value }));
   };
@@ -177,6 +195,16 @@ export default function SettingsPage() {
     value: string
   ) => {
     setNotificationSettings((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleLogoChange = (files: FileList | null) => {
+    if (files && files.length > 0) {
+      const file = files[0];
+      const imageUrl = URL.createObjectURL(file);
+      setLogoFile(file);
+      handleStoreChange("logo", file);
+      setLogoImage(imageUrl);
+    }
   };
 
   return (
@@ -241,7 +269,9 @@ export default function SettingsPage() {
         <TabsContent value="general">
           <Card className="neon-card neon-border">
             <CardHeader>
-              <CardTitle className="rtl:text-start">{t("General Settings")}</CardTitle>
+              <CardTitle className="rtl:text-start">
+                {t("General Settings")}
+              </CardTitle>
               <CardDescription className="rtl:text-start">
                 {t("Manage your application settings")}
               </CardDescription>
@@ -318,12 +348,32 @@ export default function SettingsPage() {
         <TabsContent value="store">
           <Card className="neon-card neon-border">
             <CardHeader>
-              <CardTitle className="rtl:text-start">{t("Store Settings")}</CardTitle>
+              <CardTitle className="rtl:text-start">
+                {t("Store Settings")}
+              </CardTitle>
               <CardDescription className="rtl:text-start">
                 {t("Configure your store information")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="space-y-2 flex justify-start gap-x-5">
+                <div className="w-1/4">
+                  <Label htmlFor="store-name">{t("Logo")}</Label>
+                  <Input
+                    type="file"
+                    multiple={false}
+                    id="store-logo"
+                    onChange={(e) => handleLogoChange(e.target.files)}
+                    className="neon-input"
+                  />
+                </div>
+                <Image
+                  src={logoImage ?? icon}
+                  alt="logo"
+                  width={"100"}
+                  height={"100"}
+                />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="store-name">{t("Store Name")}</Label>
                 <Input
@@ -349,9 +399,11 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="refund-days">{t("Order refund max days")}</Label>
+                <Label htmlFor="refund-days">
+                  {t("Order refund max days")}
+                </Label>
                 <Input
-                type="number"
+                  type="number"
                   id="refund-days"
                   value={storeSettings.refundDays}
                   onChange={(e) =>
@@ -404,7 +456,9 @@ export default function SettingsPage() {
         <TabsContent value="notifications">
           <Card className="neon-card neon-border">
             <CardHeader>
-              <CardTitle className="rtl:text-start">{t("Notification Settings")}</CardTitle>
+              <CardTitle className="rtl:text-start">
+                {t("Notification Settings")}
+              </CardTitle>
               <CardDescription className="rtl:text-start">
                 {t("Configure when and how you receive notifications")}
               </CardDescription>

@@ -3,7 +3,7 @@ export type AppSettings = {
 };
 
 export interface SaveSettingPayload {
-  value: string;
+  value: string | File;
   category: string;
 }
 

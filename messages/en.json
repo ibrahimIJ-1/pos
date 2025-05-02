@@ -737,5 +737,7 @@
     "DECLINED": "DECLINED",
     "CANCELLED": "CANCELLED",
     "Approve": "Approve",
-    "Reject": "Reject"
+    "Reject": "Reject",
+    "Logo":"Logo",
+    "Saving settings":"Saving settings"
 }

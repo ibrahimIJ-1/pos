@@ -737,5 +737,7 @@
     "DECLINED": "مرفوض",
     "CANCELLED": "ملغى",
     "Approve": "قبول",
-    "Reject": "رفض"
+    "Reject": "رفض",
+    "Logo": "اللوغو",
+    "Saving settings":"جاري حفظ الإعدادات"
 }

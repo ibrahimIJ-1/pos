@@ -15,7 +15,7 @@ export const getSettings = async (category?: string): Promise<AppSettings> => {
 
 // Save multiple settings at once
 export const saveSettings = async (settings: {
-  [key: string]: { value: string; category: string };
+  [key: string]: { value: string | File; category: string };
 }): Promise<void> => {
   try {
     const payload: SaveSettingsPayload = { settings };

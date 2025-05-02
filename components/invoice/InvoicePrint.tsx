@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Printer, Download, Send } from "lucide-react";
 import { formatDate } from "@/lib/utils";
@@ -6,6 +6,9 @@ import { Sale, SaleItem } from "@prisma/client";
 import { ScrollArea } from "../ui/scroll-area";
 import { useReactToPrint } from "react-to-print";
 import { usePOS } from "@/providers/POSProvider";
+import Image from "next/image";
+const icon = await import("@/public/logo.svg");
+
 interface InvoicePrintProps {
   data: any; //Sale
   onClose: () => void;
@@ -153,6 +156,7 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
         DiscountTotal: data.discountTotal, // Discount amount
         TaxTotal: data.taxTotal, // Tax amount
         TotalAmount: data.totalAmount, // Total amount
+        logo: data.logo ?? null,
       };
 
       // Send the bill data to the Windows Service
@@ -174,6 +178,10 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
       setPrinting(false);
     }
   };
+
+  useEffect(() => {
+    if (data) printWithService();
+  }, []);
 
   return (
     <div className="p-4 flex flex-col h-[90vh] overflow-y-scroll">
@@ -222,6 +230,15 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
               <p className="text-muted-foreground text-sm">
                 #{data.saleNumber}
               </p>
+            </div>
+            <div className="">
+              <Image
+                src={data.logo ?? icon}
+                alt="logo"
+                width={100}
+                height={100}
+                className="!rounded-sm shadow-sm"
+              />
             </div>
             <div className="text-right">
               <div className="mb-2 flex items-center gap-2">
