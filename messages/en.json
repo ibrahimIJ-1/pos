@@ -731,5 +731,9 @@
     "Approved Refunds": "Approved Refunds",
     "Rejected Refunds": "Rejected Refunds",
     "Canceled Refunds": "Canceled Refunds",
-    "All refund requests": "All refund requests"
+    "All refund requests": "All refund requests",
+    "PENDING": "PENDING",
+    "COMPLETED": "COMPLETED",
+    "DECLINED": "DECLINED",
+    "CANCELLED": "CANCELLED"
 }

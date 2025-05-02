@@ -102,16 +102,16 @@ export function RefundManagerDialog({
           toast.success(t(refundStatus));
           onOpenChange(false);
         },
-        onError:()=>{
-          toast.error(t("Error Happened"+"..."));
-        }
+        onError: () => {
+          toast.error(t("Error Happened" + "..."));
+        },
       }
     );
   };
 
   useEffect(() => {
     if (refund) setRefundStatus(refund.status);
-  },[refund]);  
+  }, [refund]);
 
   return (
     <>
@@ -228,7 +228,11 @@ export function RefundManagerDialog({
               {t("Are you sure")}?
             </AlertDialogTitle>
             <AlertDialogDescription className="rtl:text-start">
-              {t(`This will permanently`+" "+refundStatus+" "+`the refund`)}{" "}
+              {t(`This will permanently`) +
+                " " +
+                t(refundStatus) +
+                " " +
+                t(`the refund`)}{" "}
               <span className="font-medium">{refund?.sale.saleNumber}</span>.
               {t("This action cannot be undone")}.
             </AlertDialogDescription>

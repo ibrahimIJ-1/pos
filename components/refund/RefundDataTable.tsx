@@ -100,7 +100,7 @@ export const RefundDataTable = () => {
       accessorKey: "id",
       header: t("Sale Serial Number"),
       cell: ({ row }) => (
-        <span className="font-medium">{row.original.sale.saleNumber}</span>
+        <span className="font-medium">{row.original.sale?.saleNumber}</span>
       ),
     },
     {

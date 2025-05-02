@@ -731,5 +731,9 @@
     "Approved Refunds": "عمليات استرداد الأموال المعتمدة",
     "Rejected Refunds": "عمليات استرداد الأموال المرفوضة",
     "Canceled Refunds": "عمليات استرداد الأموال الملغاة",
-    "All refund requests": "جميع طلبات استرداد الأموال"
+    "All refund requests": "جميع طلبات استرداد الأموال",
+    "PENDING": "معلق",
+    "COMPLETED": "مكتمل",
+    "DECLINED": "مرفوض",
+    "CANCELLED": "ملغى"
 }
