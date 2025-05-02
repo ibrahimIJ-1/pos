@@ -69,7 +69,7 @@ export const changeRefundStatus = async (
         },
       });
     }
-    return true;
+    return [];
   } catch (error) {
     console.error("Error in changing the status:", error);
     throw new Error("Error in changing the status...");
