@@ -244,7 +244,7 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
             )}
             <div className="text-right">
               <div className="mb-2 flex items-center gap-2">
-                <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
+                <div className="h-max w-max rounded-md bg-primary flex items-center justify-center">
                   <span className="text-primary-foreground dark:text-black font-bold text-sm">
                     {data.storeName}
                   </span>
