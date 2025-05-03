@@ -231,15 +231,17 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
                 #{data.saleNumber}
               </p>
             </div>
-            <div className="">
-              <Image
-                src={data.logo ?? icon}
-                alt="logo"
-                width={100}
-                height={100}
-                className="!rounded-sm shadow-sm"
-              />
-            </div>
+            {data.logo && data.logo != "" && (
+              <div className="">
+                <Image
+                  src={data.logo ?? icon}
+                  alt="logo"
+                  width={100}
+                  height={100}
+                  className="!rounded-sm shadow-sm"
+                />
+              </div>
+            )}
             <div className="text-right">
               <div className="mb-2 flex items-center gap-2">
                 <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
