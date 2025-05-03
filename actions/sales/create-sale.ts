@@ -139,7 +139,7 @@ export const createNewSale = async (
       });
     }
     const storeName = await getSettingByName("storeName");
-    const storeLogo = await getSettingByName("logo");
+    const storeLogo = await getSettingByName("logo",true);
     return {
       ...(decimalToNumber(sale) as Object),
       storeName: storeName ? storeName.value ?? "Flash Pro" : "Flash Pro",
