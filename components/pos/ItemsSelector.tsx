@@ -8,6 +8,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePOS } from "@/providers/POSProvider";
 import { cn } from "@/lib/utils";
+import { useSystem } from "@/providers/SystemProvider";
 
 function ItemsSelector() {
   const {
@@ -17,8 +18,10 @@ function ItemsSelector() {
     addItemToCart,
     inputRef,
     showImage,
-    trans
+    trans,
   } = usePOS();
+
+  const { storeCurrency } = useSystem();
 
   const filteredProducts = products.filter(
     (product) =>
@@ -28,14 +31,14 @@ function ItemsSelector() {
   );
 
   return (
-    <div className="lg:col-span-2 space-y-4 h-[95%] flex flex-col">
+    <div className="lg:col-span-2 space-y-4 h-[-webkit-fill-available] flex flex-col">
       {/* Search Bar Section */}
       <div className="flex gap-2 flex-col sm:flex-row">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder={trans("Search products")+"..."}
+            placeholder={trans("Search products") + "..."}
             className="pl-10 pr-2 h-11 neon-input border-neon-purple/30 text-base"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -85,7 +88,8 @@ function ItemsSelector() {
                 </h3>
                 <div className="flex justify-between items-center gap-2">
                   <span className="text-sm sm:text-base font-bold truncate">
-                    ${product.price.toFixed(2)}
+                    {storeCurrency}{" "}
+                    {product.price.toFixed(2)}
                   </span>
                   <span className="text-xs text-muted-foreground shrink-0">
                     {product.stock} {trans("in stock")}

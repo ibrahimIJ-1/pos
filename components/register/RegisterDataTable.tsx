@@ -80,7 +80,7 @@ export const RegisterDataTable = () => {
       return (
         <Badge
           variant="outline"
-          className="bg-gray-100"
+          className="bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100"
           key={Math.random() * 1000}
         >
           {t("Closed")}
@@ -90,7 +90,7 @@ export const RegisterDataTable = () => {
       return (
         <Badge
           variant="outline"
-          className="bg-green-100 text-green-800"
+          className="bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100"
           key={Math.random() * 1000}
         >
           {t("Opened")}

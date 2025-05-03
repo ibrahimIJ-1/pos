@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatDate(dateString: string): string {  
+export function formatDate(dateString: string): string {
   const date = new Date(dateString);
   return format(date, "PPP");
 }
@@ -41,6 +41,11 @@ export const decimalToNumber = (data: unknown): unknown => {
   }
 
   if (typeof data === "object" && data !== null) {
+    // Handle Date directly
+    if (data instanceof Date) {
+      return data;
+    }
+
     return Object.fromEntries(
       Object.entries(data).map(([key, value]) => [
         key,

@@ -139,9 +139,11 @@ export const createNewSale = async (
       });
     }
     const storeName = await getSettingByName("storeName");
+    const storeLogo = await getSettingByName("logo",true);
     return {
       ...(decimalToNumber(sale) as Object),
       storeName: storeName ? storeName.value ?? "Flash Pro" : "Flash Pro",
+      logo: storeLogo ? storeLogo.value ?? null : null,
     };
   } catch (error) {
     console.error("Error creating sale:", error);

@@ -1,7 +1,6 @@
-import { POSProvider } from "@/providers/POSProvider";
-import { Permission } from "@/lib/permissions";
 import POSSidebar from "@/components/PosSidebar";
-
+import Navbar from "@/components/Navbar";
+import { SystemProvider } from "@/providers/SystemProvider";
 export default function Layout({
   children,
 }: Readonly<{
@@ -9,11 +8,11 @@ export default function Layout({
 }>) {
   const additionalPermissions: any[] = [];
   return (
-    <POSProvider>
-      <div className="fixed">
-        <POSSidebar additionalPermissions={additionalPermissions} />
-      </div>
+    <SystemProvider>
+      <Navbar>
+        <POSSidebar additionalPermissions={[]} />
+      </Navbar>
       {children}
-    </POSProvider>
+    </SystemProvider>
   );
 }

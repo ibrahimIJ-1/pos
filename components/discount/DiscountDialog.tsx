@@ -45,6 +45,7 @@ import { useProducts } from "@/lib/products-service";
 import { useCreateDiscount, useUpdateDiscount } from "@/lib/discounts-service";
 import { useTranslations } from "next-intl";
 import { discountFormSchema } from "./DiscountForm";
+import { useSystem } from "@/providers/SystemProvider";
 
 type DiscountFormValues = z.infer<ReturnType<typeof discountFormSchema>>;
 
@@ -63,6 +64,7 @@ export function DiscountDialog({
   discount,
   branches,
 }: DiscountDialogProps) {
+  const { storeCurrency } = useSystem();
   const t = useTranslations();
   const discountSchema = discountFormSchema();
   const [selectedAppliesTo, setSelectedAppliesTo] =
@@ -332,7 +334,7 @@ export function DiscountDialog({
                           {form.watch("type") === "PERCENTAGE"
                             ? t("Percentage") + " (%)"
                             : form.watch("type") === "FIXED"
-                            ? t("Amount") + " ($)"
+                            ? t("Amount") + " (" + storeCurrency + ")"
                             : t("Discount % on Y items")}
                         </FormLabel>
                         <FormControl>

@@ -16,8 +16,10 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAccountingSummary } from "@/lib/reports-service";
 import { useTranslations } from "next-intl";
+import { useSystem } from "@/providers/SystemProvider";
 
 export function AccountingSummary() {
+  const { storeCurrency } = useSystem();
   const [period, setPeriod] = React.useState<"day" | "week" | "month">("day");
   const { data, isLoading } = useAccountingSummary(period);
   const t = useTranslations();
@@ -35,7 +37,9 @@ export function AccountingSummary() {
           <div className={`p-2 rounded-full ${colorClass}`}>{icon}</div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">${value.toFixed(2)}</div>
+          <div className="text-2xl font-bold">
+            {storeCurrency} {value.toFixed(2)}
+          </div>
           <p className="text-xs text-muted-foreground">{t(description)}</p>
         </CardContent>
       </Card>
@@ -129,7 +133,7 @@ export function AccountingSummary() {
                                 {method.replace("_", " ").toUpperCase()}
                               </span>
                               <span className="text-lg font-semibold">
-                                $
+                              {storeCurrency}
                                 {typeof amount === "number"
                                   ? amount.toFixed(2)
                                   : "0.00"}

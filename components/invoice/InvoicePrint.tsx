@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Printer, Download, Send } from "lucide-react";
 import { formatDate } from "@/lib/utils";
@@ -6,12 +6,17 @@ import { Sale, SaleItem } from "@prisma/client";
 import { ScrollArea } from "../ui/scroll-area";
 import { useReactToPrint } from "react-to-print";
 import { usePOS } from "@/providers/POSProvider";
+import Image from "next/image";
+import { useSystem } from "@/providers/SystemProvider";
+const icon = await import("@/public/logo.svg");
+
 interface InvoicePrintProps {
   data: any; //Sale
   onClose: () => void;
 }
 
 export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
+  const { storeCurrency } = useSystem();
   const { trans } = usePOS();
   const [printing, setPrinting] = useState(false);
 
@@ -137,6 +142,7 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
         Id: data.saleNumber, // Invoice ID
         storeName: data.storeName, // storeName
         branchName: data.branch?.name, // branchName
+        storeCurrency: storeCurrency, // branchName
         branchAddress: data.branch?.address, // branchAddress
         cashierName: data.cashier?.name, // cashierName
         CustomerName: data.customer?.name || "Guest Customer", // Customer name
@@ -153,6 +159,7 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
         DiscountTotal: data.discountTotal, // Discount amount
         TaxTotal: data.taxTotal, // Tax amount
         TotalAmount: data.totalAmount, // Total amount
+        logo: data.logo ?? null,
       };
 
       // Send the bill data to the Windows Service
@@ -174,6 +181,10 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
       setPrinting(false);
     }
   };
+
+  useEffect(() => {
+    if (data) printWithService();
+  }, []);
 
   return (
     <div className="p-4 flex flex-col h-[90vh] overflow-y-scroll">
@@ -219,21 +230,36 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
               <h1 className="text-2xl font-bold text-primary">
                 {trans("Invoice")}
               </h1>
-              <p className="text-muted-foreground text-sm">#{data.saleNumber}</p>
+              <p className="text-muted-foreground text-sm">
+                #{data.saleNumber}
+              </p>
             </div>
+            {data.logo && data.logo != "" && (
+              <div className="">
+                <Image
+                  src={data.logo ?? icon}
+                  alt="logo"
+                  width={100}
+                  height={100}
+                  className="!rounded-sm shadow-sm"
+                />
+              </div>
+            )}
             <div className="text-right">
               <div className="mb-2 flex items-center gap-2">
-                <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-sm">
+                <div className="px-2 py-1 h-max w-max rounded-md bg-primary flex items-center justify-center">
+                  <span className="text-primary-foreground dark:text-black font-bold text-sm">
                     {data.storeName}
                   </span>
                 </div>
-                <p className="font-bold text-sm">{data.branch?.name}</p>
+                <p className="font-bold text-sm dark:text-black">
+                  {data.branch?.name}
+                </p>
               </div>
-              <p className="text-muted-foreground text-xs">
+              <p className="text-muted-foreground dark:text-black text-xs">
                 {data.branch?.address}
               </p>
-              <p className="text-muted-foreground text-xs">
+              <p className="text-muted-foreground dark:text-black text-xs">
                 {data.cashier.name}
               </p>
             </div>
@@ -245,7 +271,7 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
               <h3 className="text-sm font-semibold text-muted-foreground mb-1">
                 {trans("Bill To")}:
               </h3>
-              <p className="font-medium">
+              <p className="font-medium dark:text-black">
                 {data.customer?.name || "Guest Customer"}
               </p>
             </div>
@@ -253,11 +279,13 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
               <div className="flex flex-col md:items-end">
                 <p className="text-sm text-muted-foreground">
                   <span className="font-semibold">{trans("Date")}:</span>{" "}
-                  {formatDate(data.date)}
+                  <span className="dark:text-black">
+                    {formatDate(data.date)}
+                  </span>
                 </p>
                 <p className="text-sm text-muted-foreground">
                   <span className="font-semibold">{trans("Payment")}:</span>{" "}
-                  {data.paymentMethod}
+                  <span className=" dark:text-black">{data.paymentMethod}</span>
                 </p>
               </div>
             </div>
@@ -289,20 +317,22 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
                 <tbody>
                   {data.items.map((item: SaleItem) => (
                     <tr key={item.id} className="border-b hover:bg-muted/10">
-                      <td className="py-2 px-4 text-sm">{item.productName}</td>
-                      <td className="py-2 px-4 text-sm text-right">
+                      <td className="py-2 px-4 text-sm dark:text-black">
+                        {item.productName}
+                      </td>
+                      <td className="py-2 px-4 text-sm text-right dark:text-black">
                         {item.quantity}
                       </td>
-                      <td className="py-2 px-4 text-sm text-right">
-                        ${item.unitPrice.toFixed(2)}
+                      <td className="py-2 px-4 text-sm text-right dark:text-black">
+                        {storeCurrency} {item.unitPrice.toFixed(2)}
                       </td>
-                      <td className="py-2 px-4 text-sm text-right">
+                      <td className="py-2 px-4 text-sm text-right dark:text-black">
                         {Number(item.discountAmount) > 0
-                          ? `-$${item.discountAmount.toFixed(2)}`
+                          ? `-${storeCurrency} ${item.discountAmount.toFixed(2)}`
                           : "-"}
                       </td>
-                      <td className="py-2 px-4 text-sm text-right font-medium">
-                        ${item.subtotal.toFixed(2)}
+                      <td className="py-2 px-4 text-sm text-right font-medium dark:text-black">
+                        {storeCurrency} {item.subtotal.toFixed(2)}
                       </td>
                     </tr>
                   ))}
@@ -319,7 +349,9 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
                   <span className="text-muted-foreground">
                     {trans("Subtotal")}:
                   </span>
-                  <span>${data.subtotal.toFixed(2)}</span>
+                  <span className="dark:text-black">
+                    {storeCurrency} {data.subtotal.toFixed(2)}
+                  </span>
                 </div>
                 {data.discountTotal > 0 && (
                   <div className="flex justify-between py-1 text-sm">
@@ -327,17 +359,21 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
                       {trans("Discount")}:
                     </span>
                     <span className="text-green-600">
-                      -${data.discountTotal.toFixed(2)}
+                      -{storeCurrency} {data.discountTotal.toFixed(2)}
                     </span>
                   </div>
                 )}
                 <div className="flex justify-between py-1 text-sm">
                   <span className="text-muted-foreground">{trans("Tax")}:</span>
-                  <span>${data.taxTotal.toFixed(2)}</span>
+                  <span className="dark:text-black">
+                    {storeCurrency} {data.taxTotal.toFixed(2)}
+                  </span>
                 </div>
                 <div className="flex justify-between py-2 border-t font-semibold">
                   <span>{trans("Total")}:</span>
-                  <span>${data.totalAmount.toFixed(2)}</span>
+                  <span className="dark:text-black">
+                    {storeCurrency} {data.totalAmount.toFixed(2)}
+                  </span>
                 </div>
               </div>
             </div>

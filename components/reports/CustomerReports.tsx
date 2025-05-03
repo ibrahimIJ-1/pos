@@ -22,8 +22,10 @@ import { reportsApi } from "@/lib/api";
 import { format, subMonths } from "date-fns";
 import { useCustomerReports } from "@/lib/reports-service";
 import { useTranslations } from "next-intl";
+import { useSystem } from "@/providers/SystemProvider";
 
 export default function CustomerReports() {
+  const { storeCurrency } = useSystem();
   const t = useTranslations();
   const [fromDate, setFromDate] = useState<Date>(subMonths(new Date(), 3));
   const [toDate, setToDate] = useState<Date>(new Date());
@@ -113,7 +115,9 @@ export default function CustomerReports() {
                     </div>
                     <div className="flex items-center gap-2 text-xs mt-1 text-muted-foreground">
                       <UserPlus className="h-3 w-3" />
-                      <span>{data.newCustomers || 0} {t("new in this period")}</span>
+                      <span>
+                        {data.newCustomers || 0} {t("new in this period")}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
@@ -124,7 +128,7 @@ export default function CustomerReports() {
                       {t("Average Purchase Value")}
                     </div>
                     <div className="text-2xl font-bold">
-                      ${data.averagePurchaseValue?.toFixed(2) || "0.00"}
+                    {storeCurrency} {data.averagePurchaseValue?.toFixed(2) || "0.00"}
                     </div>
                   </CardContent>
                 </Card>
@@ -146,11 +150,21 @@ export default function CustomerReports() {
                 <Table dir={t("dir") as "rtl" | "ltr"}>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="rtl:text-start">{t("Customer")}</TableHead>
-                      <TableHead className="rtl:text-start">{t("Purchases")}</TableHead>
-                      <TableHead className="rtl:text-start">{t("Total Spend")}</TableHead>
-                      <TableHead className="rtl:text-start">{t("Average Order Value")}</TableHead>
-                      <TableHead className="rtl:text-start">{t("Last Purchase")}</TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Customer")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Purchases")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Total Spend")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Average Order Value")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Last Purchase")}
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -160,9 +174,9 @@ export default function CustomerReports() {
                           {customer.name}
                         </TableCell>
                         <TableCell>{customer.purchaseCount}</TableCell>
-                        <TableCell>${customer.totalSpend.toFixed(2)}</TableCell>
+                        <TableCell>{storeCurrency} {customer.totalSpend.toFixed(2)}</TableCell>
                         <TableCell>
-                          ${customer.averageOrderValue.toFixed(2)}
+                          {storeCurrency} {customer.averageOrderValue.toFixed(2)}
                         </TableCell>
                         <TableCell>
                           {new Date(
@@ -182,11 +196,21 @@ export default function CustomerReports() {
                 <Table dir={t("dir") as "rtl" | "ltr"}>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="rtl:text-start">{t("Region")}</TableHead>
-                      <TableHead className="rtl:text-start">{t("Customers")}</TableHead>
-                      <TableHead className="rtl:text-start">{t("Orders")}</TableHead>
-                      <TableHead className="rtl:text-start">{t("Revenue")}</TableHead>
-                      <TableHead className="rtl:text-start">{t("Average Order Value")}</TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Region")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Customers")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Orders")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Revenue")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Average Order Value")}
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -197,9 +221,9 @@ export default function CustomerReports() {
                         </TableCell>
                         <TableCell>{location.customerCount}</TableCell>
                         <TableCell>{location.orderCount}</TableCell>
-                        <TableCell>${location.revenue.toFixed(2)}</TableCell>
+                        <TableCell>{storeCurrency} {location.revenue.toFixed(2)}</TableCell>
                         <TableCell>
-                          ${location.averageOrderValue.toFixed(2)}
+                          {storeCurrency} {location.averageOrderValue.toFixed(2)}
                         </TableCell>
                       </TableRow>
                     ))}

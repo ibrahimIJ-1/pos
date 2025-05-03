@@ -32,6 +32,7 @@ import {
   ComputerIcon,
   GitBranchIcon,
   Receipt,
+  ArrowBigLeftDashIcon,
 } from "lucide-react";
 import { usePermissions } from "@/hooks/usePermissions";
 import { UserRole, Permission, rolePermissions } from "@/lib/permissions";
@@ -45,6 +46,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import UserBranchSelector from "./branch/UserBranchSelector";
 import { useTranslations } from "next-intl";
 import LanguageSwitcher from "./language-switcher/LanguageSwitcher";
+import Logo from "./Logo";
 
 interface SidebarProps {
   roles?: (UserRole | string)[] | (UserRole | string);
@@ -67,17 +69,23 @@ export default function POSSidebar({
     setIsSidebarOpen(false);
   };
 
-  const handleLogout = () => {
-    // Implement actual logout logic here
-    logout();
-    navigate.push("/auth/login");
-  };
-
   const sidebarItems = [
+    {
+      icon: <LayoutDashboard className="h-4 w-4" />,
+      label: t("Dashboard"),
+      href: "/admin",
+      neededPermissions: rolePermissions[UserRole.MANAGER],
+    },
     {
       icon: <ShoppingCart className="h-4 w-4" />,
       label: t("POS"),
       href: "/pos",
+      neededPermissions: rolePermissions[UserRole.CASHIER],
+    },
+    {
+      icon: <ArrowBigLeftDashIcon className="h-4 w-4" />,
+      label: t("Refund"),
+      href: "/refund",
       neededPermissions: rolePermissions[UserRole.CASHIER],
     },
     // {
@@ -135,10 +143,11 @@ export default function POSSidebar({
               )}
             >
               <SheetTitle>
+                <Logo width={120} className="mb-3 animate-pulse-neon" />
                 {t("POS System")}
-                <div>
+                {/* <div>
                   <UserBranchSelector />
-                </div>
+                </div> */}
               </SheetTitle>
               <SheetDescription
                 className={cn("", t("dir") == "rtl" && "text-start")}
@@ -176,7 +185,7 @@ export default function POSSidebar({
                     );
                 })}
               </div>
-              <SheetFooter logout={handleLogout} />
+              <SheetFooter />
             </ScrollArea>
           </div>
         </SheetContent>
@@ -185,29 +194,13 @@ export default function POSSidebar({
   );
 }
 
-interface SheetFooterProps {
-  logout: () => void;
-}
+interface SheetFooterProps {}
 
-function SheetFooter({ logout }: SheetFooterProps) {
+function SheetFooter({}: SheetFooterProps) {
   const t = useTranslations();
   return (
     <div className="flex flex-col">
       <LanguageSwitcher />
-
-      <div
-        className={cn(
-          "flex items-center p-4 border-t neon-border rtl:flex-row-reverse",
-          "justify-between"
-        )}
-      >
-        {/* <ThemeSwitcher /> */}
-
-        <Button variant="ghost" size="sm" className="gap-2" onClick={logout}>
-          <LogOut className="h-4 w-4" />
-          <span>{t("Logout")}</span>
-        </Button>
-      </div>
     </div>
   );
 }

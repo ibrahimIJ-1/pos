@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React from "react";
 import {
@@ -13,8 +13,10 @@ import { CreditCard, DollarSign, Wallet } from "lucide-react";
 import { NumberInput } from "../ui/number-input";
 import { CartItem } from "@prisma/client";
 import { usePOS } from "@/providers/POSProvider";
+import { useSystem } from "@/providers/SystemProvider";
 
 function PaymentDialog() {
+  const { storeCurrency } = useSystem();
   const {
     cart,
     isPaymentDialogOpen,
@@ -26,14 +28,19 @@ function PaymentDialog() {
     calculateChange,
     createSaleMutation,
     handleCompleteSale,
-    trans
+    trans,
   } = usePOS();
 
   return (
     <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
-      <DialogContent className="sm:max-w-md border-neon-purple/30" dir={trans("dir")}>
+      <DialogContent
+        className="sm:max-w-md border-neon-purple/30"
+        dir={trans("dir")}
+      >
         <DialogHeader>
-          <DialogTitle className="rtl:text-start">{trans("Payment")}</DialogTitle>
+          <DialogTitle className="rtl:text-start">
+            {trans("Payment")}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-4">
@@ -66,7 +73,9 @@ function PaymentDialog() {
 
           {paymentMethod === "cash" && (
             <div className="space-y-2">
-              <label className="text-sm font-medium">{trans("Cash Received")}</label>
+              <label className="text-sm font-medium">
+                {trans("Cash Received")}
+              </label>
               <NumberInput
                 min={cart?.totalAmount}
                 step={1}
@@ -77,7 +86,9 @@ function PaymentDialog() {
 
               <div className="flex justify-between font-medium">
                 <span>{trans("Change")}</span>
-                <span>${calculateChange().toFixed(2)}</span>
+                <span>
+                  {storeCurrency} {calculateChange().toFixed(2)}
+                </span>
               </div>
             </div>
           )}
@@ -95,12 +106,16 @@ function PaymentDialog() {
             {(cart?.discountTotal ?? 0) > 0 && (
               <div className="flex justify-between text-sm text-green-600">
                 <span>{trans("Discount")}</span>
-                <span>-${cart?.discountTotal.toFixed(2) || 0}</span>
+                <span>
+                  -{storeCurrency} {cart?.discountTotal.toFixed(2) || 0}
+                </span>
               </div>
             )}
             <div className="flex justify-between font-bold">
               <span>{trans("Total")}</span>
-              <span>${cart?.totalAmount?.toFixed(2) || "0.00"}</span>
+              <span>
+                {storeCurrency} {cart?.totalAmount?.toFixed(2) || "0.00"}
+              </span>
             </div>
           </div>
         </div>
@@ -118,7 +133,9 @@ function PaymentDialog() {
             className="gap-2 bg-neon-purple hover:bg-neon-purple/90"
           >
             <Wallet className="h-4 w-4" />
-            {createSaleMutation.isPending ? trans("Processing")+"..." : trans("Complete Sale")}
+            {createSaleMutation.isPending
+              ? trans("Processing") + "..."
+              : trans("Complete Sale")}
           </Button>
         </DialogFooter>
       </DialogContent>

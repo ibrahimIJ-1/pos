@@ -11,8 +11,10 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Copy, List, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { CartItem } from "@prisma/client";
 import { usePOS } from "@/providers/POSProvider";
+import { useSystem } from "@/providers/SystemProvider";
 
 function CartSelector() {
+  const { storeCurrency } = useSystem();
   const {
     cart,
     multiCart,
@@ -70,7 +72,7 @@ function CartSelector() {
                           {trans("Cart")} #{getShortCartId(cartId)}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          {getCartItemCount(cartId)} {trans("items")} | $
+                          {getCartItemCount(cartId)} {trans("items")} | {storeCurrency}
                           {/* {multiCart?.carts[cartId]?.items.toFixed(
                                           2
                                         )} */}

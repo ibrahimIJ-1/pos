@@ -42,12 +42,12 @@ import {
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import { useSystem } from "@/providers/SystemProvider";
 
 const COLORS = ["#6366F1", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6"];
 
-
-
 export default function Dashboard() {
+  const { storeCurrency } = useSystem();
   const t = useTranslations();
   const DATE_RANGES = [
     { value: "last7", label: t("Last 7 days") },
@@ -90,7 +90,7 @@ export default function Dashboard() {
           <RefreshCw
             className={cn("mr-2 h-4 w-4", isRefreshing && "animate-spin")}
           />
-          {isRefreshing ? t("Refreshing")+"..." : t("Retry")}
+          {isRefreshing ? t("Refreshing") + "..." : t("Retry")}
         </Button>
       </motion.div>
     );
@@ -100,15 +100,15 @@ export default function Dashboard() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="p-6 space-y-6 bg-gray-50/50"
+      className="p-6 space-y-6 bg-gray-50/50 dark:bg-black"
     >
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             {t("Dashboard Overview")}
           </h1>
-          <p className="text-gray-500 flex items-center gap-1">
+          <p className="text-gray-500 dark:text-white/90 flex items-center gap-1">
             {format(new Date(), "MMMM d, yyyy")}
             <span className="h-1 w-1 bg-gray-400 rounded-full"></span>
             {t("Real-time data")}
@@ -138,14 +138,15 @@ export default function Dashboard() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200"
+                  className="absolute z-10 mt-1 w-full bg-white dark:bg-black shadow-lg rounded-md border border-gray-200"
                 >
                   {DATE_RANGES.map((range) => (
                     <button
                       key={range.value}
                       className={cn(
-                        "w-full text-left px-4 py-2 hover:bg-gray-100",
-                        dateRange === range.value && "bg-gray-100 font-medium"
+                        "w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-violet-900",
+                        dateRange === range.value &&
+                          "bg-gray-100 dark:bg-violet-700 font-medium"
                       )}
                       onClick={() => {
                         setDateRange(range.value);
@@ -171,7 +172,10 @@ export default function Dashboard() {
             />
             {t("Refresh")}
           </Button>
-          <Button className="gap-2 bg-gradient-to-r from-indigo-600 to-indigo-400 hover:from-indigo-700 hover:to-indigo-500 shadow-indigo-200 hover:shadow-indigo-300 shadow-sm">
+          <Button
+            variant={"default"}
+            className="gap-2 hover:from-indigo-700 hover:to-indigo-500 shadow-indigo-200 hover:shadow-indigo-300 shadow-sm"
+          >
             {t("Export Report")}
           </Button>
         </div>
@@ -217,7 +221,7 @@ export default function Dashboard() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Revenue Trend */}
-        <Card className="p-6 shadow-sm border-0 bg-white rounded-xl overflow-hidden">
+        <Card className="p-6 shadow-sm border-0 bg-white dark:bg-black dark:shadow-md dark:shadow-violet-800 rounded-xl overflow-hidden">
           <CardHeader className="p-0 pb-6">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg font-semibold flex items-center gap-2">
@@ -260,7 +264,9 @@ export default function Dashboard() {
                     axisLine={false}
                     tickLine={false}
                     tick={{ fill: "#6b7280", fontSize: 12 }}
-                    tickFormatter={(value) => `$${value / 1000}k`}
+                    tickFormatter={(value) =>
+                      `${storeCurrency} ${value / 1000}k`
+                    }
                   />
                   <Tooltip
                     content={({ active, payload }) => {
@@ -275,7 +281,8 @@ export default function Dashboard() {
                               {payload[0].payload.month}
                             </p>
                             <p className="text-indigo-600 font-semibold">
-                              ${payload[0]?.value?.toLocaleString()}
+                              {storeCurrency}{" "}
+                              {payload[0]?.value?.toLocaleString()}
                             </p>
                           </motion.div>
                         );
@@ -304,7 +311,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Sales by Category */}
-        <Card className="p-6 shadow-sm border-0 bg-white rounded-xl overflow-hidden">
+        <Card className="p-6 shadow-sm border-0 bg-white dark:bg-black dark:shadow-md dark:shadow-violet-800 rounded-xl overflow-hidden">
           <CardHeader className="p-0 pb-6">
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
               <BarChart2 className="h-5 w-5 text-green-500" />
@@ -332,7 +339,9 @@ export default function Dashboard() {
                     axisLine={false}
                     tickLine={false}
                     tick={{ fill: "#6b7280", fontSize: 12 }}
-                    tickFormatter={(value) => `$${value / 1000}k`}
+                    tickFormatter={(value) =>
+                      `${storeCurrency} ${value / 1000}k`
+                    }
                   />
                   <Tooltip
                     content={({ active, payload }) => {
@@ -347,7 +356,8 @@ export default function Dashboard() {
                               {payload[0].payload.id}
                             </p>
                             <p className="text-green-600 font-semibold">
-                              ${payload[0]?.value?.toLocaleString()}
+                              {storeCurrency}{" "}
+                              {payload[0]?.value?.toLocaleString()}
                             </p>
                           </motion.div>
                         );
@@ -368,7 +378,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Payment Methods */}
-        <Card className="p-6 shadow-sm border-0 bg-white rounded-xl overflow-hidden">
+        <Card className="p-6 shadow-sm border-0 bg-white dark:bg-black dark:shadow-md dark:shadow-violet-800 rounded-xl overflow-hidden">
           <CardHeader className="p-0 pb-6">
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
               <PieChart className="h-5 w-5 text-purple-500" />
@@ -414,7 +424,8 @@ export default function Dashboard() {
                               {payload[0].name}
                             </p>
                             <p className="text-purple-600 font-semibold">
-                              ${payload[0]?.value?.toLocaleString()}
+                              {storeCurrency}{" "}
+                              {payload[0]?.value?.toLocaleString()}
                             </p>
                             <p className="text-gray-500 text-sm">
                               {(payload[0].payload.percent * 100).toFixed(1)}%
@@ -443,7 +454,7 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Transactions */}
-      <Card className="p-6 shadow-sm border-0 bg-white rounded-xl overflow-hidden">
+      <Card className="p-6 shadow-sm border-0 bg-white dark:bg-black dark:shadow-md dark:shadow-violet-800 rounded-xl overflow-hidden">
         <CardHeader className="p-0 pb-6">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
@@ -473,16 +484,16 @@ export default function Dashboard() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg transition-colors"
+                    className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-white/10 rounded-lg transition-colors"
                   >
                     <div className="flex items-center gap-4">
                       <div
                         className={`p-3 rounded-lg ${
                           tx.type === "SALE"
-                            ? "bg-indigo-100 text-indigo-600"
+                            ? "bg-indigo-100 text-indigo-600 dark:bg-indigo-600 dark:text-indigo-100"
                             : tx.type === "REFUND"
-                            ? "bg-red-100 text-red-600"
-                            : "bg-gray-100 text-gray-600"
+                            ? "bg-red-100 text-red-600 dark:bg-red-600 dark:text-red-100"
+                            : "bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-100"
                         }`}
                       >
                         <CreditCard className="h-5 w-5" />
@@ -495,9 +506,9 @@ export default function Dashboard() {
                             ? t("Refund")
                             : tx.type}
                         </p>
-                        <p className="text-sm text-gray-500 flex items-center gap-1">
+                        <p className="text-sm text-gray-500 dark:text-gray-300 flex items-center gap-1">
                           {format(new Date(tx.createdAt), "MMM d, h:mm a")}
-                          <span className="h-1 w-1 bg-gray-400 rounded-full"></span>
+                          <span className="h-1 w-1 bg-gray-400 dark:bg-gray-50 rounded-full"></span>
                           {tx.paymentMethod}
                         </p>
                       </div>
@@ -517,7 +528,7 @@ export default function Dashboard() {
                         tx.type === "CASH_OUT"
                           ? "-"
                           : "+"}
-                        ${tx.amount.toFixed(2)}
+                        {storeCurrency} {tx.amount.toFixed(2)}
                       </div>
                       {tx.type === "SALE" ? (
                         <ArrowUpRight className="h-4 w-4 text-green-500" />
@@ -553,41 +564,42 @@ function StatCard({
   isCurrency?: boolean;
   color?: "indigo" | "green" | "blue" | "orange" | "red";
 }) {
+  const { storeCurrency } = useSystem();
   const t = useTranslations();
   const colorClasses = {
     indigo: {
-      bg: "bg-indigo-100",
-      text: "text-indigo-600",
+      bg: "bg-indigo-100 dark:bg-indigo-600",
+      text: "text-indigo-600 dark:text-indigo-100",
       changeText: "text-indigo-600",
     },
     green: {
-      bg: "bg-green-100",
-      text: "text-green-600",
+      bg: "bg-green-100 dark:bg-green-600",
+      text: "text-green-600 dark:text-green-100",
       changeText: "text-green-600",
     },
     blue: {
-      bg: "bg-blue-100",
-      text: "text-blue-600",
+      bg: "bg-blue-100 dark:bg-blue-600",
+      text: "text-blue-600 dark:text-blue-100",
       changeText: "text-blue-600",
     },
     orange: {
-      bg: "bg-orange-100",
-      text: "text-orange-600",
+      bg: "bg-orange-100 dark:bg-orange-600",
+      text: "text-orange-600 dark:text-orange-100",
       changeText: "text-orange-600",
     },
     red: {
-      bg: "bg-red-100",
-      text: "text-red-600",
+      bg: "bg-red-100 dark:bg-red-600",
+      text: "text-red-600 dark:text-red-100",
       changeText: "text-red-600",
     },
   };
 
   return (
     <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.1 }}>
-      <Card className="p-6 shadow-sm border-0 bg-white rounded-xl overflow-hidden">
+      <Card className="p-6 shadow-sm border-0 bg-white dark:bg-black dark:shadow-md dark:shadow-violet-800 rounded-xl overflow-hidden">
         <CardHeader className="p-0 pb-4">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-medium text-gray-500">
+            <CardTitle className="text-sm font-medium text-gray-500 dark:text-white">
               {title}
             </CardTitle>
             <div
@@ -605,8 +617,8 @@ function StatCard({
             </>
           ) : (
             <>
-              <div className="text-2xl font-bold text-gray-900">
-                {isCurrency ? "$" : ""}
+              <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                {isCurrency ? `${storeCurrency}` : ""}
                 {value?.toLocaleString() || "0"}
                 {isCurrency ? "" : "+"}
               </div>

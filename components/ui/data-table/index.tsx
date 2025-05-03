@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import {
   ColumnDef,
@@ -46,8 +45,11 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const t = useTranslations();
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
@@ -75,10 +77,16 @@ export function DataTable<TData, TValue>({
         {filterColumn && (
           <Input
             placeholder={filterPlaceholder}
-            value={(table.getColumn(filterColumn)?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn(filterColumn)?.setFilterValue(event.target.value)
+            value={
+              (table.getColumn(filterColumn)?.getFilterValue() as string) ?? ""
             }
+            onChange={(event) => {
+              try {
+                table
+                  .getColumn(filterColumn)
+                  ?.setFilterValue(event.target.value);
+              } catch (error) {}
+            }}
             className="max-w-sm neon-input transition-shadow duration-300"
           />
         )}

@@ -38,8 +38,10 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import useAdvancedReports from "@/lib/reports-service";
 import { useTranslations } from "next-intl";
+import { useSystem } from "@/providers/SystemProvider";
 
 export function AdvancedReports() {
+  const { storeCurrency } = useSystem();
   const t = useTranslations();
   const [reportType, setReportType] = useState<
     "sales" | "inventory" | "customers" | "profit"
@@ -97,7 +99,7 @@ export function AdvancedReports() {
             index="date"
             categories={data.categories ?? []}
             colors={data.colors || ["primary", "secondary"]}
-            valueFormatter={(value) => `$${value.toFixed(2)}`}
+            valueFormatter={(value) => `${storeCurrency} ${value.toFixed(2)}`}
             showLegend={true}
             showXAxis={true}
             showYAxis={true}
@@ -115,7 +117,7 @@ export function AdvancedReports() {
             index="date"
             categories={data.categories ?? []}
             colors={data.colors || ["primary", "accent", "secondary"]}
-            valueFormatter={(value) => `$${value.toFixed(2)}`}
+            valueFormatter={(value) => `${storeCurrency} ${value.toFixed(2)}`}
             showLegend={true}
             showXAxis={true}
             showYAxis={true}
@@ -141,7 +143,7 @@ export function AdvancedReports() {
                 "muted",
               ]
             }
-            valueFormatter={(value) => `$${value.toFixed(2)}`}
+            valueFormatter={(value) => `${storeCurrency} ${value.toFixed(2)}`}
             showLabel={true}
             showAnimation={true}
             height={300}
@@ -157,7 +159,7 @@ export function AdvancedReports() {
             index="date"
             categories={data.categories ?? []}
             colors={data.colors || ["primary", "secondary"]}
-            valueFormatter={(value) => `$${value.toFixed(2)}`}
+            valueFormatter={(value) => `${storeCurrency} ${value.toFixed(2)}`}
             showLegend={true}
             showXAxis={true}
             showYAxis={true}
@@ -308,7 +310,11 @@ export function AdvancedReports() {
           {data && data.summary && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
               {data.summary.map((item: any, index: number) => (
-                <Card key={index} className="bg-muted/40" dir={t("dir") as "rtl" | "ltr"}>
+                <Card
+                  key={index}
+                  className="bg-muted/40"
+                  dir={t("dir") as "rtl" | "ltr"}
+                >
                   <CardContent className="p-6">
                     <div className="text-sm text-muted-foreground">
                       {t(item.label)}
@@ -342,7 +348,10 @@ export function AdvancedReports() {
                   <thead>
                     <tr className="border-b">
                       {data.tableHeaders?.map((header: any, index: number) => (
-                        <th key={index} className="text-left py-3 px-4 rtl:text-start">
+                        <th
+                          key={index}
+                          className="text-left py-3 px-4 rtl:text-start"
+                        >
                           {t(header)}
                         </th>
                       ))}

@@ -17,6 +17,7 @@ import { Percent, Tag, Search, Calendar } from "lucide-react";
 import { DiscountType } from "@prisma/client";
 import { usePOSDiscounts } from "@/lib/discounts-service";
 import { usePOS } from "@/providers/POSProvider";
+import { useSystem } from "@/providers/SystemProvider";
 
 interface DiscountSelectorProps {
   open: boolean;
@@ -29,6 +30,7 @@ export function DiscountSelector({
   onOpenChange,
   onSelectDiscount,
 }: DiscountSelectorProps) {
+  const { storeCurrency } = useSystem();
   const { trans } = usePOS();
   const { data: discounts = [], isLoading } = usePOSDiscounts();
   const [searchTerm, setSearchTerm] = useState("");
@@ -60,7 +62,7 @@ export function DiscountSelector({
       case "PERCENTAGE":
         return `${value}% off`;
       case "FIXED":
-        return `$${value.toFixed(2)} off`;
+        return `${storeCurrency} ${value.toFixed(2)} off`;
       case "BUY_X_GET_Y":
         return "Buy X Get Y Free";
       default:
@@ -132,7 +134,7 @@ export function DiscountSelector({
 
                     {discount.minPurchaseAmount && (
                       <span className="text-xs text-muted-foreground">
-                        {trans("Min")}. {trans("purchase")}: $
+                        {trans("Min")}. {trans("purchase")}: {storeCurrency}
                         {discount.minPurchaseAmount.toFixed(2)}
                       </span>
                     )}
