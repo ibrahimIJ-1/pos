@@ -20,8 +20,10 @@ import { DiscountDialog } from "./DiscountDialog";
 import { Branch, Discount, DiscountType } from "@prisma/client";
 import { useDeleteDiscount, useDiscounts } from "@/lib/discounts-service";
 import { useTranslations } from "next-intl";
+import { useSystem } from "@/providers/SystemProvider";
 
 export const DiscountDataTable = ({ branches }: { branches: Branch[] }) => {
+  const {storeCurrency} = useSystem();
   const t = useTranslations();
   const { toast } = useToast();
   const { data: discounts = [] } = useDiscounts();
@@ -75,7 +77,7 @@ export const DiscountDataTable = ({ branches }: { branches: Branch[] }) => {
       case "percentage":
         return `${value}% off`;
       case "fixed":
-        return `$${value.toFixed(2)} off`;
+        return `${storeCurrency} ${value.toFixed(2)} off`;
       case "buy_x_get_y":
         return "Buy X Get Y Free";
       default:

@@ -4,6 +4,7 @@ import Sidebar from "@/components/sidebar";
 import { Permission, UserRole } from "@/lib/permissions";
 import { ReactNode } from "react";
 import Navbar from "@/components/Navbar";
+import { SystemProvider } from "@/providers/SystemProvider";
 
 interface AdminLayoutProps {
   children?: ReactNode;
@@ -17,10 +18,12 @@ export default function Layout({ children }: AdminLayoutProps) {
       <div className="flex min-h-screen dark:bg-black dark:border-b-1 dark:border-r-1 dark:border-l-1 rounded-md dark:shadow-md dark:shadow-violet-700 dark:border-violet-800">
         <main className="flex-1 overflow-y-auto">
           <div className="">
-            <Navbar>
-              <Sidebar additionalPermissions={[]} />
-            </Navbar>
-            {children}
+            <SystemProvider>
+              <Navbar>
+                <Sidebar additionalPermissions={[]} />
+              </Navbar>
+              {children}
+            </SystemProvider>
           </div>
         </main>
         <Toaster />

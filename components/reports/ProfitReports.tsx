@@ -36,8 +36,10 @@ import {
 } from "date-fns";
 import { useProfitReports } from "@/lib/reports-service";
 import { useTranslations } from "next-intl";
+import { useSystem } from "@/providers/SystemProvider";
 
 export default function ProfitReports() {
+  const { storeCurrency } = useSystem();
   const t = useTranslations();
   const [dateRange, setDateRange] = useState<
     "day" | "week" | "month" | "custom"
@@ -164,7 +166,7 @@ export default function ProfitReports() {
                       {t("Total Revenue")}
                     </div>
                     <div className="text-2xl font-bold">
-                      ${data.totalRevenue?.toFixed(2) || "0.00"}
+                    {storeCurrency} {data.totalRevenue?.toFixed(2) || "0.00"}
                     </div>
                     {data.revenueGrowth !== undefined && (
                       <div
@@ -188,7 +190,7 @@ export default function ProfitReports() {
                       {t("Cost of Goods")}
                     </div>
                     <div className="text-2xl font-bold">
-                      ${data.totalCosts?.toFixed(2) || "0.00"}
+                      {storeCurrency} {data.totalCosts?.toFixed(2) || "0.00"}
                     </div>
                   </CardContent>
                 </Card>
@@ -199,7 +201,7 @@ export default function ProfitReports() {
                       {t("Gross Profit")}
                     </div>
                     <div className="text-2xl font-bold">
-                      ${data.grossProfit?.toFixed(2) || "0.00"}
+                      {storeCurrency} {data.grossProfit?.toFixed(2) || "0.00"}
                     </div>
                     {data.profitGrowth !== undefined && (
                       <div
@@ -234,11 +236,21 @@ export default function ProfitReports() {
                 <Table dir={t("dir") as "rtl" | "ltr"}>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="rtl:text-start">{t("Category")}</TableHead>
-                      <TableHead className="rtl:text-start">{t("Revenue")}</TableHead>
-                      <TableHead className="rtl:text-start">{t("Cost")}</TableHead>
-                      <TableHead className="rtl:text-start">{t("Profit")}</TableHead>
-                      <TableHead className="rtl:text-start">{t("Margin")}</TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Category")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Revenue")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Cost")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Profit")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Margin")}
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -247,9 +259,9 @@ export default function ProfitReports() {
                         <TableCell className="font-medium">
                           {category.name}
                         </TableCell>
-                        <TableCell>${category.revenue.toFixed(2)}</TableCell>
-                        <TableCell>${category.cost.toFixed(2)}</TableCell>
-                        <TableCell>${category.profit.toFixed(2)}</TableCell>
+                        <TableCell>{storeCurrency} {category.revenue.toFixed(2)}</TableCell>
+                        <TableCell>{storeCurrency} {category.cost.toFixed(2)}</TableCell>
+                        <TableCell>{storeCurrency} {category.profit.toFixed(2)}</TableCell>
                         <TableCell>{category.margin.toFixed(1)}%</TableCell>
                       </TableRow>
                     ))}
@@ -291,9 +303,9 @@ export default function ProfitReports() {
                           {product.name}
                         </TableCell>
                         <TableCell>{product.unitsSold}</TableCell>
-                        <TableCell>${product.revenue.toFixed(2)}</TableCell>
-                        <TableCell>${product.cost.toFixed(2)}</TableCell>
-                        <TableCell>${product.profit.toFixed(2)}</TableCell>
+                        <TableCell>{storeCurrency} {product.revenue.toFixed(2)}</TableCell>
+                        <TableCell>{storeCurrency} {product.cost.toFixed(2)}</TableCell>
+                        <TableCell>{storeCurrency} {product.profit.toFixed(2)}</TableCell>
                         <TableCell>{product.margin.toFixed(1)}%</TableCell>
                       </TableRow>
                     ))}

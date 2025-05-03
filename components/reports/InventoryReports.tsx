@@ -21,8 +21,10 @@ import { reportsApi } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import { useInventoryReports } from "@/lib/reports-service";
 import { useTranslations } from "next-intl";
+import { useSystem } from "@/providers/SystemProvider";
 
 export default function InventoryReports() {
+  const { storeCurrency } = useSystem();
   const t = useTranslations();
   const [showLowStock, setShowLowStock] = useState(false);
 
@@ -150,12 +152,24 @@ export default function InventoryReports() {
                 <Table dir={t("dir") as "rtl" | "ltr"}>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="rtl:text-start">{t("Product")}</TableHead>
-                      <TableHead className="rtl:text-start">{t("SKU")}</TableHead>
-                      <TableHead className="rtl:text-start">{t("Category")}</TableHead>
-                      <TableHead className="rtl:text-start">{t("Current Stock")}</TableHead>
-                      <TableHead className="rtl:text-start">{t("Status")}</TableHead>
-                      <TableHead className="rtl:text-start">{t("Restock Value")}</TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Product")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("SKU")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Category")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Current Stock")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Status")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Restock Value")}
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -178,7 +192,7 @@ export default function InventoryReports() {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            $
+                            {storeCurrency}
                             {(
                               product.cost *
                               Math.max(
@@ -199,12 +213,24 @@ export default function InventoryReports() {
                 <Table dir={t("dir") as "rtl" | "ltr"}>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="rtl:text-start">{t("Category")}</TableHead>
-                      <TableHead className="rtl:text-start">{t("Product Count")}</TableHead>
-                      <TableHead className="rtl:text-start">{t("Total Stock")}</TableHead>
-                      <TableHead className="rtl:text-start">{t("Cost Value")}</TableHead>
-                      <TableHead className="rtl:text-start">{t("Retail Value")}</TableHead>
-                      <TableHead className="rtl:text-start">{t("Potential Profit")}</TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Category")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Product Count")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Total Stock")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Cost Value")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Retail Value")}
+                      </TableHead>
+                      <TableHead className="rtl:text-start">
+                        {t("Potential Profit")}
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -215,12 +241,14 @@ export default function InventoryReports() {
                         </TableCell>
                         <TableCell>{category.productCount}</TableCell>
                         <TableCell>{category.totalStock}</TableCell>
-                        <TableCell>${category.costValue.toFixed(2)}</TableCell>
                         <TableCell>
-                          ${category.retailValue.toFixed(2)}
+                          {storeCurrency} {category.costValue.toFixed(2)}
                         </TableCell>
                         <TableCell>
-                          ${category.potentialProfit.toFixed(2)}
+                          {storeCurrency} {category.retailValue.toFixed(2)}
+                        </TableCell>
+                        <TableCell>
+                          {storeCurrency} {category.potentialProfit.toFixed(2)}
                         </TableCell>
                       </TableRow>
                     ))}

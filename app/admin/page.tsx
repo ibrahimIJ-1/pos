@@ -42,12 +42,12 @@ import {
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import { useSystem } from "@/providers/SystemProvider";
 
 const COLORS = ["#6366F1", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6"];
 
-
-
 export default function Dashboard() {
+  const { storeCurrency } = useSystem();
   const t = useTranslations();
   const DATE_RANGES = [
     { value: "last7", label: t("Last 7 days") },
@@ -90,7 +90,7 @@ export default function Dashboard() {
           <RefreshCw
             className={cn("mr-2 h-4 w-4", isRefreshing && "animate-spin")}
           />
-          {isRefreshing ? t("Refreshing")+"..." : t("Retry")}
+          {isRefreshing ? t("Refreshing") + "..." : t("Retry")}
         </Button>
       </motion.div>
     );
@@ -100,7 +100,7 @@ export default function Dashboard() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="p-6 space-y-6 bg-gray-50/50 dark:bg-black" 
+      className="p-6 space-y-6 bg-gray-50/50 dark:bg-black"
     >
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -145,7 +145,8 @@ export default function Dashboard() {
                       key={range.value}
                       className={cn(
                         "w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-violet-900",
-                        dateRange === range.value && "bg-gray-100 dark:bg-violet-700 font-medium"
+                        dateRange === range.value &&
+                          "bg-gray-100 dark:bg-violet-700 font-medium"
                       )}
                       onClick={() => {
                         setDateRange(range.value);
@@ -171,7 +172,10 @@ export default function Dashboard() {
             />
             {t("Refresh")}
           </Button>
-          <Button variant={"default"} className="gap-2 hover:from-indigo-700 hover:to-indigo-500 shadow-indigo-200 hover:shadow-indigo-300 shadow-sm">
+          <Button
+            variant={"default"}
+            className="gap-2 hover:from-indigo-700 hover:to-indigo-500 shadow-indigo-200 hover:shadow-indigo-300 shadow-sm"
+          >
             {t("Export Report")}
           </Button>
         </div>
@@ -260,7 +264,9 @@ export default function Dashboard() {
                     axisLine={false}
                     tickLine={false}
                     tick={{ fill: "#6b7280", fontSize: 12 }}
-                    tickFormatter={(value) => `$${value / 1000}k`}
+                    tickFormatter={(value) =>
+                      `${storeCurrency} ${value / 1000}k`
+                    }
                   />
                   <Tooltip
                     content={({ active, payload }) => {
@@ -275,7 +281,8 @@ export default function Dashboard() {
                               {payload[0].payload.month}
                             </p>
                             <p className="text-indigo-600 font-semibold">
-                              ${payload[0]?.value?.toLocaleString()}
+                              {storeCurrency}{" "}
+                              {payload[0]?.value?.toLocaleString()}
                             </p>
                           </motion.div>
                         );
@@ -332,7 +339,9 @@ export default function Dashboard() {
                     axisLine={false}
                     tickLine={false}
                     tick={{ fill: "#6b7280", fontSize: 12 }}
-                    tickFormatter={(value) => `$${value / 1000}k`}
+                    tickFormatter={(value) =>
+                      `${storeCurrency} ${value / 1000}k`
+                    }
                   />
                   <Tooltip
                     content={({ active, payload }) => {
@@ -347,7 +356,8 @@ export default function Dashboard() {
                               {payload[0].payload.id}
                             </p>
                             <p className="text-green-600 font-semibold">
-                              ${payload[0]?.value?.toLocaleString()}
+                              {storeCurrency}{" "}
+                              {payload[0]?.value?.toLocaleString()}
                             </p>
                           </motion.div>
                         );
@@ -414,7 +424,8 @@ export default function Dashboard() {
                               {payload[0].name}
                             </p>
                             <p className="text-purple-600 font-semibold">
-                              ${payload[0]?.value?.toLocaleString()}
+                              {storeCurrency}{" "}
+                              {payload[0]?.value?.toLocaleString()}
                             </p>
                             <p className="text-gray-500 text-sm">
                               {(payload[0].payload.percent * 100).toFixed(1)}%
@@ -517,7 +528,7 @@ export default function Dashboard() {
                         tx.type === "CASH_OUT"
                           ? "-"
                           : "+"}
-                        ${tx.amount.toFixed(2)}
+                        {storeCurrency} {tx.amount.toFixed(2)}
                       </div>
                       {tx.type === "SALE" ? (
                         <ArrowUpRight className="h-4 w-4 text-green-500" />
@@ -553,6 +564,7 @@ function StatCard({
   isCurrency?: boolean;
   color?: "indigo" | "green" | "blue" | "orange" | "red";
 }) {
+  const { storeCurrency } = useSystem();
   const t = useTranslations();
   const colorClasses = {
     indigo: {
@@ -606,7 +618,7 @@ function StatCard({
           ) : (
             <>
               <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                {isCurrency ? "$" : ""}
+                {isCurrency ? `${storeCurrency}` : ""}
                 {value?.toLocaleString() || "0"}
                 {isCurrency ? "" : "+"}
               </div>

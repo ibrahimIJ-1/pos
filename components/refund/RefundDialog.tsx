@@ -12,8 +12,10 @@ import { Button } from "../ui/button";
 import { Wallet } from "lucide-react";
 import { NumberInput } from "../ui/number-input";
 import { useRefund } from "@/providers/RefundProvider";
+import { useSystem } from "@/providers/SystemProvider";
 
 function RefundDialog() {
+  const { storeCurrency } = useSystem();
   const {
     refund,
     handleCompleteRefund,
@@ -56,7 +58,7 @@ function RefundDialog() {
 
             <div className="flex justify-between font-bold">
               <span>{trans("Total")}</span>
-              <span>${refund?.totalAmount?.toFixed(2) || "0.00"}</span>
+              <span>{storeCurrency} {refund?.totalAmount?.toFixed(2) || "0.00"}</span>
             </div>
           </div>
         </div>

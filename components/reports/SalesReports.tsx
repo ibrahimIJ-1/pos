@@ -47,8 +47,10 @@ import {
 import { LineChart, BarChart } from "@/components/ui/chart";
 import { useSalesReports } from "@/lib/reports-service";
 import { useTranslations } from "next-intl";
+import { useSystem } from "@/providers/SystemProvider";
 
 export default function SalesReports() {
+  const { storeCurrency } = useSystem();
   const t = useTranslations();
   const [dateRange, setDateRange] = useState<
     "day" | "week" | "month" | "custom"
@@ -191,7 +193,7 @@ export default function SalesReports() {
                       <TrendingUp className="h-4 w-4 text-green-500" />
                     </div>
                     <div className="text-2xl font-bold">
-                      ${data.totalSales?.toFixed(2) || "0.00"}
+                    {storeCurrency} {data.totalSales?.toFixed(2) || "0.00"}
                     </div>
                     {data.salesGrowth !== undefined && (
                       <div
@@ -253,7 +255,7 @@ export default function SalesReports() {
                       <CalendarRange className="h-4 w-4 text-purple-500" />
                     </div>
                     <div className="text-2xl font-bold">
-                      ${data.averageTransactionValue?.toFixed(2) || "0.00"}
+                    {storeCurrency} {data.averageTransactionValue?.toFixed(2) || "0.00"}
                     </div>
                     {data.avgTransactionGrowth !== undefined && (
                       <div
@@ -312,7 +314,7 @@ export default function SalesReports() {
                       valueFormatter={(value) =>
                         typeof value === "number"
                           ? value > 100
-                            ? `$${value.toFixed(0)}`
+                            ? `${storeCurrency} ${value.toFixed(0)}`
                             : value.toString()
                           : value
                       }
@@ -333,7 +335,7 @@ export default function SalesReports() {
                       valueFormatter={(value) =>
                         typeof value === "number"
                           ? value > 100
-                            ? `$${value.toFixed(0)}`
+                            ? `${storeCurrency} ${value.toFixed(0)}`
                             : value.toString()
                           : value
                       }
@@ -379,7 +381,7 @@ export default function SalesReports() {
                               {item.method}
                             </TableCell>
                             <TableCell>{item.count}</TableCell>
-                            <TableCell>${item.amount?.toFixed(2)}</TableCell>
+                            <TableCell>{storeCurrency} {item.amount?.toFixed(2)}</TableCell>
                             <TableCell>
                               {item.percentage?.toFixed(1)}%
                             </TableCell>
@@ -420,7 +422,7 @@ export default function SalesReports() {
                             <TableCell className="font-medium">
                               {item.category}
                             </TableCell>
-                            <TableCell>${item.sales?.toFixed(2)}</TableCell>
+                            <TableCell>{storeCurrency} {item.sales?.toFixed(2)}</TableCell>
                             <TableCell>
                               {item.percentage?.toFixed(1)}%
                             </TableCell>
@@ -485,10 +487,10 @@ export default function SalesReports() {
                             <TableCell>{product.category}</TableCell>
                             <TableCell>{product.quantitySold}</TableCell>
                             <TableCell>
-                              ${product.revenue?.toFixed(2)}
+                              {storeCurrency} {product.revenue?.toFixed(2)}
                             </TableCell>
                             <TableCell>
-                              $
+                              {storeCurrency} 
                               {(product.revenue && product.quantitySold
                                 ? product.revenue / product.quantitySold
                                 : 0
@@ -536,11 +538,11 @@ export default function SalesReports() {
                                 {employee.name}
                               </TableCell>
                               <TableCell>
-                                ${employee.sales?.toFixed(2)}
+                                {storeCurrency} {employee.sales?.toFixed(2)}
                               </TableCell>
                               <TableCell>{employee.transactions}</TableCell>
                               <TableCell>
-                                ${employee.average?.toFixed(2)}
+                                {storeCurrency} {employee.average?.toFixed(2)}
                               </TableCell>
                               <TableCell>
                                 {(data.totalSales && employee.sales

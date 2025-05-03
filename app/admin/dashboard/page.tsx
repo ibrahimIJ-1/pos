@@ -25,6 +25,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getDashboardData } from "@/actions/dashboard/get-dashboard-data";
+import { useSystem } from "@/providers/SystemProvider";
 
 // Type definitions for our data
 type DashboardData = {
@@ -45,6 +46,7 @@ type DashboardData = {
 };
 
 export default function Dashboard() {
+  const {storeCurrency} = useSystem();
   const userRoles = [UserRole.ADMIN, UserRole.MANAGER, UserRole.CASHIER];
   const { isAdmin } = usePermissions(userRoles);
 
@@ -79,7 +81,7 @@ export default function Dashboard() {
             ) : (
               <>
                 <div className="text-2xl font-bold">
-                  $
+                  {storeCurrency}
                   {data?.totalRevenue.toLocaleString("en-US", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
@@ -197,7 +199,7 @@ export default function Dashboard() {
                   tickSize: 5,
                   tickPadding: 5,
                   tickRotation: 0,
-                  format: (value) => `$${value.toLocaleString()}`,
+                  format: (value) => `${storeCurrency} ${value.toLocaleString()}`,
                 }}
                 colors={["hsl(var(--primary))"]}
                 pointSize={10}
@@ -332,7 +334,7 @@ export default function Dashboard() {
                   tickSize: 5,
                   tickPadding: 5,
                   tickRotation: 0,
-                  format: (value) => `$${value.toLocaleString()}`,
+                  format: (value) => `${storeCurrency} ${value.toLocaleString()}`,
                 }}
                 labelSkipWidth={12}
                 labelSkipHeight={12}
@@ -408,7 +410,7 @@ export default function Dashboard() {
                       tx.type === "CASH_OUT"
                         ? "-"
                         : "+"}
-                      ${tx.amount.toFixed(2)}
+                      {storeCurrency} {tx.amount.toFixed(2)}
                     </div>
                   </div>
                 ))}

@@ -35,6 +35,7 @@ import { DatabaseInitializer } from "@/components/DatabaseInitializer";
 import { UserRoleManager } from "@/components/user-management/UserRoleManager";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import { NumberInput } from "@/components/ui/number-input";
 const icon = await import("@/public/logo.svg");
 interface IStoreSettings {
   storeName: string;
@@ -43,6 +44,7 @@ interface IStoreSettings {
   currency: string;
   taxEnabled: string;
   productImages: string;
+  nearestValue: string;
   logo: string | File;
 }
 export default function SettingsPage() {
@@ -67,6 +69,7 @@ export default function SettingsPage() {
     taxEnabled: "true",
     productImages: "false",
     logo: "",
+    nearestValue: "0",
   });
 
   const [notificationSettings, setNotificationSettings] = useState({
@@ -104,6 +107,7 @@ export default function SettingsPage() {
           taxEnabled: storeData.taxEnabled || "true",
           productImages: generalData.productImages || "false",
           logo: storeData.logo || "",
+          nearestValue: storeData.nearestValue || "0",
         });
         if (storeData.logo) {
           setLogoImage(storeData.logo);
@@ -143,6 +147,7 @@ export default function SettingsPage() {
         currency: { value: storeSettings.currency, category: "store" },
         taxEnabled: { value: storeSettings.taxEnabled, category: "store" },
         logo: { value: storeSettings.logo, category: "store" },
+        nearestValue: { value: storeSettings.nearestValue, category: "store" },
         productImages: {
           value: storeSettings.productImages,
           category: "store",
@@ -427,11 +432,25 @@ export default function SettingsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="usd">USD ($)</SelectItem>
+                    <SelectItem value="IQD">IQD (IQD)</SelectItem>
+                    <SelectItem value="SP">SP (SP)</SelectItem>
                     <SelectItem value="eur">EUR (€)</SelectItem>
                     <SelectItem value="gbp">GBP (£)</SelectItem>
                     <SelectItem value="cad">CAD ($)</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="refund-days">{t("Nearest Amount (0 for none)")}</Label>
+                <NumberInput
+                  type="number"
+                  id="refund-days"
+                  value={Number(storeSettings.nearestValue)}
+                  onChange={(e) =>
+                    handleStoreChange("nearestValue", e.toFixed(2))
+                  }
+                  className="neon-input"
+                />
               </div>
 
               <div className="flex items-center justify-between pt-2">

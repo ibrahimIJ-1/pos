@@ -28,6 +28,7 @@ import { Product, BranchProduct, Branch } from "@prisma/client";
 import Decimal from "decimal.js";
 import { useCreateProduct, useUpdateProduct } from "@/lib/products-service";
 import { useTranslations } from "next-intl";
+import { useSystem } from "@/providers/SystemProvider";
 
 interface ProductFormProps {
   product?: Product & {
@@ -44,6 +45,7 @@ export function ProductForm({
   mode,
   branches,
 }: ProductFormProps) {
+  const { storeCurrency } = useSystem();
   const t = useTranslations();
   const productFormSchema = z.object({
     name: z.string().min(2, t("Name must be at least 2 characters") + "."),
@@ -365,7 +367,9 @@ export function ProductForm({
                     name={`branches.${index}.price`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("Price")} ($)</FormLabel>
+                        <FormLabel>
+                          {t("Price")} ({storeCurrency})
+                        </FormLabel>
                         <FormControl>
                           <NumberInput
                             min={0}
@@ -384,7 +388,9 @@ export function ProductForm({
                     name={`branches.${index}.cost`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("Cost")} ($)</FormLabel>
+                        <FormLabel>
+                          {t("Cost")} ({storeCurrency})
+                        </FormLabel>
                         <FormControl>
                           <NumberInput
                             min={0}
@@ -489,7 +495,11 @@ export function ProductForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>{t("Category")}</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value} dir={t("dir") as "rtl" | "ltr"}>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value}
+                dir={t("dir") as "rtl" | "ltr"}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder={t("Select category")} />

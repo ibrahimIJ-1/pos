@@ -15,8 +15,10 @@ import { usePOS } from "@/providers/POSProvider";
 import { Button } from "../ui/button";
 import { Minus, Plus, ShoppingCart, Trash } from "lucide-react";
 import Logo from "../Logo";
+import { useSystem } from "@/providers/SystemProvider";
 
 function CartItems() {
+  const { storeCurrency } = useSystem();
   const { cart, cartOps, updateCartItemQuantity,trans } = usePOS();
   return (
     <ScrollArea className="h-[calc(90vh-26rem)]" dir={trans("dir") as "rtl" | "ltr"}>
@@ -38,7 +40,7 @@ function CartItems() {
               <TableRow key={item.productId}>
                 <TableCell className="font-medium">{item.name}</TableCell>
                 <TableCell className="text-right">
-                  ${item?.price.toString()}
+                  {storeCurrency} {item?.price.toString()}
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center justify-center gap-1">
@@ -68,7 +70,7 @@ function CartItems() {
                   </div>
                 </TableCell>
                 <TableCell className="text-right">
-                  ${(Number(item.price) * item.quantity).toFixed(2)}
+                  {storeCurrency} {(Number(item.price) * item.quantity).toFixed(2)}
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center justify-center gap-1">

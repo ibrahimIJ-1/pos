@@ -7,6 +7,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { useReactToPrint } from "react-to-print";
 import { usePOS } from "@/providers/POSProvider";
 import Image from "next/image";
+import { useSystem } from "@/providers/SystemProvider";
 const icon = await import("@/public/logo.svg");
 
 interface InvoicePrintProps {
@@ -15,6 +16,7 @@ interface InvoicePrintProps {
 }
 
 export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
+  const { storeCurrency } = useSystem();
   const { trans } = usePOS();
   const [printing, setPrinting] = useState(false);
 
@@ -140,6 +142,7 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
         Id: data.saleNumber, // Invoice ID
         storeName: data.storeName, // storeName
         branchName: data.branch?.name, // branchName
+        storeCurrency: storeCurrency, // branchName
         branchAddress: data.branch?.address, // branchAddress
         cashierName: data.cashier?.name, // cashierName
         CustomerName: data.customer?.name || "Guest Customer", // Customer name
@@ -321,15 +324,15 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
                         {item.quantity}
                       </td>
                       <td className="py-2 px-4 text-sm text-right dark:text-black">
-                        ${item.unitPrice.toFixed(2)}
+                        {storeCurrency} {item.unitPrice.toFixed(2)}
                       </td>
                       <td className="py-2 px-4 text-sm text-right dark:text-black">
                         {Number(item.discountAmount) > 0
-                          ? `-$${item.discountAmount.toFixed(2)}`
+                          ? `-${storeCurrency} ${item.discountAmount.toFixed(2)}`
                           : "-"}
                       </td>
                       <td className="py-2 px-4 text-sm text-right font-medium dark:text-black">
-                        ${item.subtotal.toFixed(2)}
+                        {storeCurrency} {item.subtotal.toFixed(2)}
                       </td>
                     </tr>
                   ))}
@@ -347,7 +350,7 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
                     {trans("Subtotal")}:
                   </span>
                   <span className="dark:text-black">
-                    ${data.subtotal.toFixed(2)}
+                    {storeCurrency} {data.subtotal.toFixed(2)}
                   </span>
                 </div>
                 {data.discountTotal > 0 && (
@@ -356,20 +359,20 @@ export function InvoicePrint({ data, onClose }: InvoicePrintProps) {
                       {trans("Discount")}:
                     </span>
                     <span className="text-green-600">
-                      -${data.discountTotal.toFixed(2)}
+                      -{storeCurrency} {data.discountTotal.toFixed(2)}
                     </span>
                   </div>
                 )}
                 <div className="flex justify-between py-1 text-sm">
                   <span className="text-muted-foreground">{trans("Tax")}:</span>
                   <span className="dark:text-black">
-                    ${data.taxTotal.toFixed(2)}
+                    {storeCurrency} {data.taxTotal.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between py-2 border-t font-semibold">
                   <span>{trans("Total")}:</span>
                   <span className="dark:text-black">
-                    ${data.totalAmount.toFixed(2)}
+                    {storeCurrency} {data.totalAmount.toFixed(2)}
                   </span>
                 </div>
               </div>

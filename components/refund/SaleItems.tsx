@@ -12,8 +12,10 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Logo from "../Logo";
 import { useRefund } from "@/providers/RefundProvider";
+import { useSystem } from "@/providers/SystemProvider";
 
 function SaleItems() {
+  const { storeCurrency } = useSystem();
   const { saleItems, trans } = useRefund();
   return (
     <ScrollArea
@@ -40,7 +42,7 @@ function SaleItems() {
             <TableRow key={item.productId}>
               <TableCell className="font-medium">{item.productName}</TableCell>
               <TableCell className="text-right">
-                ${item?.unitPrice.toString()}
+                {storeCurrency} {item?.unitPrice.toString()}
               </TableCell>
               <TableCell>
                 <div className="flex items-center justify-center gap-1">
@@ -48,7 +50,7 @@ function SaleItems() {
                 </div>
               </TableCell>
               <TableCell className="text-right">
-                ${(Number(item.unitPrice) * item.quantity).toFixed(2)}
+                {storeCurrency} {(Number(item.unitPrice) * item.quantity).toFixed(2)}
               </TableCell>
             </TableRow>
           ))}

@@ -10,12 +10,14 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTransaction } from "@/lib/transactions-service";
 import { useTranslations } from "next-intl";
+import { useSystem } from "@/providers/SystemProvider";
 
 interface TransactionDetailsProps {
   id: string;
 }
 
 export function TransactionDetails({ id }: TransactionDetailsProps) {
+  const { storeCurrency } = useSystem();
   const t = useTranslations();
   const { data: transaction, isLoading, error } = useTransaction(id);
 
@@ -97,9 +99,11 @@ export function TransactionDetails({ id }: TransactionDetailsProps) {
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-sm font-medium text-muted-foreground">{t("Amount")}</p>
+            <p className="text-sm font-medium text-muted-foreground">
+              {t("Amount")}
+            </p>
             <p className="text-xl font-semibold">
-              ${Math.abs(Number(transaction.amount)).toFixed(2)}
+              {storeCurrency} {Math.abs(Number(transaction.amount)).toFixed(2)}
             </p>
           </div>
           <div>

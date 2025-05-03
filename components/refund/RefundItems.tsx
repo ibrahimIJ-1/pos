@@ -15,8 +15,10 @@ import { useRefund } from "@/providers/RefundProvider";
 import { Button } from "../ui/button";
 import { Minus, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSystem } from "@/providers/SystemProvider";
 
 function RefundItems() {
+  const { storeCurrency } = useSystem();
   const { refundItems, trans, changeItemQuantity } = useRefund();
   return (
     <ScrollArea
@@ -53,7 +55,7 @@ function RefundItems() {
             >
               <TableCell className="font-medium">{item.productName}</TableCell>
               <TableCell className="text-right">
-                ${item?.unitPrice.toString()}
+                {storeCurrency} {item?.unitPrice.toString()}
               </TableCell>
               <TableCell>
                 <div className="flex items-center justify-center gap-1">
@@ -90,7 +92,7 @@ function RefundItems() {
                 </div>
               </TableCell>
               <TableCell className="text-right">
-                ${(Number(item.unitPrice) * item.quantity).toFixed(2)}
+                {storeCurrency} {(Number(item.unitPrice) * item.quantity).toFixed(2)}
               </TableCell>
             </TableRow>
           ))}

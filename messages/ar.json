@@ -739,5 +739,6 @@
     "Approve": "قبول",
     "Reject": "رفض",
     "Logo": "اللوغو",
-    "Saving settings":"جاري حفظ الإعدادات"
+    "Saving settings":"جاري حفظ الإعدادات",
+    "Nearest Amount (0 for none)":"أقرب مبلغ (0 لا شيء)"
 }
