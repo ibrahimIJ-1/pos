@@ -4,8 +4,10 @@ import React, { ReactNode, useEffect, useState } from "react";
 import Logo from "./Logo";
 import LogoutButton from "./auth/LogoutButton";
 import { ThemeSwitcher } from "./ThemeSwitcher";
+import { useTranslations } from "next-intl";
 
 function Navbar({ children }: { children: ReactNode }) {
+  const t = useTranslations();
   const [time, setTime] = useState<string | null>(null);
 
   useEffect(() => {
@@ -20,23 +22,24 @@ function Navbar({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <div>
-      <div className="flex w-full justify-between mb-2 shadow-md bg-blue-50/70 dark:bg-white px-3 py-1">
-        <div className="flex gap-2 justify-start items-center">
-          {children}
-          <Logo width={70} />
-        </div>
-        <div className="flex gap-2 justify-end items-center">
-          {time !== null ? (
-            <div className="duration-1000 animate-pulse-neon font-semibold text-black">
-              {time}
-            </div>
-          ) : (
-            <div className="font-semibold text-black">Loading...</div>
-          )}
-          <ThemeSwitcher />
-          <LogoutButton />
-        </div>
+    <div
+      className="flex w-full justify-between mb-2 shadow-md bg-blue-50/70 dark:bg-white px-3 py-1"
+      dir={t("dir")}
+    >
+      <div className="flex gap-2 justify-start items-center">
+        {children}
+        <Logo width={70} />
+      </div>
+      <div className="flex gap-2 justify-end items-center">
+        {time !== null ? (
+          <div className="duration-1000 animate-pulse-neon font-semibold text-black">
+            {time}
+          </div>
+        ) : (
+          <div className="font-semibold text-black">Loading...</div>
+        )}
+        <ThemeSwitcher />
+        <LogoutButton />
       </div>
     </div>
   );

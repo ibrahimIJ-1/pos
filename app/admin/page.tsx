@@ -172,12 +172,12 @@ export default function Dashboard() {
             />
             {t("Refresh")}
           </Button>
-          <Button
+          {/* <Button
             variant={"default"}
             className="gap-2 hover:from-indigo-700 hover:to-indigo-500 shadow-indigo-200 hover:shadow-indigo-300 shadow-sm"
           >
             {t("Export Report")}
-          </Button>
+          </Button> */}
         </div>
       </div>
 
