@@ -245,13 +245,13 @@ export default function SettingsPage() {
             <span>{t("Store")}</span>
           </TabsTrigger>
 
-          <TabsTrigger
+          {/* <TabsTrigger
             value="notifications"
             className="flex items-center gap-1"
           >
             <Bell className="h-4 w-4" />
             <span>{t("Notifications")}</span>
-          </TabsTrigger>
+          </TabsTrigger> */}
 
           {checkPermission(Permission.EDIT_USERS) && (
             <TabsTrigger value="users" className="flex items-center gap-1">
@@ -453,7 +453,7 @@ export default function SettingsPage() {
                 />
               </div>
 
-              <div className="flex items-center justify-between pt-2">
+              {/* <div className="flex items-center justify-between pt-2">
                 <div className="space-y-0.5">
                   <Label htmlFor="tax-enabled">{t("Enable Tax")}</Label>
                   <p className="text-sm text-muted-foreground">
@@ -467,12 +467,12 @@ export default function SettingsPage() {
                     handleStoreChange("taxEnabled", checked.toString())
                   }
                 />
-              </div>
+              </div> */}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="notifications">
+        {/* <TabsContent value="notifications">
           <Card className="neon-card neon-border">
             <CardHeader>
               <CardTitle className="rtl:text-start">
@@ -542,7 +542,7 @@ export default function SettingsPage() {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabsContent> */}
 
         {checkPermission(Permission.EDIT_USERS) && (
           <TabsContent value="users">
