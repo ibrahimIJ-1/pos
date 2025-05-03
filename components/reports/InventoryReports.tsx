@@ -94,14 +94,14 @@ export default function InventoryReports() {
                   : t("Show Low Stock Only")}
               </Button>
 
-              <div className="flex gap-2">
+              {/* <div className="flex gap-2">
                 <Button variant="outline" size="icon" onClick={handleExport}>
                   <FileDown className="h-4 w-4" />
                 </Button>
                 <Button variant="outline" size="icon">
                   <Printer className="h-4 w-4" />
                 </Button>
-              </div>
+              </div> */}
             </div>
           </div>
         </CardHeader>

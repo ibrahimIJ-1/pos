@@ -250,14 +250,14 @@ export function AdvancedReports() {
                 </PopoverContent>
               </Popover>
 
-              <Button variant="outline" className="gap-2">
+              {/* <Button variant="outline" className="gap-2">
                 <FileDown className="h-4 w-4" />
                 {t("Export")}
               </Button>
 
               <Button variant="outline" size="icon">
                 <Sliders className="h-4 w-4" />
-              </Button>
+              </Button> */}
             </div>
           </div>
         </div>

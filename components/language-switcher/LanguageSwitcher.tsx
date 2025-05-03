@@ -33,6 +33,7 @@ export default function LanguageSwitcher() {
         <SelectContent>
           <SelectItem value="en">English</SelectItem>
           <SelectItem value="ar">العربية</SelectItem>
+          <SelectItem value="kr">كوردی</SelectItem>
         </SelectContent>
       </Select>
     </div>
