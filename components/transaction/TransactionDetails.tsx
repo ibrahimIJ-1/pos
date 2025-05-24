@@ -139,6 +139,9 @@ export function TransactionDetails({ id }: TransactionDetailsProps) {
           <p>
             {t("ID")}: {transaction.cashierId}
           </p>
+          <p>
+            {t("Name")}: {transaction.cashier?.name}
+          </p>
         </div>
 
         <div>
@@ -147,6 +150,9 @@ export function TransactionDetails({ id }: TransactionDetailsProps) {
           </p>
           <p>
             {t("ID")}: {transaction.registerId}
+          </p>
+          <p>
+            {t("Name")}: {transaction.register?.name}
           </p>
         </div>
       </CardContent>
