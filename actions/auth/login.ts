@@ -3,6 +3,7 @@
 import { PrismaClient } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 import * as jwt from "jsonwebtoken";
+import { getAllUserPermissions } from "../users/get-all-permissions";
 
 const prisma = new PrismaClient();
 
@@ -35,7 +36,6 @@ export default async function login(
       throw new Error("Invalid credentials");
     }
 
-    console.log("USER1", "ASDASD");
     const reg = await prisma.register.updateMany({
       where: {
         currentCashierId: user?.id,
@@ -53,7 +53,6 @@ export default async function login(
         currentCashierId: user?.id,
       },
     });
-    console.log("USER2", "ASDASD");
     // Generate JWT token
     const token = jwt.sign(
       {
@@ -67,6 +66,16 @@ export default async function login(
       { expiresIn: "8h" }
     );
 
+    const permissions = await getAllUserPermissions({
+      alterUser: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        roles: user.roles.map((role) => role.name),
+        avatar: user.avatar,
+      },
+    });
+
     // Return user data and token
     return {
       user: {
@@ -75,6 +84,7 @@ export default async function login(
         email: user.email,
         roles: user.roles.map((role) => role.name),
         avatar: user.avatar,
+        permissions,
       },
       token,
     };
