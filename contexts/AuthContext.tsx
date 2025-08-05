@@ -15,6 +15,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAllUserPermissions } from "@/actions/users/get-all-permissions";
 import logoutUser from "@/actions/auth/logout";
 import { useTranslations } from "next-intl";
+import { set } from "lodash";
 
 interface User {
   id: string;
@@ -69,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const getPermissions = () => {
-    getPermissionMutation.mutate();
+    getPermissionMutation.mutate({alterUser:undefined});
   };
   const getMacAddress = async () => {
     try {
@@ -135,6 +136,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         sameSite: "Strict",
       });
       setUser(user);
+      setPermissions(user.permissions || []);
+      console.log("User logged in:", user.permissions || []);
 
       toast.success(t("Successfully logged in"));
     } catch (error: any) {

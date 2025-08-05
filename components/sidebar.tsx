@@ -46,6 +46,7 @@ import UserBranchSelector from "./branch/UserBranchSelector";
 import { useTranslations } from "next-intl";
 import LanguageSwitcher from "./language-switcher/LanguageSwitcher";
 import Logo from "./Logo";
+import { SidebarItemType } from "@/lib/types/SidebarItemsType";
 
 interface SidebarProps {
   roles?: (UserRole | string)[] | (UserRole | string);
@@ -63,6 +64,9 @@ export default function Sidebar({
   const { toast } = useToast();
   const navigate = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [currentSidebarItems, setCurrentSidebarItems] = useState<
+    SidebarItemType[]
+  >([]);
 
   const closeSidebar = () => {
     setIsSidebarOpen(false);
@@ -161,6 +165,16 @@ export default function Sidebar({
     },
   ];
 
+  React.useEffect(() => {
+    const filteredItems = sidebarItems.filter((item) => {
+      if (item.neededPermissions.length === 0) return true;
+      return item.neededPermissions.some((perm) =>
+        permissions.has(perm as string)
+      );
+    });
+    setCurrentSidebarItems(filteredItems);
+  }, [permissions]);
+
   return (
     <TooltipProvider delayDuration={100}>
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
@@ -192,11 +206,11 @@ export default function Sidebar({
         </SheetTrigger>
         <SheetContent
           side={t("dir") == "ltr" ? "left" : "right"}
-          className="w-64 border-right p-0 flex flex-col justify-between"
+          className="h-[100vh] w-64 border-right p-0 flex flex-col justify-between"
         >
           <div
             className={cn(
-              "flex flex-col rtl:direction-reverse",
+              "flex flex-col rtl:direction-reverse overflow-y-scroll",
               t("dir") == "rtl" && ""
             )}
             dir={t("dir")}
@@ -222,32 +236,26 @@ export default function Sidebar({
             </SheetHeader>
             <ScrollArea>
               <div className="py-2">
-                {sidebarItems.map((item) => {
-                  if (
-                    item.neededPermissions.length == 0 ||
-                    item.neededPermissions.some((perm) =>
-                      permissions.has(perm as string)
-                    )
-                  )
-                    return (
-                      <Tooltip key={item.label}>
-                        <TooltipTrigger asChild>
-                          <Link
-                            href={item.href}
-                            onClick={closeSidebar}
-                            className={cn(
-                              "group flex items-center gap-3 rounded-md px-5 py-2 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800",
-                              t("dir") == "rtl" &&
-                                "justify-start flex-row-reverse"
-                            )}
-                          >
-                            {item.icon}
-                            <span>{item.label}</span>
-                          </Link>
-                        </TooltipTrigger>
-                        <TooltipContent>{item.label}</TooltipContent>
-                      </Tooltip>
-                    );
+                {currentSidebarItems.map((item) => {
+                  return (
+                    <Tooltip key={item.label}>
+                      <TooltipTrigger asChild>
+                        <Link
+                          href={item.href}
+                          onClick={closeSidebar}
+                          className={cn(
+                            "group flex items-center gap-3 rounded-md px-5 py-2 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800",
+                            t("dir") == "rtl" &&
+                              "justify-start flex-row-reverse"
+                          )}
+                        >
+                          {item.icon}
+                          <span>{item.label}</span>
+                        </Link>
+                      </TooltipTrigger>
+                      <TooltipContent>{item.label}</TooltipContent>
+                    </Tooltip>
+                  );
                 })}
               </div>
               <SheetFooter />
