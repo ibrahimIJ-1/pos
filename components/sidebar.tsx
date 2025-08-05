@@ -206,11 +206,11 @@ export default function Sidebar({
         </SheetTrigger>
         <SheetContent
           side={t("dir") == "ltr" ? "left" : "right"}
-          className="w-64 border-right p-0 flex flex-col justify-between"
+          className="h-[100vh] w-64 border-right p-0 flex flex-col justify-between"
         >
           <div
             className={cn(
-              "flex flex-col rtl:direction-reverse",
+              "flex flex-col rtl:direction-reverse overflow-y-scroll",
               t("dir") == "rtl" && ""
             )}
             dir={t("dir")}
