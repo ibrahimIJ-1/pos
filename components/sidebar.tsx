@@ -210,7 +210,7 @@ export default function Sidebar({
         >
           <div
             className={cn(
-              "flex flex-col rtl:direction-reverse overflow-y-scroll",
+              "flex flex-col rtl:direction-reverse overflow-y-scroll [scroll-bar:none] [-ms-overflow-style:none] [scrollbar-width:none]",
               t("dir") == "rtl" && ""
             )}
             dir={t("dir")}
