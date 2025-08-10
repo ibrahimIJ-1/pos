@@ -4,11 +4,14 @@ import { checkUserPermissions } from "@/actions/users/check-permissions";
 import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { checkUser } from "../Authorization";
+import { checkUserRoles } from "../users/check-role";
 78;
 export const getAllUserBranches = async () => {
   try {
-    await checkUserPermissions(rolePermissions[UserRole.OWNER]);
+    // await checkUserPermissions(rolePermissions[UserRole.OWNER]);
     const user = await checkUser();
+    const isOwner = await checkUserRoles([UserRole.OWNER]);
+
     const mainBranchId = await prisma.user.findUnique({
       where: {
         id: user.id,
@@ -19,10 +22,17 @@ export const getAllUserBranches = async () => {
     });
     const branches = await prisma.branch.findMany({
       where: {
+        isWarehouse: false,
+        isActive: true,
         users: {
-          some: {
-            id: user.id,
-          },
+          // If the user is an owner, fetch all branches
+          ...(isOwner
+            ? {}
+            : {
+                some: {
+                  id: user.id,
+                },
+              }),
         },
       },
       select: {

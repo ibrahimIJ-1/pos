@@ -14,7 +14,7 @@ export const activateBranch = async (id: string) => {
   try {
     // Check if register exists and is closed
     const branch = await prisma.branch.findUnique({
-      where: { id },
+      where: { id ,isWarehouse: false },
     });
 
     if (!branch) {

@@ -3,6 +3,7 @@ import { createBranch } from "@/actions/branches/create-branch";
 import { deactivateBranch } from "@/actions/branches/deactivate-branch";
 import { deleteBranch } from "@/actions/branches/delete-branch";
 import { getAllBranches } from "@/actions/branches/get-all-branches";
+import { getAllSelectableUserBranches } from "@/actions/branches/get-all-selectable-user-branches";
 import { getAllUserBranches } from "@/actions/branches/get-user-all-branches";
 import { setUserDefaultBranch } from "@/actions/branches/set-user-default-branch";
 import { updateBranch } from "@/actions/branches/update-branch";
@@ -15,6 +16,14 @@ export const useBranches = () => {
       queryFn: getAllBranches,
     });
   };
+
+export const useSelectableUserBranches = () => {
+    return useQuery({
+      queryKey: ["SelectableUserBranches"],
+      queryFn: getAllSelectableUserBranches,
+    });
+  };
+
   export const useUserBranches = () => {
     return useQuery({
       queryKey: ["userBranches"],
@@ -29,7 +38,7 @@ export const useBranches = () => {
       mutationFn: ({ name, address }: { name: string; address: string }) =>
         createBranch(name, address),
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["branches"] });
+        queryClient.invalidateQueries({ queryKey: ["SelectableUserBranches"] });
         toast.success("Branch deleted successfully");
       },
       onError: (error) => {
@@ -72,7 +81,7 @@ export const useBranches = () => {
         name: string;
       }) => updateBranch(id, name, address),
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["branches"] });
+        queryClient.invalidateQueries({ queryKey: ["SelectableUserBranches"] });
         toast.success("Branch deleted successfully");
       },
       onError: (error) => {
@@ -91,7 +100,7 @@ export const useBranches = () => {
     return useMutation({
       mutationFn: deleteBranch,
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["branches"] });
+        queryClient.invalidateQueries({ queryKey: ["SelectableUserBranches"] });
         toast.success("Branch deleted successfully");
       },
       onError: (error) => {
@@ -110,7 +119,7 @@ export const useBranches = () => {
     return useMutation({
       mutationFn: async ({ id }: { id: string }) => activateBranch(id),
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["branches"] });
+        queryClient.invalidateQueries({ queryKey: ["SelectableUserBranches"] });
         toast.success("Branch activated successfully");
       },
       onError: (error) => {
@@ -129,7 +138,7 @@ export const useBranches = () => {
     return useMutation({
       mutationFn: async ({ id }: { id: string }) => deactivateBranch(id),
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["branches"] });
+        queryClient.invalidateQueries({ queryKey: ["SelectableUserBranches"] });
         toast.success("Branch deactivated successfully");
       },
       onError: (error) => {
