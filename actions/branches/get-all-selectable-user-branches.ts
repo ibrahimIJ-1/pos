@@ -3,14 +3,32 @@
 import { checkUserPermissions } from "@/actions/users/check-permissions";
 import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
-78
-export const getAllBranches = async () => {
+import { checkUser } from "../Authorization";
+import { checkUserRoles } from "../users/check-role";
+78;
+export const getAllSelectableUserBranches = async () => {
   try {
-    await checkUserPermissions(rolePermissions[UserRole.OWNER]);
+    const user = await checkUser();
+    const isOwner = await checkUserRoles([UserRole.OWNER]);
+
+    if (!user) throw new Error("No user found");
 
     const branches = await prisma.branch.findMany({
-      where:{isWarehouse: false },
       orderBy: { created_at: "desc" },
+      where: {
+        isWarehouse: false,
+        isActive: true,
+        users: {
+          // If the user is an owner, fetch all branches
+          ...(isOwner
+            ? {}
+            : {
+                some: {
+                  id: user.id,
+                },
+              }),
+        },
+      },
     });
 
     // Ensure created_at is a valid Date object and format it

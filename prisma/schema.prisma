@@ -298,6 +298,7 @@ model Branch {
   name                String
   address             String?
   isActive            Boolean               @default(true) @map("is_active")
+  isWarehouse         Boolean               @default(false) @map("is_warehouse")
   created_at          DateTime              @default(now()) @map("created_at")
   updated_at          DateTime              @updatedAt @map("updated_at")
   Register            Register[]

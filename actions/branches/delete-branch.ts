@@ -9,7 +9,7 @@ export const deleteBranch = async (id: string) => {
     await checkUserPermissions(rolePermissions[UserRole.OWNER]);
 
     await prisma.branch.delete({
-      where: { id },
+      where: { id, isWarehouse: false },
     });
   } catch (error) {
     console.error("Error deleting branch:", error);

@@ -8,7 +8,7 @@ export const getBranchById = async (id: string) => {
   try {
     await checkUserPermissions(rolePermissions[UserRole.OWNER]);
     const branch = await prisma.branch.findUnique({
-      where: { id },
+      where: { id, isWarehouse: false },
     });
 
     if (!branch) throw new Error("No transaction found...");

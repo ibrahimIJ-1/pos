@@ -68,7 +68,7 @@ import { createNewUser } from "@/actions/users/create-new-user";
 import { updateUser, updateUserPassword } from "@/actions/users/update-user";
 import { deleteUserById } from "@/actions/users/delete-user";
 import { Branch } from "@prisma/client";
-import { useBranches } from "@/lib/branches-service";
+import { useBranches, useSelectableUserBranches } from "@/lib/branches-service";
 import { useTranslations } from "next-intl";
 
 // Define the shape of our user
@@ -143,7 +143,7 @@ export default function UsersPage() {
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [activeTab, setActiveTab] = useState("all");
   const { roles } = useRolesPermissions();
-  const { data: branches } = useBranches();
+  const { data: branches } = useSelectableUserBranches();
 
   // Form for adding new users
   const addForm = useForm<z.infer<typeof userFormSchema>>({

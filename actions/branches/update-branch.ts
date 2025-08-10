@@ -24,6 +24,7 @@ export const updateBranch = async (
       data: {
         name,
         address,
+        isWarehouse: false,
       },
     });
 

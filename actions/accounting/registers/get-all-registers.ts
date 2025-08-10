@@ -1,5 +1,6 @@
 "use server";
 
+import { getAllUserBranches } from "@/actions/branches/get-user-all-branches";
 import { checkUserPermissions } from "@/actions/users/check-permissions";
 import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
@@ -8,6 +9,8 @@ import { decimalToNumber } from "@/lib/utils";
 export const getAllRegisters = async () => {
   try {
     await checkUserPermissions(rolePermissions[UserRole.MANAGER]);
+    const branches = await getAllUserBranches();
+
     const registers = await prisma.register.findMany({
       include: {
         cashier: {
@@ -23,7 +26,14 @@ export const getAllRegisters = async () => {
           },
         },
       },
-
+      where: {
+        branch: {
+          id: {
+            in: branches.branches.map((branch) => branch.id),
+          },
+          isActive: true,
+        },
+      },
       orderBy: { name: "asc" },
     });
 
