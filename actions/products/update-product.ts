@@ -6,6 +6,7 @@ import { decimalToNumber } from "@/lib/utils";
 import { checkUserPermissions } from "../users/check-permissions";
 import { uploadFile } from "../tools/s3-bucket-uploader";
 import { BranchProduct } from "@prisma/client";
+import { getAllUserBranches } from "../branches/get-user-all-branches";
 
 export const updateProduct = async ({
   id,
@@ -33,6 +34,7 @@ export const updateProduct = async ({
       ...rolePermissions[UserRole.MANAGER],
       ...rolePermissions[UserRole.CASHIER],
     ]);
+    const userBranches = await getAllUserBranches();
     if (image_file) {
       image_url = await uploadFile(image_file,true);
     }
@@ -73,6 +75,7 @@ export const updateProduct = async ({
         productId: id,
         branchId: {
           notIn: incomingBranchIds,
+          in: userBranches.branches.map((branch) => branch.id),
         },
       },
     });

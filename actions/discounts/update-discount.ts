@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { BranchProduct, Discount } from "@prisma/client";
 import { checkUserPermissions } from "../users/check-permissions";
 import { decimalToNumber } from "@/lib/utils";
+import { getAllUserBranches } from "../branches/get-user-all-branches";
 
 export const updateDiscount = async ({
   id,
@@ -23,15 +24,32 @@ export const updateDiscount = async ({
   maxUses,
   isActive,
   branches,
-}: Partial<
-  Discount & { productIds?: string[] } & { branches?: string[] }
->) => {
+}: Partial<Discount & { productIds?: string[] } & { branches?: string[] }>) => {
   try {
     await checkUserPermissions([...rolePermissions[UserRole.ACCOUNTANT]]);
     // Validate required fields
     if (!name || !type || value === undefined || !appliesTo || !startDate) {
       throw new Error("Missing required discount fields");
     }
+    const currentBranchIds =
+      (
+        await prisma.discount.findUnique({
+          where: { id },
+          select: { branches: { select: { id: true } } },
+        })
+      )?.branches.map((b) => b.id) || [];
+
+    const userBranches = (await getAllUserBranches()).branches.map((b) => b.id);
+    const submittedBranchIds = (branches || []).filter((id) =>
+      userBranches.includes(id)
+    );
+
+    const toConnect = submittedBranchIds.filter(
+      (id) => !currentBranchIds.includes(id)
+    );
+    const toDisconnect = userBranches.filter(
+      (id) => !submittedBranchIds.includes(id) && currentBranchIds.includes(id)
+    );
 
     // Update the discount
     const discount = await prisma.discount.update({
@@ -58,12 +76,8 @@ export const updateDiscount = async ({
               : undefined,
         },
         branches: {
-          set: [],
-
-          connect:
-            branches && branches.length > 0
-              ? branches.map((id: string) => ({ id }))
-              : undefined,
+          connect: toConnect.map((id) => ({ id })),
+          disconnect: toDisconnect.map((id) => ({ id })),
         },
       },
       include: {

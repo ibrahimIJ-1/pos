@@ -3,6 +3,8 @@
 import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { checkUserPermissions } from "../users/check-permissions";
+import { getAllUserBranches } from "../branches/get-user-all-branches";
+import { checkUserRoles } from "../users/check-role";
 
 export const getAllDiscounts = async () => {
   try {
@@ -10,6 +12,9 @@ export const getAllDiscounts = async () => {
       ...rolePermissions[UserRole.ACCOUNTANT],
       ...rolePermissions[UserRole.CASHIER],
     ]);
+    const isOwner = await checkUserRoles([UserRole.OWNER]);
+    const userBranches = (await getAllUserBranches()).branches;
+
     const discounts = await prisma.discount.findMany({
       include: {
         products: {
@@ -19,6 +24,17 @@ export const getAllDiscounts = async () => {
           },
         },
         branches: true,
+      },
+      where: {
+        branches: isOwner
+          ? {}
+          : {
+              some: {
+                id: {
+                  in: userBranches.map((b) => b.id),
+                },
+              },
+            },
       },
       orderBy: { name: "asc" },
     });

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Product, BranchProduct, Branch } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import ExcelJS from "exceljs";
+import { getAllUserBranches } from "../branches/get-user-all-branches";
 
 export async function uploadProductsFromExcel(formData: FormData) {
   try {
@@ -12,6 +13,7 @@ export async function uploadProductsFromExcel(formData: FormData) {
     if (!file) {
       return { success: false, error: "No file uploaded" };
     }
+    const userBranches = await getAllUserBranches();
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
@@ -45,6 +47,11 @@ export async function uploadProductsFromExcel(formData: FormData) {
 
         if (!branchName) {
           errors.push(`Row ${rowNumber}: Branch name is required`);
+          errorCount++;
+          continue;
+        }
+        if(userBranches.branches.find(b => b.name.toLowerCase() === branchName.toLowerCase()) === undefined) {
+          errors.push(`Row ${rowNumber}: You do not have access to branch "${branchName}"`);
           errorCount++;
           continue;
         }

@@ -61,6 +61,7 @@ export default async function login(
         name: user.name,
         roles: user.roles.map((role) => role.name),
         macAddress: mac,
+        currentBranchId: user.branchId,
       },
       process.env.AUTH_SECRET || "your-secret-key-here",
       { expiresIn: "8h" }
@@ -84,6 +85,7 @@ export default async function login(
         email: user.email,
         roles: user.roles.map((role) => role.name),
         avatar: user.avatar,
+        currentBranchId: user.branchId,
         permissions,
       },
       token,
