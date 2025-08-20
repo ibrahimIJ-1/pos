@@ -1,9 +1,13 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { getAllUserBranches } from "../branches/get-user-all-branches";
 
 export const accountingSummary = async (period = "day") => {
   try {
+    const userBranches = await getAllUserBranches();
+    if (userBranches.branchId === null)
+      throw new Error("User has no branch selected");
     // Set date range based on period
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -28,6 +32,7 @@ export const accountingSummary = async (period = "day") => {
     // Get all transactions within the date range
     const transactions = await prisma.registerTransaction.findMany({
       where: {
+        branchId: userBranches.branchId,
         created_at: {
           gte: startDate,
         },

@@ -1,5 +1,6 @@
 "use server";
 
+import { getAllUserBranches } from "@/actions/branches/get-user-all-branches";
 import { checkUserPermissions } from "@/actions/users/check-permissions";
 import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
@@ -8,8 +9,13 @@ import { decimalToNumber } from "@/lib/utils";
 export const getAllRegisterTransactions = async () => {
   try {
     await checkUserPermissions(rolePermissions[UserRole.MANAGER]);
-
+    const userBranches = await getAllUserBranches();
+    if (userBranches.branchId === null)
+      throw new Error("User has no branch selected");
     const registers = await prisma.registerTransaction.findMany({
+      where: {
+        branchId: userBranches.branchId,
+      },
       include: {
         cashier: {
           select: {
