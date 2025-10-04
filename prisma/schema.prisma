@@ -72,22 +72,23 @@ model UserPermission {
 }
 
 model Product {
-  id               String          @id @default(uuid())
-  name             String
-  description      String          @db.Text
-  sku              String          @unique
-  barcode          String?         @unique
-  category         String
-  image_url        String?         @map("image_url") @db.Text
-  created_at       DateTime        @default(now()) @map("created_at")
-  updated_at       DateTime        @updatedAt @map("updated_at")
-  saleItems        SaleItem[]
-  discountProducts Discount[]      @relation("DiscountProducts")
-  cartItem         CartItem[]
+  id                    String                  @id @default(uuid())
+  name                  String
+  description           String                  @db.Text
+  sku                   String                  @unique
+  barcode               String?                 @unique
+  category              String
+  image_url             String?                 @map("image_url") @db.Text
+  created_at            DateTime                @default(now()) @map("created_at")
+  updated_at            DateTime                @updatedAt @map("updated_at")
+  saleItems             SaleItem[]
+  discountProducts      Discount[]              @relation("DiscountProducts")
+  cartItem              CartItem[]
   // Optional: if you frequently filter active products
   // @@index([active])
-  BranchProduct    BranchProduct[]
-  RefundItem       RefundItem[]    @relation("ProductRefunds")
+  BranchProduct         BranchProduct[]
+  RefundItem            RefundItem[]            @relation("ProductRefunds")
+  WarehouseTransactions WarehouseTransactions[]
 
   @@index([category])
   @@map("products")
@@ -294,22 +295,25 @@ model CartItem {
 }
 
 model Branch {
-  id                  String                @id @default(uuid())
-  name                String
-  address             String?
-  isActive            Boolean               @default(true) @map("is_active")
-  isWarehouse         Boolean               @default(false) @map("is_warehouse")
-  created_at          DateTime              @default(now()) @map("created_at")
-  updated_at          DateTime              @updatedAt @map("updated_at")
-  Register            Register[]
-  RegisterTransaction RegisterTransaction[]
-  Sale                Sale[]
-  BranchProduct       BranchProduct[]
-  discountBranches    Discount[]            @relation("DiscountBranches")
-  Cart                Cart[]
-  mainBranchUsers     User[]                @relation("MainBranch")
-  users               User[]                @relation("UserBranches")
-  Refund              Refund[]
+  id                    String                  @id @default(uuid())
+  name                  String
+  address               String?
+  isActive              Boolean                 @default(true) @map("is_active")
+  isWarehouse           Boolean                 @default(false) @map("is_warehouse")
+  created_at            DateTime                @default(now()) @map("created_at")
+  updated_at            DateTime                @updatedAt @map("updated_at")
+  Register              Register[]
+  RegisterTransaction   RegisterTransaction[]
+  Sale                  Sale[]
+  BranchProduct         BranchProduct[]
+  discountBranches      Discount[]              @relation("DiscountBranches")
+  Cart                  Cart[]
+  mainBranchUsers       User[]                  @relation("MainBranch")
+  users                 User[]                  @relation("UserBranches")
+  Refund                Refund[]
+  Shelf                 Shelf[]
+  StockIn               StockIn[]
+  WarehouseTransactions WarehouseTransactions[]
 
   @@map("branches")
 }
@@ -399,6 +403,54 @@ model RefundDiscount {
   @@map("refund_discounts")
 }
 
+model Shelf {
+  id                    String                  @id @default(uuid())
+  name                  String                  @map("name")
+  location              String?                 @map("location")
+  warehouse             Branch                  @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  warehouseId           String                  @map("warehouse_id")
+  created_at            DateTime                @default(now()) @map("created_at")
+  updated_at            DateTime                @updatedAt @map("updated_at")
+  WarehouseTransactions WarehouseTransactions[]
+
+  @@map("shelves")
+}
+
+model StockIn {
+  id          String        @id @default(uuid())
+  code        String        @map("code")
+  date        DateTime?     @map("date")
+  status      GeneralStatus @default(PENDING)
+  warehouse   Branch        @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  warehouseId String        @map("warehouse_id")
+  created_at  DateTime      @default(now()) @map("created_at")
+  updated_at  DateTime      @updatedAt @map("updated_at")
+
+  warehouseTransactions WarehouseTransactions[] @relation("StockInToWarehouseTransactions")
+
+  @@map("stock_ins")
+}
+
+model WarehouseTransactions {
+  id              String                   @id @default(uuid())
+  warehouseId     String                   @map("warehouse_id")
+  warehouse       Branch                   @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  shelfId         String?                  @map("shelf_id")
+  shelf           Shelf?                   @relation(fields: [shelfId], references: [id], onDelete: SetNull)
+  productId       String                   @map("product_id")
+  product         Product                  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity        Decimal                  @db.Decimal(10, 2)
+  transactionType WarehouseTransactionType
+  referenceId     String?                  @map("reference_id")
+  deletedAt       DateTime?                @map("deleted_at")
+  created_at      DateTime                 @default(now()) @map("created_at")
+  updated_at      DateTime                 @updatedAt @map("updated_at")
+
+  stockIn StockIn? @relation("StockInToWarehouseTransactions", fields: [referenceId], references: [id])
+
+  @@map("warehouse_transactions")
+}
+
 // Enums
 enum RegisterStatus {
   OPEN
@@ -430,4 +482,17 @@ enum RefundStatus {
   COMPLETED
   DECLINED
   CANCELLED
+}
+
+enum GeneralStatus {
+  PENDING
+  COMPLETED
+  DECLINED
+  CANCELLED
+}
+
+enum WarehouseTransactionType {
+  StockIn
+  StockOut
+  StockTransfer
 }

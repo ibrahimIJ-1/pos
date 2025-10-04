@@ -1,8 +1,9 @@
 import { Permission } from "../permissions";
 
-export type SidebarItemType = {
-  icon: React.JSX.Element;
+export interface SidebarItemType {
+  icon: React.ReactNode;
   label: string;
-  href: string;
+  href?: string;
   neededPermissions: (Permission | Permission[])[];
-};
+  children?: SidebarItemType[];
+}

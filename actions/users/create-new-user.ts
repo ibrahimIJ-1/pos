@@ -11,7 +11,8 @@ export const createNewUser = async (
   password: string,
   roles: string[],
   active?: boolean,
-  branches?: string[]
+  branches?: string[],
+  warehouses?: string[]
 ) => {
   try {
     // Validate required fields
@@ -51,9 +52,14 @@ export const createNewUser = async (
           connect: roles.map((role: string) => ({ name: role })),
         },
         branches: {
-          connect: branches
-            ? branches.map((branch: string) => ({ id: branch }))
-            : [],
+          connect: [
+            ...(branches
+              ? branches.map((branch: string) => ({ id: branch }))
+              : []),
+            ...(warehouses
+              ? warehouses.map((branch: string) => ({ id: branch }))
+              : []),
+          ],
         },
       },
       select: {
@@ -68,15 +74,21 @@ export const createNewUser = async (
             name: true,
           },
         },
-        branches:true,
-        branchId:true,
-        mainBranch:true,
+        branches: true,
+        branchId: true,
+        mainBranch: true,
         created_at: true,
         updated_at: true,
       },
     });
 
-    return user;
+    const userWithBranchAndWarehouse = {
+      ...user,
+      branches: user.branches.filter((b) => !b.isWarehouse),
+      warehouses: user.branches.filter((b) => b.isWarehouse),
+    };
+
+    return userWithBranchAndWarehouse;
   } catch (error) {
     console.error("Error creating user:", error);
     throw new Error("Failed to create user");

@@ -1,10 +1,11 @@
 import { Toaster } from "sonner";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import Sidebar from "@/components/sidebar";
+import Sidebar from "@/components/sidebar/sidebar";
 import { Permission, UserRole } from "@/lib/permissions";
 import { ReactNode } from "react";
 import Navbar from "@/components/Navbar";
 import { SystemProvider } from "@/providers/SystemProvider";
+import { SidebarAdminItems } from "@/components/sidebar/sidebar-items";
 
 interface AdminLayoutProps {
   children?: ReactNode;
@@ -20,7 +21,7 @@ export default function Layout({ children }: AdminLayoutProps) {
           <div className="">
             <SystemProvider>
               <Navbar>
-                <Sidebar additionalPermissions={[]} />
+                <Sidebar canShowBranches additionalPermissions={[]} sidebarItems={SidebarAdminItems} />
               </Navbar>
               {children}
             </SystemProvider>

@@ -11,6 +11,7 @@ export const updateUser = async ({
   roles,
   active,
   branches,
+  warehouses,
 }: {
   id: string;
   name: string;
@@ -19,6 +20,7 @@ export const updateUser = async ({
   roles?: string[];
   active?: boolean;
   branches?: string[];
+  warehouses?: string[];
 }) => {
   try {
     // Validate required fields
@@ -38,6 +40,10 @@ export const updateUser = async ({
     // updated_ata.password = await bcrypt.hash("12345678", 10);
 
     // Update the user
+    const userBranchesAndWarehouses = [
+      ...(branches?.map((branch: string) => ({ id: branch })) || []),
+      ...(warehouses?.map((warehouse: string) => ({ id: warehouse })) || []),
+    ];
     const user = await prisma.user.update({
       where: { id },
       data: {
@@ -48,12 +54,10 @@ export const updateUser = async ({
               connect: roles.map((role: string) => ({ name: role })),
             }
           : undefined,
-        branches: branches
-          ? {
-              set: [], // First disconnect all roles
-              connect: branches.map((branch: string) => ({ id: branch })),
-            }
-          : undefined,
+        branches: {
+          set: [], // First disconnect all roles
+          connect: userBranchesAndWarehouses,
+        },
       },
       select: {
         id: true,
@@ -75,7 +79,13 @@ export const updateUser = async ({
       },
     });
 
-    return user;
+    const userWithBranchAndWarehouse = {
+      ...user,
+      branches: user.branches.filter((b) => !b.isWarehouse),
+      warehouses: user.branches.filter((b) => b.isWarehouse),
+    };
+
+    return userWithBranchAndWarehouse;
   } catch (error) {
     console.error(`Error updating user ${id}:`, error);
     throw new Error("Failed to update user");
@@ -124,12 +134,19 @@ export const updateUserPassword = async ({
             name: true,
           },
         },
+        branches: true,
         created_at: true,
         updated_at: true,
       },
     });
 
-    return user;
+    const userWithBranchAndWarehouse = {
+      ...user,
+      branches: user.branches.filter((b) => !b.isWarehouse),
+      warehouses: user.branches.filter((b) => b.isWarehouse),
+    };
+
+    return userWithBranchAndWarehouse;
   } catch (error) {
     console.error(`Error updating user ${id}:`, error);
     throw new Error("Failed to update user");

@@ -1,6 +1,7 @@
-import POSSidebar from "@/components/PosSidebar";
 import Navbar from "@/components/Navbar";
 import { SystemProvider } from "@/providers/SystemProvider";
+import Sidebar from "@/components/sidebar/sidebar";
+import { SidebarPOSItems } from "@/components/sidebar/sidebar-items";
 export default function Layout({
   children,
 }: Readonly<{
@@ -10,7 +11,12 @@ export default function Layout({
   return (
     <SystemProvider>
       <Navbar>
-        <POSSidebar additionalPermissions={[]} />
+        <Sidebar
+          additionalPermissions={[]}
+          sidebarItems={SidebarPOSItems}
+          title="POS System"
+          description="Sale Or Refund your products, make a happy customer"
+        />
       </Navbar>
       {children}
     </SystemProvider>

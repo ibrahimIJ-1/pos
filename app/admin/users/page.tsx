@@ -70,6 +70,7 @@ import { deleteUserById } from "@/actions/users/delete-user";
 import { Branch } from "@prisma/client";
 import { useBranches, useSelectableUserBranches } from "@/lib/branches-service";
 import { useTranslations } from "next-intl";
+import { useSelectableUserWarehouses } from "@/lib/warehouses-service";
 
 // Define the shape of our user
 interface UserData {
@@ -82,6 +83,7 @@ interface UserData {
   created_at?: Date;
   updated_at?: Date;
   branches: Branch[];
+  warehouses: Branch[];
 }
 
 // Schema for adding/editing users
@@ -118,6 +120,7 @@ export default function UsersPage() {
     branches: z
       .array(z.string())
       .min(1, t("At least one branch must be selected")),
+    warehouses: z.array(z.string()).optional(),
   });
 
   // Schema for changing password
@@ -144,7 +147,7 @@ export default function UsersPage() {
   const [activeTab, setActiveTab] = useState("all");
   const { roles } = useRolesPermissions();
   const { data: branches } = useSelectableUserBranches();
-
+  const { data: warehouses } = useSelectableUserWarehouses();
   // Form for adding new users
   const addForm = useForm<z.infer<typeof userFormSchema>>({
     resolver: zodResolver(userFormSchema),
@@ -154,6 +157,7 @@ export default function UsersPage() {
       roles: [UserRole.VIEWER],
       active: true,
       branches: [],
+      warehouses: [],
     },
   });
 
@@ -166,6 +170,7 @@ export default function UsersPage() {
       roles: [],
       active: true,
       branches: [],
+      warehouses: [],
     },
   });
 
@@ -212,7 +217,8 @@ export default function UsersPage() {
         values.password ?? "12345678",
         values.roles,
         true,
-        values.branches
+        values.branches,
+        values.warehouses,
       );
 
       setData([...data, response]);
@@ -253,6 +259,7 @@ export default function UsersPage() {
         roles: values.roles,
         active: values.active,
         branches: values.branches,
+        warehouses: values.warehouses,
         ...(values.password ? { password: values.password } : {}),
       });
 
@@ -298,7 +305,9 @@ export default function UsersPage() {
 
       toast({
         title: t("Password updated"),
-        description: `${t("Password for")} ${selectedUser.name} ${t("was successfully updated")}.`,
+        description: `${t("Password for")} ${selectedUser.name} ${t(
+          "was successfully updated"
+        )}.`,
       });
 
       setOpenPasswordDialog(false);
@@ -338,7 +347,7 @@ export default function UsersPage() {
       toast({
         title: `${t("User")} ${newStatus ? t("activated") : t("deactivated")}`,
         description: `${t("User")} ${user.name} ${t("was successfully")} ${
-newStatus ? t("activated") : t("deactivated")
+          newStatus ? t("activated") : t("deactivated")
         }.`,
       });
     } catch (error) {
@@ -391,6 +400,7 @@ newStatus ? t("activated") : t("deactivated")
         roles: selectedUser.roles.map((r) => r.name),
         active: selectedUser.active ?? true,
         branches: selectedUser.branches.map((b) => b.id),
+        warehouses: selectedUser.warehouses.map((w) => w.id),
       });
     }
   }, [selectedUser, openEditDialog, editForm]);
@@ -531,7 +541,9 @@ newStatus ? t("activated") : t("deactivated")
                       </AlertDialogTitle>
                       <AlertDialogDescription className="rtl:text-start">
                         {t("This action cannot be undone")}.{" "}
-                        {t("This will permanently delete the user and remove their data from our servers")}
+                        {t(
+                          "This will permanently delete the user and remove their data from our servers"
+                        )}
                         .
                       </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -572,7 +584,10 @@ newStatus ? t("activated") : t("deactivated")
                   {t("Add New User")}
                 </DialogTitle>
                 <DialogDescription className="rtl:text-start">
-                  {t("Create a new user account to give someone access to the system")}.
+                  {t(
+                    "Create a new user account to give someone access to the system"
+                  )}
+                  .
                 </DialogDescription>
               </DialogHeader>
               <Form {...addForm}>
@@ -652,6 +667,43 @@ newStatus ? t("activated") : t("deactivated")
                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                               >
                                 {branch.name}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={addForm.control}
+                    name="warehouses"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("Select Warehouses")}</FormLabel>
+                        <div className="border rounded-md p-2 max-h-40 overflow-y-auto space-y-2">
+                          {warehouses?.map((warehouse) => (
+                            <div
+                              key={warehouse.id}
+                              className="flex items-center space-x-2"
+                            >
+                              <Checkbox
+                                id={`warehouse-${warehouse.id}`}
+                                checked={field.value?.includes(warehouse.id)}
+                                onCheckedChange={(checked) => {
+                                  const newValue = checked
+                                    ? [...(field.value || []), warehouse.id]
+                                    : (field.value || []).filter(
+                                        (id: string) => id !== warehouse.id
+                                      );
+                                  field.onChange(newValue);
+                                }}
+                              />
+                              <label
+                                htmlFor={`warehouse-${warehouse.id}`}
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                              >
+                                {warehouse.name}
                               </label>
                             </div>
                           ))}
@@ -755,7 +807,9 @@ newStatus ? t("activated") : t("deactivated")
       <Dialog open={openEditDialog} onOpenChange={setOpenEditDialog}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle className="rtl:text-start">{t("Edit User")}</DialogTitle>
+            <DialogTitle className="rtl:text-start">
+              {t("Edit User")}
+            </DialogTitle>
             <DialogDescription className="rtl:text-start">
               {t("Update user details and roles")}.
             </DialogDescription>
@@ -831,6 +885,43 @@ newStatus ? t("activated") : t("deactivated")
                 />
                 <FormField
                   control={editForm.control}
+                  name="warehouses"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("Select Warehouses")}</FormLabel>
+                      <div className="border rounded-md p-2 max-h-40 overflow-y-auto space-y-2">
+                        {warehouses?.map((warehouse) => (
+                          <div
+                            key={warehouse.id}
+                            className="flex items-center space-x-2"
+                          >
+                            <Checkbox
+                              id={`warehouse-${warehouse.id}`}
+                              checked={field.value?.includes(warehouse.id)}
+                              onCheckedChange={(checked) => {
+                                const newValue = checked
+                                  ? [...(field.value || []), warehouse.id]
+                                  : (field.value || []).filter(
+                                      (id: string) => id !== warehouse.id
+                                    );
+                                field.onChange(newValue);
+                              }}
+                            />
+                            <label
+                              htmlFor={`warehouse-${warehouse.id}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              {warehouse.name}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editForm.control}
                   name="active"
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
@@ -839,7 +930,9 @@ newStatus ? t("activated") : t("deactivated")
                           {t("User Status")}
                         </FormLabel>
                         <FormDescription>
-                          {field.value ? t("User is active") : t("User is inactive")}
+                          {field.value
+                            ? t("User is active")
+                            : t("User is inactive")}
                         </FormDescription>
                       </div>
                       <FormControl>
