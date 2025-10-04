@@ -68,9 +68,8 @@ import { createNewUser } from "@/actions/users/create-new-user";
 import { updateUser, updateUserPassword } from "@/actions/users/update-user";
 import { deleteUserById } from "@/actions/users/delete-user";
 import { Branch } from "@prisma/client";
-import { useBranches, useSelectableUserBranches } from "@/lib/branches-service";
+import {  useSelectableUserBranches } from "@/lib/branches-service";
 import { useTranslations } from "next-intl";
-import { useSelectableUserWarehouses } from "@/lib/warehouses-service";
 
 // Define the shape of our user
 interface UserData {
@@ -83,7 +82,6 @@ interface UserData {
   created_at?: Date;
   updated_at?: Date;
   branches: Branch[];
-  warehouses: Branch[];
 }
 
 // Schema for adding/editing users
@@ -120,7 +118,6 @@ export default function UsersPage() {
     branches: z
       .array(z.string())
       .min(1, t("At least one branch must be selected")),
-    warehouses: z.array(z.string()).optional(),
   });
 
   // Schema for changing password
@@ -147,7 +144,6 @@ export default function UsersPage() {
   const [activeTab, setActiveTab] = useState("all");
   const { roles } = useRolesPermissions();
   const { data: branches } = useSelectableUserBranches();
-  const { data: warehouses } = useSelectableUserWarehouses();
   // Form for adding new users
   const addForm = useForm<z.infer<typeof userFormSchema>>({
     resolver: zodResolver(userFormSchema),
@@ -157,7 +153,6 @@ export default function UsersPage() {
       roles: [UserRole.VIEWER],
       active: true,
       branches: [],
-      warehouses: [],
     },
   });
 
@@ -170,7 +165,6 @@ export default function UsersPage() {
       roles: [],
       active: true,
       branches: [],
-      warehouses: [],
     },
   });
 
@@ -218,7 +212,6 @@ export default function UsersPage() {
         values.roles,
         true,
         values.branches,
-        values.warehouses,
       );
 
       setData([...data, response]);
@@ -259,7 +252,6 @@ export default function UsersPage() {
         roles: values.roles,
         active: values.active,
         branches: values.branches,
-        warehouses: values.warehouses,
         ...(values.password ? { password: values.password } : {}),
       });
 
@@ -400,7 +392,6 @@ export default function UsersPage() {
         roles: selectedUser.roles.map((r) => r.name),
         active: selectedUser.active ?? true,
         branches: selectedUser.branches.map((b) => b.id),
-        warehouses: selectedUser.warehouses.map((w) => w.id),
       });
     }
   }, [selectedUser, openEditDialog, editForm]);
@@ -675,43 +666,7 @@ export default function UsersPage() {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={addForm.control}
-                    name="warehouses"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("Select Warehouses")}</FormLabel>
-                        <div className="border rounded-md p-2 max-h-40 overflow-y-auto space-y-2">
-                          {warehouses?.map((warehouse) => (
-                            <div
-                              key={warehouse.id}
-                              className="flex items-center space-x-2"
-                            >
-                              <Checkbox
-                                id={`warehouse-${warehouse.id}`}
-                                checked={field.value?.includes(warehouse.id)}
-                                onCheckedChange={(checked) => {
-                                  const newValue = checked
-                                    ? [...(field.value || []), warehouse.id]
-                                    : (field.value || []).filter(
-                                        (id: string) => id !== warehouse.id
-                                      );
-                                  field.onChange(newValue);
-                                }}
-                              />
-                              <label
-                                htmlFor={`warehouse-${warehouse.id}`}
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                              >
-                                {warehouse.name}
-                              </label>
-                            </div>
-                          ))}
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  
                   <FormField
                     control={addForm.control}
                     name="roles"
@@ -875,43 +830,6 @@ export default function UsersPage() {
                               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                             >
                               {branch.name}
-                            </label>
-                          </div>
-                        ))}
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={editForm.control}
-                  name="warehouses"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("Select Warehouses")}</FormLabel>
-                      <div className="border rounded-md p-2 max-h-40 overflow-y-auto space-y-2">
-                        {warehouses?.map((warehouse) => (
-                          <div
-                            key={warehouse.id}
-                            className="flex items-center space-x-2"
-                          >
-                            <Checkbox
-                              id={`warehouse-${warehouse.id}`}
-                              checked={field.value?.includes(warehouse.id)}
-                              onCheckedChange={(checked) => {
-                                const newValue = checked
-                                  ? [...(field.value || []), warehouse.id]
-                                  : (field.value || []).filter(
-                                      (id: string) => id !== warehouse.id
-                                    );
-                                field.onChange(newValue);
-                              }}
-                            />
-                            <label
-                              htmlFor={`warehouse-${warehouse.id}`}
-                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            >
-                              {warehouse.name}
                             </label>
                           </div>
                         ))}

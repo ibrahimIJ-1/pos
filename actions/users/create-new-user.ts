@@ -11,8 +11,7 @@ export const createNewUser = async (
   password: string,
   roles: string[],
   active?: boolean,
-  branches?: string[],
-  warehouses?: string[]
+  branches?: string[]
 ) => {
   try {
     // Validate required fields
@@ -56,9 +55,6 @@ export const createNewUser = async (
             ...(branches
               ? branches.map((branch: string) => ({ id: branch }))
               : []),
-            ...(warehouses
-              ? warehouses.map((branch: string) => ({ id: branch }))
-              : []),
           ],
         },
       },
@@ -84,8 +80,7 @@ export const createNewUser = async (
 
     const userWithBranchAndWarehouse = {
       ...user,
-      branches: user.branches.filter((b) => !b.isWarehouse),
-      warehouses: user.branches.filter((b) => b.isWarehouse),
+      branches: user.branches.filter((b) => !b.isWarehouse)
     };
 
     return userWithBranchAndWarehouse;

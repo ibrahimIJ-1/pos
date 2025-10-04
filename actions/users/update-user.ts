@@ -42,7 +42,6 @@ export const updateUser = async ({
     // Update the user
     const userBranchesAndWarehouses = [
       ...(branches?.map((branch: string) => ({ id: branch })) || []),
-      ...(warehouses?.map((warehouse: string) => ({ id: warehouse })) || []),
     ];
     const user = await prisma.user.update({
       where: { id },
@@ -82,7 +81,6 @@ export const updateUser = async ({
     const userWithBranchAndWarehouse = {
       ...user,
       branches: user.branches.filter((b) => !b.isWarehouse),
-      warehouses: user.branches.filter((b) => b.isWarehouse),
     };
 
     return userWithBranchAndWarehouse;
