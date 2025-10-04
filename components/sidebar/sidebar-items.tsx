@@ -1,7 +1,5 @@
 import {
   ArrowBigLeftDashIcon,
-  ArrowDown,
-  Building,
   Coins,
   ComputerIcon,
   GitBranchIcon,
@@ -96,28 +94,6 @@ export const SidebarAdminItems: SidebarItemType[] = [
     label: "Users",
     href: "/admin/users",
     neededPermissions: rolePermissions[UserRole.OWNER],
-  },
-  {
-    icon: <Warehouse className="h-4 w-4" />,
-    label: "Warehousing",
-    neededPermissions: [
-      ...rolePermissions[UserRole.ACCOUNTANT],
-      rolePermissions[UserRole.MANAGER],
-    ],
-    children: [
-      {
-        icon: <Building className="h-4 w-4" />,
-        label: "Warehouses",
-        href: "/admin/warehouses",
-        neededPermissions: [],
-      },
-      {
-        icon: <ArrowDown className="h-4 w-4" />,
-        label: "Stock In",
-        href: "/admin/stock-in",
-        neededPermissions: [],
-      },
-    ],
   },
   {
     icon: <GitBranchIcon className="h-4 w-4" />,

@@ -88,7 +88,6 @@ model Product {
   // @@index([active])
   BranchProduct         BranchProduct[]
   RefundItem            RefundItem[]            @relation("ProductRefunds")
-  WarehouseTransactions WarehouseTransactions[]
 
   @@index([category])
   @@map("products")
@@ -312,8 +311,6 @@ model Branch {
   users                 User[]                  @relation("UserBranches")
   Refund                Refund[]
   Shelf                 Shelf[]
-  StockIn               StockIn[]
-  WarehouseTransactions WarehouseTransactions[]
 
   @@map("branches")
 }
@@ -411,44 +408,8 @@ model Shelf {
   warehouseId           String                  @map("warehouse_id")
   created_at            DateTime                @default(now()) @map("created_at")
   updated_at            DateTime                @updatedAt @map("updated_at")
-  WarehouseTransactions WarehouseTransactions[]
 
   @@map("shelves")
-}
-
-model StockIn {
-  id          String        @id @default(uuid())
-  code        String        @map("code")
-  date        DateTime?     @map("date")
-  status      GeneralStatus @default(PENDING)
-  warehouse   Branch        @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
-  warehouseId String        @map("warehouse_id")
-  created_at  DateTime      @default(now()) @map("created_at")
-  updated_at  DateTime      @updatedAt @map("updated_at")
-
-  warehouseTransactions WarehouseTransactions[] @relation("StockInToWarehouseTransactions")
-
-  @@map("stock_ins")
-}
-
-model WarehouseTransactions {
-  id              String                   @id @default(uuid())
-  warehouseId     String                   @map("warehouse_id")
-  warehouse       Branch                   @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
-  shelfId         String?                  @map("shelf_id")
-  shelf           Shelf?                   @relation(fields: [shelfId], references: [id], onDelete: SetNull)
-  productId       String                   @map("product_id")
-  product         Product                  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  quantity        Decimal                  @db.Decimal(10, 2)
-  transactionType WarehouseTransactionType
-  referenceId     String?                  @map("reference_id")
-  deletedAt       DateTime?                @map("deleted_at")
-  created_at      DateTime                 @default(now()) @map("created_at")
-  updated_at      DateTime                 @updatedAt @map("updated_at")
-
-  stockIn StockIn? @relation("StockInToWarehouseTransactions", fields: [referenceId], references: [id])
-
-  @@map("warehouse_transactions")
 }
 
 // Enums
@@ -489,10 +450,4 @@ enum GeneralStatus {
   COMPLETED
   DECLINED
   CANCELLED
-}
-
-enum WarehouseTransactionType {
-  StockIn
-  StockOut
-  StockTransfer
 }
