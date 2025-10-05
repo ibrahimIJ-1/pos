@@ -7,10 +7,10 @@ import {
 } from "@/components/ui/dialog";
 import { StockInForm } from "./StockInForm";
 import { useTranslations } from "next-intl";
-import { StockInRow } from "@/lib/types/warehouse-transaction-types";
+import { WarehouseTransactionRow } from "@/lib/types/warehouse-transaction-types";
 
 interface StockInDialogProps {
-  stockIn?: StockInRow;
+  stockIn?: WarehouseTransactionRow;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;

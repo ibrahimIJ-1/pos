@@ -12,7 +12,7 @@ export const getStockIn = async (id: string) => {
   try {
     const user = await checkUser();
     const userWarehouses = await getAllUserWarehouses();
-    const stockIn = await prisma.stockIn.findUnique({
+    const stockIn = await prisma.warehouseTransaction.findUnique({
       where: {
         id,
         warehouseId: {
@@ -20,7 +20,7 @@ export const getStockIn = async (id: string) => {
         },
       },
       include: {
-        warehouseTransactions: true,
+        warehouseTransactionItems: true,
       },
     });
     const convertedStockIns = decimalToNumber(stockIn);

@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
-import { StockIn, WarehouseTransactions } from "@prisma/client";
+import { WarehouseTransactionItems, WarehouseTransaction } from "@prisma/client";
 import { useTranslations } from "next-intl";
 import { useCreateStockIn, useUpdateStockIn } from "@/lib/stock-in-service";
 import { useUserWarehouses, useWarehouses } from "@/lib/warehouses-service";
@@ -45,7 +45,7 @@ import { useProducts } from "@/lib/products-service";
 // Form schema validation
 
 interface StockInFormProps {
-  initialData?: StockIn & { warehouseTransactions: WarehouseTransactions[] };
+  initialData?: WarehouseTransaction & { warehouseTransactions: WarehouseTransactionItems[] };
   onSuccess?: () => void;
   onCancel?: () => void;
   id?: string;

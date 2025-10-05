@@ -1,6 +1,7 @@
 import {
   ArrowBigLeftDashIcon,
   ArrowDown,
+  ArrowLeftRight,
   Building,
   Coins,
   ComputerIcon,
@@ -115,6 +116,12 @@ export const SidebarAdminItems: SidebarItemType[] = [
         icon: <ArrowDown className="h-4 w-4" />,
         label: "Stock In",
         href: "/admin/stock-in",
+        neededPermissions: [],
+      },
+      {
+        icon: <ArrowLeftRight className="h-4 w-4" />,
+        label: "Branch Transfer",
+        href: "/admin/branch-transfer",
         neededPermissions: [],
       },
     ],

@@ -6,7 +6,7 @@ import { hardDeleteWarehouseTransactionItems } from "../warehouse-transactions/c
 export const deleteStockIn = async (id: string) => {
   try {
     await hardDeleteWarehouseTransactionItems(id);
-    await prisma.stockIn.delete({
+    await prisma.warehouseTransaction.delete({
       where: { id },
     });
   } catch (error) {

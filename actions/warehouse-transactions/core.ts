@@ -10,16 +10,16 @@ export interface WarehouseTransactionItemsInterface {
   productId: string;
   quantity: number;
   transactionType: WarehouseTransactionType;
-  referenceId?: string;
+  referenceId: string;
 }
 
 export const logWarehouseTransactionItems = async (
   data: WarehouseTransactionItemsInterface[],
-  referenceId?: string,
+  referenceId?: string
 ) => {
   try {
     await hardDeleteWarehouseTransactionItems(referenceId || "");
-    await prisma.warehouseTransactions.createMany({
+    await prisma.warehouseTransactionItems.createMany({
       data,
     });
     return true;
@@ -33,7 +33,7 @@ export const softDeleteWarehouseTransactionItems = async (
   referenceId: string
 ) => {
   try {
-    await prisma.warehouseTransactions.updateMany({
+    await prisma.warehouseTransactionItems.updateMany({
       where: {
         referenceId,
       },
@@ -52,7 +52,7 @@ export const hardDeleteWarehouseTransactionItems = async (
   referenceId: string
 ) => {
   try {
-    await prisma.warehouseTransactions.deleteMany({
+    await prisma.warehouseTransactionItems.deleteMany({
       where: {
         referenceId,
       },
@@ -66,7 +66,7 @@ export const hardDeleteWarehouseTransactionItems = async (
 
 export const getWarehouseTransactionItems = async (referenceId: string) => {
   try {
-    await prisma.warehouseTransactions.deleteMany({
+    await prisma.warehouseTransactionItems.deleteMany({
       where: {
         referenceId,
       },

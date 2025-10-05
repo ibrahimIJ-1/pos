@@ -1,12 +1,12 @@
 "use server";
 
-import { StockIn, WarehouseTransactionType } from "@prisma/client";
+import {  WarehouseTransactionType } from "@prisma/client";
 import {
   logWarehouseTransactionItems,
   WarehouseTransactionItemsInterface,
 } from "../warehouse-transactions/core";
 import { prisma } from "@/lib/prisma";
-import { StockInItemFormType } from "@/lib/types/warehouse-transaction-types";
+import { WarehouseTransactionItemFormType } from "@/lib/types/warehouse-transaction-types";
 
 export const updateStockIn = async ({
   stockInData,
@@ -17,10 +17,10 @@ export const updateStockIn = async ({
     warehouseId: string;
     id: string;
   };
-  stockInItems: StockInItemFormType[];
+  stockInItems: WarehouseTransactionItemFormType[];
 }) => {
   try {
-    const updatedStockIn = await prisma.stockIn.update({
+    const updatedStockIn = await prisma.warehouseTransaction.update({
       where: { id: stockInData.id },
       data: stockInData,
     });
@@ -28,6 +28,7 @@ export const updateStockIn = async ({
     const warehouseTransactionItems: WarehouseTransactionItemsInterface[] =
       stockInItems.map((item) => ({
         ...item,
+        quantity: item.quantity,
         referenceId: updatedStockIn.id,
         warehouseId: stockInData.warehouseId,
         transactionType: WarehouseTransactionType.StockIn,

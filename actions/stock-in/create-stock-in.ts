@@ -2,16 +2,13 @@
 
 import {
   GeneralStatus,
-  StockIn,
   WarehouseTransactionType,
 } from "@prisma/client";
 import {
   logWarehouseTransactionItems,
-  WarehouseTransactionItemsInterface,
 } from "../warehouse-transactions/core";
 import { prisma } from "@/lib/prisma";
-import { StockInItemFormType } from "@/lib/types/warehouse-transaction-types";
-import { date } from "zod";
+import { WarehouseTransactionItemFormType } from "@/lib/types/warehouse-transaction-types";
 
 export const createStockIn = async ({
   stockInData,
@@ -21,20 +18,22 @@ export const createStockIn = async ({
     date: Date | null;
     warehouseId: string;
   };
-  stockInItems: StockInItemFormType[];
+  stockInItems: WarehouseTransactionItemFormType[];
 }) => {
   try {
-    const createdStockIn = await prisma.stockIn.create({
+    const createdStockIn = await prisma.warehouseTransaction.create({
       data: {
         date: stockInData.date || new Date(),
         warehouseId: stockInData.warehouseId,
         status: GeneralStatus.COMPLETED,
         code: `SI-${Date.now()}`,
+        transactionType: WarehouseTransactionType.StockIn,
       },
     });
 
     const warehouseTransactionItems = stockInItems.map((item) => ({
       ...item,
+      quantity: item.quantity,
       warehouseId: stockInData.warehouseId,
       transactionType: WarehouseTransactionType.StockIn,
       referenceId: createdStockIn.id,

@@ -22,7 +22,7 @@ import { StockInDialog } from "@/components/stock-in/StockInDialog";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
-export default function StockIn() {
+export default function BranchTransfer() {
   const t = useTranslations();
   const { data: stockIns, isLoading, refetch } = useStockIns();
   const deleleteMutation = useDeleteStockIn();

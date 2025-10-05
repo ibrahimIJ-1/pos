@@ -3,10 +3,10 @@ import { deleteStockIn } from "@/actions/stock-in/delete-stock-in";
 import { getAllStockIns } from "@/actions/stock-in/get-all-stock-ins";
 import { updateStockIn } from "@/actions/stock-in/update-stock-in";
 import { WarehouseTransactionItemsInterface } from "@/actions/warehouse-transactions/core";
-import { StockIn } from "@prisma/client";
+import { WarehouseTransaction } from "@prisma/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { StockInItemFormType } from "./types/warehouse-transaction-types";
+import { WarehouseTransactionItemFormType } from "./types/warehouse-transaction-types";
 
 export const useStockIns = () => {
   return useQuery({
@@ -27,7 +27,7 @@ export const useCreateStockIn = () => {
         date: Date | null;
         warehouseId: string;
       };
-      stockInItems: StockInItemFormType[];
+      stockInItems: WarehouseTransactionItemFormType[];
     }) => createStockIn({ stockInData, stockInItems }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stockIns"] });
@@ -56,7 +56,7 @@ export const useUpdateStockIn = () => {
         warehouseId: string;
         id: string;
       };
-      stockInItems: StockInItemFormType[];
+      stockInItems: WarehouseTransactionItemFormType[];
     }) => updateStockIn({ stockInData, stockInItems }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stockIns"] });

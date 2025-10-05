@@ -12,14 +12,14 @@ export const getAllStockIns = async () => {
   try {
     const user = await checkUser();
     const userWarehouses = await getAllUserWarehouses();
-    const stockIns = await prisma.stockIn.findMany({
+    const stockIns = await prisma.warehouseTransaction.findMany({
       where: {
         warehouseId: {
           in: [...userWarehouses.map((warehouse) => warehouse.id)],
         },
       },
       include: {
-        warehouseTransactions: true,
+        warehouseTransactionItems: true,
         warehouse: true,
       },
     });
