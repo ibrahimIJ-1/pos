@@ -25,15 +25,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
-import { WarehouseTransactionItems, WarehouseTransaction } from "@prisma/client";
+import {
+  WarehouseTransactionItems,
+  WarehouseTransaction,
+} from "@prisma/client";
 import { useTranslations } from "next-intl";
-import { useCreateStockIn, useUpdateStockIn } from "@/lib/stock-in-service";
+import {
+  useCreateBranchTransfer,
+  useUpdateBranchTransfer,
+} from "@/lib/branch-transfer-service";
 import { useUserWarehouses, useWarehouses } from "@/lib/warehouses-service";
 import {
-  parseStockInExcel,
-  generateStockInTemplate,
-} from "./stock-in-excel-utils";
-import { StockInItemRow } from "./StockInItemRow";
+  parseBranchTransferExcel,
+  generateBranchTransferTemplate,
+} from "./branch-transfer-excel-utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,22 +46,27 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { useProducts } from "@/lib/products-service";
+import { BranchTransferItemRow } from "./BranchTransferRow";
+import { useBranches, useUserBranches } from "@/lib/branches-service";
+import { useItemsByWarehouse } from "@/lib/warehouse-core-service";
 
 // Form schema validation
 
-interface StockInFormProps {
-  initialData?: WarehouseTransaction & { warehouseTransactionItems: WarehouseTransactionItems[] };
+interface BranchTransferFormProps {
+  initialData?: WarehouseTransaction & {
+    warehouseTransactions: WarehouseTransactionItems[];
+  };
   onSuccess?: () => void;
   onCancel?: () => void;
   id?: string;
 }
 
-export function StockInForm({
+export function BranchTransferForm({
   initialData,
   onSuccess,
   onCancel,
   id,
-}: StockInFormProps) {
+}: BranchTransferFormProps) {
   // Place this after the function parameter destructuring
   const [forceRerender, setForceRerender] = React.useState<number>(0);
 
@@ -65,12 +75,15 @@ export function StockInForm({
   // Reset shelves when warehouse changes
   const prevWarehouseId = useRef<string | undefined>(undefined);
 
-  const { mutate: createStockIn, isPending } = useCreateStockIn();
-  const { mutate: updateStockIn, isPending: isUpdatePending } =
-    useUpdateStockIn();
+  const { mutate: createBranchTransfer, isPending } = useCreateBranchTransfer();
+  const { mutate: updateBranchTransfer, isPending: isUpdatePending } =
+    useUpdateBranchTransfer();
   const { data: warehouses, isPending: isWarehousesPending } =
     useUserWarehouses();
+  const { data: branches, isPending: isBranchesPending } = useBranches();
+
   const { data: products, isPending: isProductsPending } = useProducts();
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formSchema = z.object({
     date: z.date().optional().default(new Date()),
@@ -79,23 +92,23 @@ export function StockInForm({
       .array(
         z.object({
           productId: z.string().nonempty(t("Product is required")),
-          shelfId: z.string().nonempty(t("Shelf is required")),
+          warehouseId: z.string().nonempty(t("Shelf is required")),
           quantity: z.number().min(1, t("Quantity must be at least 1")),
         })
       )
       .min(0, t("At least one item is required")),
   });
 
-  type StockInFormValues = z.infer<typeof formSchema>;
-  const form = useForm<StockInFormValues>({
+  type BranchTransferFormValues = z.infer<typeof formSchema>;
+  const form = useForm<BranchTransferFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData
       ? {
           date: initialData.date || new Date(),
           warehouseId: initialData.warehouseId || "",
-          items: (initialData.warehouseTransactionItems || []).map((item) => ({
+          items: (initialData.warehouseTransactions || []).map((item) => ({
             productId: item.productId,
-            shelfId: item.shelfId ?? "",
+            warehouseId: item.shelfId ?? "",
             quantity:
               typeof item.quantity === "object" && "toNumber" in item.quantity
                 ? (item.quantity as any).toNumber()
@@ -113,44 +126,48 @@ export function StockInForm({
     name: "items",
   });
 
-  const onSubmit = (data: StockInFormValues) => {
+  // Watch the currently selected warehouse id and pass it to the hook so the
+  // query runs automatically whenever the warehouse changes.
+  const selectedWarehouseId = form.watch("warehouseId");
+  const itemsByWarehouseMutation = useItemsByWarehouse();
+  const onSubmit = (data: BranchTransferFormValues) => {
     if (id) {
-      updateStockIn(
+      updateBranchTransfer(
         {
-          stockInData: {
+          branchTransferData: {
             id: id,
             warehouseId: data.warehouseId || "",
             date: data.date,
           },
-          stockInItems: data.items,
+          branchTransferItems: data.items,
         },
         {
           onSuccess: () => {
-            toast.success(t("StockIn saved successfully"));
+            toast.success(t("BranchTransfer saved successfully"));
             if (onSuccess) {
               onSuccess();
             } else {
-              navigate.push("/admin/stockIns");
+              navigate.push("/admin/branchTransfers");
             }
           },
         }
       );
     } else {
-      createStockIn(
+      createBranchTransfer(
         {
-          stockInData: {
+          branchTransferData: {
             warehouseId: data.warehouseId || "",
             date: data.date,
           },
-          stockInItems: data.items,
+          branchTransferItems: data.items,
         },
         {
           onSuccess: () => {
-            toast.success(t("StockIn saved successfully"));
+            toast.success(t("BranchTransfer saved successfully"));
             if (onSuccess) {
               onSuccess();
             } else {
-              navigate.push("/admin/stockIns");
+              navigate.push("/admin/branchTransfers");
             }
           },
         }
@@ -158,12 +175,12 @@ export function StockInForm({
     }
   };
 
-  // Excel import for StockIn items: expects columns 'product', 'shelf', 'quantity'
+  // Excel import for BranchTransfer items: expects columns 'product', 'shelf', 'quantity'
   const handleExcelImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const data = await file.arrayBuffer();
-    const { rows, sheetName } = parseStockInExcel(data);
+    const { rows, sheetName } = parseBranchTransferExcel(data);
     // Find warehouse by sheet name (case-insensitive)
     const warehouse = warehouses?.find(
       (w) => w.name?.toLowerCase() === sheetName.toLowerCase()
@@ -194,29 +211,33 @@ export function StockInForm({
         });
       const existingKeys = new Set(
         fields.map(
-          (f) => `${f.productId.toLowerCase()}-${f.shelfId.toLowerCase()}`
+          (f) => `${f.productId.toLowerCase()}-${f.warehouseId.toLowerCase()}`
         )
       );
       const uniqueRows = rows.filter(
         (row) =>
           row.product &&
-          row.shelf &&
+          row.branch &&
           !existingKeys.has(
-            `${row.product.toLowerCase()}-${row.shelf.toLowerCase()}`
+            `${row.product.toLowerCase()}-${row.branch.toLowerCase()}`
           )
       );
       const seen = new Set<string>();
       const finalRows = uniqueRows.filter((row) => {
-        const key = `${row.product.toLowerCase()}-${row.shelf.toLowerCase()}`;
+        const key = `${row.product.toLowerCase()}-${row.branch.toLowerCase()}`;
         if (seen.has(key)) return false;
         seen.add(key);
         return true;
       });
       finalRows.forEach((row) => {
         const productId = productMap.get(row.product.toLowerCase());
-        const shelfId = shelfMap.get(row.shelf.toLowerCase());
-        if (productId && shelfId) {
-          append({ productId, shelfId, quantity: Number(row.quantity) || 1 });
+        const warehouseId = shelfMap.get(row.branch.toLowerCase());
+        if (productId && warehouseId) {
+          append({
+            productId,
+            warehouseId,
+            quantity: Number(row.quantity) || 1,
+          });
         }
       });
     };
@@ -231,10 +252,10 @@ export function StockInForm({
   );
   const selectedWarehouseName = selectedWarehouse?.name || "Items";
 
-  // Download Excel template for StockIn items
+  // Download Excel template for BranchTransfer items
   const handleDownloadTemplate = () => {
     if (!selectedWarehouse) return;
-    const excelBuffer = generateStockInTemplate(
+    const excelBuffer = generateBranchTransferTemplate(
       selectedWarehouseName,
       Array.isArray(products) ? products : [],
       selectedWarehouse.Shelf || []
@@ -247,7 +268,18 @@ export function StockInForm({
     a.click();
     window.URL.revokeObjectURL(url);
   };
-
+  // NOTE: useItemsByWarehouse is invoked above via `itemsByWarehouseQuery` and
+  // will refetch automatically when `selectedWarehouseId` changes.
+  const getWarehouseItems = () => {
+    itemsByWarehouseMutation.mutate(
+      { id: selectedWarehouseId },
+      {
+        onSuccess: (data) => {
+          console.log(data);
+        },
+      }
+    );
+  };
   useEffect(() => {
     const currentWarehouseId = form.watch("warehouseId");
     if (
@@ -260,13 +292,14 @@ export function StockInForm({
       );
     }
     prevWarehouseId.current = currentWarehouseId;
+    getWarehouseItems();
   }, [form.watch("warehouseId")]);
 
   return (
     <Form {...form} key={forceRerender}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* StockIn Name */}
+          {/* BranchTransfer Name */}
           <FormField
             control={form.control}
             name="date"
@@ -328,20 +361,23 @@ export function StockInForm({
           <div>
             <div className="space-y-2">
               <div className="flex justify-between items-center mb-2">
-                <span className="font-semibold">{t("StockIn Items")}</span>
+                <span className="font-semibold">
+                  {t("BranchTransfer Items")}
+                </span>
                 <div className="flex gap-2">
-                  {/* Split Button: Add StockIn Item */}
+                  {/* Split Button: Add BranchTransfer Item */}
                   <div className="relative flex">
                     <Button
                       type="button"
                       size="sm"
                       className="rounded-r-none bg-green-600 text-white hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 dark:text-white"
+                      disabled={!selectedWarehouse}
                       onClick={() =>
-                        append({ productId: "", shelfId: "", quantity: 0 })
+                        append({ productId: "", warehouseId: "", quantity: 0 })
                       }
                     >
                       <span className="flex items-center gap-1">
-                        <span>{t("Add Shelf")}</span>
+                        <span>{t("Add Item")}</span>
                         <span className="text-xs">+</span>
                       </span>
                     </Button>
@@ -398,6 +434,7 @@ export function StockInForm({
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => fileInputRef.current?.click()}
+                          disabled={!selectedWarehouse}
                           className="hover:bg-blue-50 dark:hover:bg-blue-900 text-blue-700 dark:text-blue-400"
                         >
                           <span className="flex items-center gap-2">
@@ -442,16 +479,13 @@ export function StockInForm({
         </div>
         <div className="w-full">
           {fields.map((itemField, idx) => (
-            <StockInItemRow
+            <BranchTransferItemRow
               key={itemField.id}
               idx={idx}
               field={itemField}
               form={form}
               products={Array.isArray(products) ? products : []}
-              shelves={
-                warehouses?.find((w) => w.id === form.watch("warehouseId"))
-                  ?.Shelf || []
-              }
+              branches={branches || []}
               remove={remove}
               t={t}
             />
@@ -466,7 +500,7 @@ export function StockInForm({
           <Button type="submit" disabled={isPending || isUpdatePending}>
             {isPending || isUpdatePending
               ? t("Saving") + "..."
-              : t("Save StockIn")}
+              : t("Save BranchTransfer")}
           </Button>
         </div>
       </form>

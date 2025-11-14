@@ -35,7 +35,6 @@ export const createStockIn = async ({
       ...item,
       quantity: item.quantity,
       warehouseId: stockInData.warehouseId,
-      transactionType: WarehouseTransactionType.StockIn,
       referenceId: createdStockIn.id,
     }));
 

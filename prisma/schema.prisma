@@ -449,7 +449,7 @@ model WarehouseTransactionItems {
 
   warehouseTransaction WarehouseTransaction @relation("WarehouseTransactions", fields: [referenceId], references: [id])
 
-  @@map("warehouse_transactions")
+  @@map("warehouse_transaction_items")
 }
 
 // Enums

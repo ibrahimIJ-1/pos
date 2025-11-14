@@ -1,6 +1,6 @@
 "use server";
 
-import {  WarehouseTransactionType } from "@prisma/client";
+import { WarehouseTransactionType } from "@prisma/client";
 import {
   logWarehouseTransactionItems,
   WarehouseTransactionItemsInterface,
@@ -22,7 +22,10 @@ export const updateStockIn = async ({
   try {
     const updatedStockIn = await prisma.warehouseTransaction.update({
       where: { id: stockInData.id },
-      data: stockInData,
+      data: {
+        ...stockInData,
+        transactionType: WarehouseTransactionType.StockIn,
+      },
     });
 
     const warehouseTransactionItems: WarehouseTransactionItemsInterface[] =
@@ -31,7 +34,6 @@ export const updateStockIn = async ({
         quantity: item.quantity,
         referenceId: updatedStockIn.id,
         warehouseId: stockInData.warehouseId,
-        transactionType: WarehouseTransactionType.StockIn,
       }));
 
     await logWarehouseTransactionItems(

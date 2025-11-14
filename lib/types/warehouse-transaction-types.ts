@@ -15,6 +15,7 @@ export type WarehouseTransactionRow = {
 
 export type WarehouseTransactionItemFormType = {
   productId: string;
-  shelfId: string;
+  shelfId?: string;
   quantity: number;
+  warehouseId?: string;
 };

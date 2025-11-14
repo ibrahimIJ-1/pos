@@ -16,24 +16,24 @@ import {
 import { UserRole, Permission } from "@/lib/permissions";
 import { PermissionGuard } from "@/hooks/usePermissions";
 import { useTranslations } from "next-intl";
-import { useDeleteStockIn, useStockIns } from "@/lib/stock-in-service";
+import { useDeleteBranchTransfer, useBranchTransfers } from "@/lib/branch-transfer-service";
 import { WarehouseTransactionRow } from "@/lib/types/warehouse-transaction-types";
-import { StockInDialog } from "@/components/stock-in/StockInDialog";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { BranchTransferDialog } from "@/components/branch-transfer/BranchtransferDialog";
 
 export default function BranchTransfer() {
   const t = useTranslations();
-  const { data: stockIns, isLoading, refetch } = useStockIns();
-  const deleleteMutation = useDeleteStockIn();
+  const { data: branchTransfers, isLoading, refetch } = useBranchTransfers();
+  const deleleteMutation = useDeleteBranchTransfer();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [selectedStockIn, setSelectedStockIn] = useState<
+  const [selectedBranchTransfer, setSelectedBranchTransfer] = useState<
     WarehouseTransactionRow | undefined
   >(undefined);
   const [viewMode, setViewMode] = useState<"list" | "details">("list");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [stockInToDelete, setStockInToDelete] = useState<string | null>(null);
+  const [branchTransferToDelete, setBranchTransferToDelete] = useState<string | null>(null);
 
   // Table column definitions
   const columns: ColumnDef<WarehouseTransactionRow>[] = [
@@ -91,7 +91,7 @@ export default function BranchTransfer() {
               size="icon"
               onClick={(e) => {
                 e.stopPropagation();
-                editStockIn(row.original);
+                editBranchTransfer(row.original);
               }}
             >
               <Edit className="h-4 w-4" />
@@ -113,13 +113,13 @@ export default function BranchTransfer() {
     },
   ];
 
-  const viewStockInDetails = (stockIn: WarehouseTransactionRow) => {
-    setSelectedStockIn(stockIn);
+  const viewBranchTransferDetails = (branchTransfer: WarehouseTransactionRow) => {
+    setSelectedBranchTransfer(branchTransfer);
     setViewMode("details");
   };
 
-  const editStockIn = (stockIn: WarehouseTransactionRow) => {
-    setSelectedStockIn(stockIn);
+  const editBranchTransfer = (branchTransfer: WarehouseTransactionRow) => {
+    setSelectedBranchTransfer(branchTransfer);
     setIsEditOpen(true);
   };
 
@@ -129,22 +129,22 @@ export default function BranchTransfer() {
 
   const handleBackToList = () => {
     setViewMode("list");
-    setSelectedStockIn(undefined);
+    setSelectedBranchTransfer(undefined);
   };
 
-  const handleStockInSuccess = () => {
+  const handleBranchTransferSuccess = () => {
     refetch();
   };
 
   const handleDelete = (id: string) => {
-    setStockInToDelete(id);
+    setBranchTransferToDelete(id);
     setIsDeleteDialogOpen(true);
   };
 
   const confirmDelete = () => {
-    if (stockInToDelete) {
+    if (branchTransferToDelete) {
       deleleteMutation.mutate(
-        { id: stockInToDelete },
+        { id: branchTransferToDelete },
         {
           onSuccess: () => {
             setIsDeleteDialogOpen(false);
@@ -165,7 +165,7 @@ export default function BranchTransfer() {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Users className="h-6 w-6" />
-            <h1 className="text-2xl font-bold">{t("StockIns")}</h1>
+            <h1 className="text-2xl font-bold">{t("BranchTransfers")}</h1>
           </div>
           <PermissionGuard
             userRole={[UserRole.ADMIN, UserRole.MANAGER, UserRole.CASHIER]}
@@ -173,37 +173,37 @@ export default function BranchTransfer() {
           >
             <Button onClick={handleAddNewClick}>
               <UserPlus className="h-4 w-4 mr-2" />
-              {t("Add New StockIn")}
+              {t("Add New BranchTransfer")}
             </Button>
           </PermissionGuard>
         </div>
 
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
-            <p>{t("Loading stockIns")}...</p>
+            <p>{t("Loading branchTransfers")}...</p>
           </div>
         ) : (
           <DataTable
             columns={columns}
-            data={stockIns as any[] || []}
+            data={branchTransfers as any[] || []}
             filterColumn="code"
-            filterPlaceholder={t("Search stockIns") + "..."}
+            filterPlaceholder={t("Search branchTransfers") + "..."}
             className="neon-border"
           />
         )}
       </>
-      {/* Add New StockIn Dialog */}
-      <StockInDialog
+      {/* Add New BranchTransfer Dialog */}
+      <BranchTransferDialog
         open={isAddOpen}
         onOpenChange={setIsAddOpen}
-        onSuccess={handleStockInSuccess}
+        onSuccess={handleBranchTransferSuccess}
       />
-      {/* Edit StockIn Dialog */}
-      <StockInDialog
-        stockIn={selectedStockIn}
+      {/* Edit BranchTransfer Dialog */}
+      <BranchTransferDialog
+        branchTransfer={selectedBranchTransfer}
         open={isEditOpen}
         onOpenChange={setIsEditOpen}
-        onSuccess={handleStockInSuccess}
+        onSuccess={handleBranchTransferSuccess}
       />
       {/* Delete Confirmation Dialog */}
       <AlertDialog

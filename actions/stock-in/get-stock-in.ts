@@ -7,6 +7,7 @@ import { getAllUserWarehouses } from "../warehouses/get-user-all-warehouses";
 import { checkUserRoles } from "../users/check-role";
 import { UserRole } from "@/lib/permissions";
 import { decimalToNumber } from "@/lib/utils";
+import { WarehouseTransactionType } from "@prisma/client";
 
 export const getStockIn = async (id: string) => {
   try {
@@ -18,6 +19,7 @@ export const getStockIn = async (id: string) => {
         warehouseId: {
           in: [...userWarehouses.map((warehouse) => warehouse.id)],
         },
+        transactionType: WarehouseTransactionType.StockIn,
       },
       include: {
         warehouseTransactionItems: true,
