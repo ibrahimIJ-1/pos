@@ -63,7 +63,7 @@ function ItemsSelector() {
       </div>
 
       {/* Products Grid */}
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 max-sm:hidden">
         <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(160px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] xl:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2 p-1">
           {filteredProducts.map((product) => (
             <Card

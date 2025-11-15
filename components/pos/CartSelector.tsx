@@ -129,7 +129,8 @@ function CartSelector() {
         disabled={(cart?.items as CartItem[])?.length === 0}
       >
         <Trash2 className="h-4 w-4 mr-1" />
-        {trans("Clear")}
+        {trans("")}
+        {/* {trans("Clear")} */}
       </Button>
     </div>
   );
