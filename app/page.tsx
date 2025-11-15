@@ -38,6 +38,7 @@ export default function Index() {
       setIsInitilized(data.value == "1");
     },
     onError: (error) => {
+      setIsInitilized(false);
       toast.error(`Failed to check database initialization`);
     },
   });
