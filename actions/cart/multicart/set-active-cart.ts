@@ -26,27 +26,27 @@ export const setActiveCart = async (cartId: string) => {
     if (!cart) {
       throw new Error("Cart not found");
     }
+    const result = await prisma.$transaction(async (tx) => {
+      // First, set all carts to inactive
+      await prisma.cart.updateMany({
+        where: {
+          userId,
+          isActive: true,
+          branchId: reg.branchId,
+        },
+        data: {
+          isActive: false,
+        },
+      });
 
-    // First, set all carts to inactive
-    await prisma.cart.updateMany({
-      where: {
-        userId,
-        isActive: true,
-        branchId: reg.branchId,
-      },
-      data: {
-        isActive: false,
-      },
+      // Set the specified cart to active
+      await prisma.cart.update({
+        where: { id: cartId, branchId: reg.branchId },
+        data: {
+          isActive: true,
+        },
+      });
     });
-
-    // Set the specified cart to active
-    await prisma.cart.update({
-      where: { id: cartId, branchId: reg.branchId },
-      data: {
-        isActive: true,
-      },
-    });
-
     return "Active cart updated";
   } catch (error) {
     console.error("Error switching cart:", error);

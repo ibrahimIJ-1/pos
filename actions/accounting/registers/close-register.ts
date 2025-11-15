@@ -50,41 +50,42 @@ export const closeRegister = async (id: string, closingBalance: number) => {
         expectedBalance -= Number(transaction.amount);
       }
     }
-
-    // Close the register
-    const updatedRegister = await prisma.register.update({
-      where: { id },
-      data: {
-        status: "CLOSED",
-        currentCashierId: null,
-        closingBalance: closingBalance,
-        closedAt: new Date(),
-      },
-      include: {
-        cashier: {
-          select: {
-            id: true,
-            name: true,
+    const result = await prisma.$transaction(async (tx) => {
+      // Close the register
+      const updatedRegister = await prisma.register.update({
+        where: { id },
+        data: {
+          status: "CLOSED",
+          currentCashierId: null,
+          closingBalance: closingBalance,
+          closedAt: new Date(),
+        },
+        include: {
+          cashier: {
+            select: {
+              id: true,
+              name: true,
+            },
           },
         },
-      },
-    });
-    if (closingBalance > 0)
-      // Create a transaction record for closing the register
-      await prisma.registerTransaction.create({
-        data: {
-          registerId: id,
-          type: "CASH_OUT",
-          amount: closingBalance,
-          paymentMethod: "CASH",
-          description: "Register closed",
-          cashierId: userId,
-          branchId:updatedRegister.branchId
-        },
       });
-
+      if (closingBalance > 0)
+        // Create a transaction record for closing the register
+        await prisma.registerTransaction.create({
+          data: {
+            registerId: id,
+            type: "CASH_OUT",
+            amount: closingBalance,
+            paymentMethod: "CASH",
+            description: "Register closed",
+            cashierId: userId,
+            branchId: updatedRegister.branchId,
+          },
+        });
+      return updatedRegister;
+    });
     return {
-      register: decimalToNumber(updatedRegister),
+      register: decimalToNumber(result),
       expectedBalance,
       difference: closingBalance - expectedBalance,
     };

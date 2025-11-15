@@ -13,34 +13,35 @@ export const createCart = async () => {
     const reg = await getRegisterById(user.macAddress);
     if (!reg) throw new Error("Register Not found");
     await checkUserPermissions(rolePermissions[UserRole.CASHIER]);
+    const result = await prisma.$transaction(async (tx) => {
+      // First, set all carts to inactive
+      await prisma.cart.updateMany({
+        where: {
+          userId,
+          isActive: true,
+          branchId: reg.branchId,
+        },
+        data: {
+          isActive: false,
+        },
+      });
 
-    // First, set all carts to inactive
-    await prisma.cart.updateMany({
-      where: {
-        userId,
-        isActive: true,
-        branchId: reg.branchId,
-      },
-      data: {
-        isActive: false,
-      },
+      // Create a new cart and set it active
+      const newCart = await prisma.cart.create({
+        data: {
+          userId,
+          name: `Cart ${new Date().toLocaleTimeString()}`,
+          isActive: true,
+          branchId: reg.branchId,
+        },
+        include: {
+          items: true,
+        },
+      });
+      return newCart
     });
-
-    // Create a new cart and set it active
-    const newCart = await prisma.cart.create({
-      data: {
-        userId,
-        name: `Cart ${new Date().toLocaleTimeString()}`,
-        isActive: true,
-        branchId: reg.branchId,
-      },
-      include: {
-        items: true,
-      },
-    });
-
     return {
-      ...newCart,
+      ...result,
       active: true,
     };
   } catch (error) {

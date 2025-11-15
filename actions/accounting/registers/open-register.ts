@@ -31,41 +31,42 @@ export const openRegister = async (id: string, openingBalance = 0) => {
     if (register.status === "OPEN") {
       throw new Error("Register is already open");
     }
-
-    // Open the register
-    const updatedRegister = await prisma.register.update({
-      where: { id },
-      data: {
-        status: "OPEN",
-        openingBalance: openingBalance,
-        openedAt: new Date(),
-        closedAt: null,
-        closingBalance: null,
-      },
-      include: {
-        cashier: {
-          select: {
-            id: true,
-            name: true,
+    const result = await prisma.$transaction(async (tx) => {
+      // Open the register
+      const updatedRegister = await prisma.register.update({
+        where: { id },
+        data: {
+          status: "OPEN",
+          openingBalance: openingBalance,
+          openedAt: new Date(),
+          closedAt: null,
+          closingBalance: null,
+        },
+        include: {
+          cashier: {
+            select: {
+              id: true,
+              name: true,
+            },
           },
         },
-      },
-    });
-    if (openingBalance > 0)
-      // Create a transaction record for opening the register
-      await prisma.registerTransaction.create({
-        data: {
-          registerId: id,
-          type: "CASH_IN",
-          amount: openingBalance,
-          paymentMethod: "CASH",
-          description: "Register opened",
-          cashierId: userId,
-          branchId:updatedRegister.branchId
-        },
       });
-
-    return decimalToNumber(updatedRegister);
+      if (openingBalance > 0)
+        // Create a transaction record for opening the register
+        await prisma.registerTransaction.create({
+          data: {
+            registerId: id,
+            type: "CASH_IN",
+            amount: openingBalance,
+            paymentMethod: "CASH",
+            description: "Register opened",
+            cashierId: userId,
+            branchId: updatedRegister.branchId,
+          },
+        });
+      return updatedRegister;
+    });
+    return decimalToNumber(result);
   } catch (error) {
     console.error(`Error opening register ${id}:`, error);
     throw new Error("Failed to open register");

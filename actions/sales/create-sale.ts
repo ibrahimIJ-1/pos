@@ -45,103 +45,106 @@ export const createNewSale = async (
     if (!register) {
       throw new Error("register not found");
     }
-    // Create the sale with its items
-    const sale = await prisma.sale.create({
-      data: {
-        saleNumber,
-        customerId,
-        cashierId: user.id,
-        subtotal,
-        taxTotal,
-        discountTotal,
-        totalAmount,
-        paymentMethod,
-        paymentStatus,
-        notes,
-        registerId: user.macAddress,
-        branchId: register.branchId,
-        items: {
-          create: items.map((item: SaleItem) => ({
-            productId: item.productId,
-            productName: item.productName,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            discountAmount: item.discountAmount || 0,
-            taxAmount: item.taxAmount || 0,
-            subtotal: item.subtotal,
-          })),
-        },
-      },
-      include: {
-        customer: true,
-        cashier: {
-          select: {
-            id: true,
-            name: true,
+    const result = await prisma.$transaction(async (tx) => {
+      // Create the sale with its items
+      const sale = await prisma.sale.create({
+        data: {
+          saleNumber,
+          customerId,
+          cashierId: user.id,
+          subtotal,
+          taxTotal,
+          discountTotal,
+          totalAmount,
+          paymentMethod,
+          paymentStatus,
+          notes,
+          registerId: user.macAddress,
+          branchId: register.branchId,
+          items: {
+            create: items.map((item: SaleItem) => ({
+              productId: item.productId,
+              productName: item.productName,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              discountAmount: item.discountAmount || 0,
+              taxAmount: item.taxAmount || 0,
+              subtotal: item.subtotal,
+            })),
           },
         },
-        branch: {
-          select: {
-            id: true,
-            name: true,
-            address: true,
+        include: {
+          customer: true,
+          cashier: {
+            select: {
+              id: true,
+              name: true,
+            },
           },
-        },
-        items: {
-          include: {
-            product: {
-              select: {
-                id: true,
-                name: true,
-                sku: true,
-                BranchProduct: {
-                  where: {
-                    branchId: register.branchId,
+          branch: {
+            select: {
+              id: true,
+              name: true,
+              address: true,
+            },
+          },
+          items: {
+            include: {
+              product: {
+                select: {
+                  id: true,
+                  name: true,
+                  sku: true,
+                  BranchProduct: {
+                    where: {
+                      branchId: register.branchId,
+                    },
                   },
                 },
               },
             },
           },
         },
-      },
-    });
+      });
 
-    items.forEach(async (item) => {
-      await prisma.branchProduct.update({
-        where: {
-          productId_branchId: {
+      items.forEach(async (item) => {
+        await prisma.branchProduct.update({
+          where: {
+            productId_branchId: {
+              branchId: register.branchId,
+              productId: item.productId,
+            },
+          },
+          data: {
+            stock: {
+              decrement: item.quantity,
+            },
+          },
+        });
+      });
+
+      // If this sale is linked to a register, add a transaction record
+      if (user.macAddress) {
+        await prisma.registerTransaction.create({
+          data: {
+            registerId: user.macAddress,
             branchId: register.branchId,
-            productId: item.productId,
+            type: "SALE",
+            referenceId: sale.id,
+            amount: totalAmount,
+            paymentMethod,
+            description: `Sale #${saleNumber}`,
+            //TODO GET THE CASHIER ID
+            cashierId: user.id,
           },
-        },
-        data: {
-          stock: {
-            decrement: item.quantity,
-          },
-        },
-      });
+        });
+      }
+      return sale;
     });
-
-    // If this sale is linked to a register, add a transaction record
-    if (user.macAddress) {
-      await prisma.registerTransaction.create({
-        data: {
-          registerId: user.macAddress,
-          branchId: register.branchId,
-          type: "SALE",
-          referenceId: sale.id,
-          amount: totalAmount,
-          paymentMethod,
-          description: `Sale #${saleNumber}`,
-          //TODO GET THE CASHIER ID
-          cashierId: user.id,
-        },
-      });
-    }
-    const storeName = await getSettingByName("storeName");
-    const storeLogo = await getSettingByName("logo",true);
+    const storeName = await getSettingByName("storeName",true);
+    const storeLogo = await getSettingByName("logo", true);
     return {
-      ...(decimalToNumber(sale) as Object),
+      ...(decimalToNumber(result) as Object),
       storeName: storeName ? storeName.value ?? "Flash Pro" : "Flash Pro",
       logo: storeLogo ? storeLogo.value ?? null : null,
     };

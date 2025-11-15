@@ -36,86 +36,87 @@ export const createRefund = async ({ refund, refundItems }: ICreateRefund) => {
     if (!register) {
       throw new Error("register not found");
     }
-
-    const savedRefund = await prisma.refund.create({
-      data: {
-        saleId: refund.saleId!,
-        customerId: refund.customerId ?? null,
-        cashierId: user.id,
-        subtotal: refund.subtotal!,
-        taxTotal: refund.taxTotal!,
-        discountTotal: refund.discountTotal!,
-        totalAmount: refund.totalAmount!,
-        paymentMethod: "cash",
-        paymentStatus: "",
-        notes: refund.notes ?? "",
-        reason: refund.reason ?? "",
-        status: RefundStatus.PENDING,
-        registerId: register.id,
-        branchId: register.branchId,
-        items: {
-          create: refundItems.map((item: RefundItem) => ({
-            productId: item.productId,
-            productName: item.productName,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            discountAmount: item.discountAmount || 0,
-            taxAmount: item.taxAmount || 0,
-            subtotal: item.subtotal,
-            saleItemId: item.saleItemId,
-          })),
-        },
-      },
-      include: {
-        customer: true,
-        sale: true,
-        cashier: {
-          select: {
-            id: true,
-            name: true,
+    const result = await prisma.$transaction(async (tx) => {
+      const savedRefund = await prisma.refund.create({
+        data: {
+          saleId: refund.saleId!,
+          customerId: refund.customerId ?? null,
+          cashierId: user.id,
+          subtotal: refund.subtotal!,
+          taxTotal: refund.taxTotal!,
+          discountTotal: refund.discountTotal!,
+          totalAmount: refund.totalAmount!,
+          paymentMethod: "cash",
+          paymentStatus: "",
+          notes: refund.notes ?? "",
+          reason: refund.reason ?? "",
+          status: RefundStatus.PENDING,
+          registerId: register.id,
+          branchId: register.branchId,
+          items: {
+            create: refundItems.map((item: RefundItem) => ({
+              productId: item.productId,
+              productName: item.productName,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              discountAmount: item.discountAmount || 0,
+              taxAmount: item.taxAmount || 0,
+              subtotal: item.subtotal,
+              saleItemId: item.saleItemId,
+            })),
           },
         },
-        branch: {
-          select: {
-            id: true,
-            name: true,
-            address: true,
+        include: {
+          customer: true,
+          sale: true,
+          cashier: {
+            select: {
+              id: true,
+              name: true,
+            },
           },
-        },
-        items: {
-          include: {
-            product: {
-              select: {
-                id: true,
-                name: true,
-                sku: true,
-                BranchProduct: {
-                  where: {
-                    branchId: register.branchId,
+          branch: {
+            select: {
+              id: true,
+              name: true,
+              address: true,
+            },
+          },
+          items: {
+            include: {
+              product: {
+                select: {
+                  id: true,
+                  name: true,
+                  sku: true,
+                  BranchProduct: {
+                    where: {
+                      branchId: register.branchId,
+                    },
                   },
                 },
               },
             },
           },
         },
-      },
-    });
-    refundItems.forEach(async (element: RefundItem) => {
-      await prisma.saleItem.update({
-        where: {
-          id: element.saleItemId,
-        },
-        data: {
-          refundedQuantity: {
-            increment: element.quantity,
-          },
-        },
       });
+      refundItems.forEach(async (element: RefundItem) => {
+        await prisma.saleItem.update({
+          where: {
+            id: element.saleItemId,
+          },
+          data: {
+            refundedQuantity: {
+              increment: element.quantity,
+            },
+          },
+        });
+      });
+      return savedRefund;
     });
-
-    const storeName = await getSettingByName("storeName");
+    const storeName = await getSettingByName("storeName",true);
     return {
-      ...(decimalToNumber(savedRefund) as Object),
+      ...(decimalToNumber(result) as Object),
       storeName: storeName ? storeName.value ?? "Flash Pro" : "Flash Pro",
     };
   } catch (error) {

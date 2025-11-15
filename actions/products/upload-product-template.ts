@@ -37,159 +37,168 @@ export async function uploadProductsFromExcel(formData: FormData) {
     const errors: string[] = [];
 
     // Process rows sequentially to handle operations properly
-    for (let rowNumber = 2; rowNumber <= worksheet.rowCount; rowNumber++) {
-      const row = worksheet.getRow(rowNumber);
-      try {
-        // Extract product data
-        const barcode = row.getCell(4).value?.toString() || undefined;
-        const branchName = row.getCell(6).value?.toString();
-        // console.log("@BARCODE",row.getCell(2).value?.toString());
+    const result = await prisma.$transaction(async (tx) => {
+      for (let rowNumber = 2; rowNumber <= worksheet.rowCount; rowNumber++) {
+        const row = worksheet.getRow(rowNumber);
+        try {
+          // Extract product data
+          const barcode = row.getCell(4).value?.toString() || undefined;
+          const branchName = row.getCell(6).value?.toString();
+          // console.log("@BARCODE",row.getCell(2).value?.toString());
 
-        if (!branchName) {
-          errors.push(`Row ${rowNumber}: Branch name is required`);
-          errorCount++;
-          continue;
-        }
-        if(userBranches.branches.find(b => b.name.toLowerCase() === branchName.toLowerCase()) === undefined) {
-          errors.push(`Row ${rowNumber}: You do not have access to branch "${branchName}"`);
-          errorCount++;
-          continue;
-        }
+          if (!branchName) {
+            errors.push(`Row ${rowNumber}: Branch name is required`);
+            errorCount++;
+            continue;
+          }
+          if (
+            userBranches.branches.find(
+              (b) => b.name.toLowerCase() === branchName.toLowerCase()
+            ) === undefined
+          ) {
+            errors.push(
+              `Row ${rowNumber}: You do not have access to branch "${branchName}"`
+            );
+            errorCount++;
+            continue;
+          }
 
-        const branchId = branchNameToIdMap.get(branchName.toLowerCase());
-        if (!branchId) {
-          errors.push(`Row ${rowNumber}: Branch "${branchName}" not found`);
-          errorCount++;
-          continue;
-        }
+          const branchId = branchNameToIdMap.get(branchName.toLowerCase());
+          if (!branchId) {
+            errors.push(`Row ${rowNumber}: Branch "${branchName}" not found`);
+            errorCount++;
+            continue;
+          }
 
-        // Handle image URL (assuming it's a string URL or path in the Excel)
-        let image_url: string | undefined = undefined;
-        const imageCell = row.getCell(12); // Assuming image is in column 12
-        if (imageCell.value) {
-          const imageValue = imageCell.value?.toString();
-          if (imageValue) {
-            // If it's a URL, use it directly
-            if (imageValue.startsWith("http")) {
-              image_url = imageValue;
-            } else {
-              const base64String = imageCell.value.toString();
-              // Implement a function to upload from base64
-              //   image_url = await uploadFileFromBase64(base64String, true);
+          // Handle image URL (assuming it's a string URL or path in the Excel)
+          let image_url: string | undefined = undefined;
+          const imageCell = row.getCell(12); // Assuming image is in column 12
+          if (imageCell.value) {
+            const imageValue = imageCell.value?.toString();
+            if (imageValue) {
+              // If it's a URL, use it directly
+              if (imageValue.startsWith("http")) {
+                image_url = imageValue;
+              } else {
+                const base64String = imageCell.value.toString();
+                // Implement a function to upload from base64
+                //   image_url = await uploadFileFromBase64(base64String, true);
+              }
             }
           }
-        }
-        let productData: any = {};
-        if (row.getCell(1).value) {
-          productData.name = row.getCell(1).value?.toString() || "";
-        }
-        if (row.getCell(2).value) {
-          productData.description = row.getCell(2).value?.toString() || "";
-        }
-        if (row.getCell(3).value) {
-          productData.sku = row.getCell(3).value?.toString() || "";
-        }
-        if (row.getCell(5).value) {
-          productData.category = row.getCell(5).value?.toString() || "";
-        }
-        productData.barcode = barcode;
-        let branchProductData: any = {};
-        if (row.getCell(7).value) {
-          branchProductData.price = parseFloat(
-            row.getCell(7).value?.toString() || "0"
+          let productData: any = {};
+          if (row.getCell(1).value) {
+            productData.name = row.getCell(1).value?.toString() || "";
+          }
+          if (row.getCell(2).value) {
+            productData.description = row.getCell(2).value?.toString() || "";
+          }
+          if (row.getCell(3).value) {
+            productData.sku = row.getCell(3).value?.toString() || "";
+          }
+          if (row.getCell(5).value) {
+            productData.category = row.getCell(5).value?.toString() || "";
+          }
+          productData.barcode = barcode;
+          let branchProductData: any = {};
+          if (row.getCell(7).value) {
+            branchProductData.price = parseFloat(
+              row.getCell(7).value?.toString() || "0"
+            );
+          }
+          branchProductData.cost = parseFloat(
+            row.getCell(8).value?.toString() || "0"
           );
-        }
-        branchProductData.cost = parseFloat(row.getCell(8).value?.toString() || "0");
-        if (row.getCell(9).value) {
-          branchProductData.taxRate = parseFloat(
-            row.getCell(9).value?.toString() || "0"
-          );
-        }
-        if (row.getCell(11).value) {
-          branchProductData.low_stock_threshold = parseInt(
-            row.getCell(11).value?.toString() || "10"
-          );
-        }
-        const newStock = parseInt(row.getCell(10).value?.toString() || "0");
-        branchProductData.stock = newStock;
-        branchProductData.isActive = true;
+          if (row.getCell(9).value) {
+            branchProductData.taxRate = parseFloat(
+              row.getCell(9).value?.toString() || "0"
+            );
+          }
+          if (row.getCell(11).value) {
+            branchProductData.low_stock_threshold = parseInt(
+              row.getCell(11).value?.toString() || "10"
+            );
+          }
+          const newStock = parseInt(row.getCell(10).value?.toString() || "0");
+          branchProductData.stock = newStock;
+          branchProductData.isActive = true;
 
-        // Upsert product (create or update by barcode)
-        let product: Product;
-        if (barcode) {
-          // Try to find existing product by barcode
-          const existingProduct = await prisma.product.findFirst({
-            where: { barcode },
-          });
-
-          if (existingProduct) {
-            // Update existing product
-            product = await prisma.product.update({
-              where: { id: existingProduct.id },
-              data: productData,
+          // Upsert product (create or update by barcode)
+          let product: Product;
+          if (barcode) {
+            // Try to find existing product by barcode
+            const existingProduct = await prisma.product.findFirst({
+              where: { barcode },
             });
+
+            if (existingProduct) {
+              // Update existing product
+              product = await prisma.product.update({
+                where: { id: existingProduct.id },
+                data: productData,
+              });
+            } else {
+              // Create new product
+              product = await prisma.product.create({
+                data: productData,
+              });
+            }
           } else {
-            // Create new product
+            // Create new product (no barcode to match)
             product = await prisma.product.create({
               data: productData,
             });
           }
-        } else {
-          // Create new product (no barcode to match)
-          product = await prisma.product.create({
-            data: productData,
-          });
-        }
 
-        // Check if branch product exists
-        const existingBranchProduct = await prisma.branchProduct.findUnique({
-          where: {
-            productId_branchId: {
-              productId: product.id,
-              branchId,
-            },
-          },
-        });
-
-        if (existingBranchProduct) {
-          // Update existing branch product and increment stock
-          await prisma.branchProduct.update({
+          // Check if branch product exists
+          const existingBranchProduct = await prisma.branchProduct.findUnique({
             where: {
               productId_branchId: {
                 productId: product.id,
                 branchId,
               },
             },
-            data: {
-              ...branchProductData,
-              stock: {
-                increment: newStock, // Increment existing stock by new quantity
+          });
+
+          if (existingBranchProduct) {
+            // Update existing branch product and increment stock
+            await prisma.branchProduct.update({
+              where: {
+                productId_branchId: {
+                  productId: product.id,
+                  branchId,
+                },
               },
-            },
-          });
-        } else {
-          // Create new branch product
-          await prisma.branchProduct.create({
-            data: {
-              ...branchProductData,
-              productId: product.id,
-              branchId,
-            },
-          });
+              data: {
+                ...branchProductData,
+                stock: {
+                  increment: newStock, // Increment existing stock by new quantity
+                },
+              },
+            });
+          } else {
+            // Create new branch product
+            await prisma.branchProduct.create({
+              data: {
+                ...branchProductData,
+                productId: product.id,
+                branchId,
+              },
+            });
+          }
+
+          successCount++;
+        } catch (error) {
+          console.error(`Error processing row ${rowNumber}:`, error);
+          errors.push(
+            `Row ${rowNumber}: ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`
+          );
+          errorCount++;
         }
-
-        successCount++;
-      } catch (error) {
-        console.error(`Error processing row ${rowNumber}:`, error);
-        errors.push(
-          `Row ${rowNumber}: ${
-            error instanceof Error ? error.message : "Unknown error"
-          }`
-        );
-        errorCount++;
       }
-    }
-
+    });
     revalidatePath("/products");
     return {
       success: true,

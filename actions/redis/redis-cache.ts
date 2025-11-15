@@ -15,7 +15,7 @@ export async function getCache<T>(cacheKey: string) {
     } else {
       return data as T;
     }
-  } catch (error) {
+  } catch (error) {    
     return null;
   }
 }

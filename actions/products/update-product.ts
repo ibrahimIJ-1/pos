@@ -36,62 +36,64 @@ export const updateProduct = async ({
     ]);
     const userBranches = await getAllUserBranches();
     if (image_file) {
-      image_url = await uploadFile(image_file,true);
+      image_url = await uploadFile(image_file, true);
     }
 
     const incomingBranchIds = branches.map((b) => b.branchId);
-    for (const branch of branches) {
-      await prisma.branchProduct.upsert({
+    const result = await prisma.$transaction(async (tx) => {
+      for (const branch of branches) {
+        await prisma.branchProduct.upsert({
+          where: {
+            productId_branchId: {
+              productId: id,
+              branchId: branch.branchId,
+            },
+          },
+          update: {
+            price: branch.price,
+            cost: branch.cost,
+            taxRate: branch.taxRate,
+            stock: branch.stock,
+            low_stock_threshold: branch.low_stock_threshold,
+            isActive: branch.isActive,
+          },
+          create: {
+            product: { connect: { id: id } },
+            branch: { connect: { id: branch.branchId } },
+            price: branch.price,
+            cost: branch.cost,
+            taxRate: branch.taxRate,
+            stock: branch.stock,
+            low_stock_threshold: branch.low_stock_threshold,
+            isActive: branch.isActive,
+          },
+        });
+      }
+
+      // 3. Delete removed branches
+      await prisma.branchProduct.deleteMany({
         where: {
-          productId_branchId: {
-            productId: id,
-            branchId: branch.branchId,
+          productId: id,
+          branchId: {
+            notIn: incomingBranchIds,
+            in: userBranches.branches.map((branch) => branch.id),
           },
         },
-        update: {
-          price: branch.price,
-          cost: branch.cost,
-          taxRate: branch.taxRate,
-          stock: branch.stock,
-          low_stock_threshold: branch.low_stock_threshold,
-          isActive: branch.isActive,
-        },
-        create: {
-          product: { connect: { id: id } },
-          branch: { connect: { id: branch.branchId } },
-          price: branch.price,
-          cost: branch.cost,
-          taxRate: branch.taxRate,
-          stock: branch.stock,
-          low_stock_threshold: branch.low_stock_threshold,
-          isActive: branch.isActive,
+      });
+      const product = await prisma.product.update({
+        where: { id },
+        data: {
+          name,
+          sku,
+          description,
+          barcode,
+          category,
+          image_url,
         },
       });
-    }
-
-    // 3. Delete removed branches
-    await prisma.branchProduct.deleteMany({
-      where: {
-        productId: id,
-        branchId: {
-          notIn: incomingBranchIds,
-          in: userBranches.branches.map((branch) => branch.id),
-        },
-      },
+      return product;
     });
-    const product = await prisma.product.update({
-      where: { id },
-      data: {
-        name,
-        sku,
-        description,
-        barcode,
-        category,
-        image_url,
-      },
-    });
-
-    return decimalToNumber(product);
+    return decimalToNumber(result);
   } catch (error) {
     console.error(`Error updating product ${id}:`, error);
     throw new Error("Failed to update product");
