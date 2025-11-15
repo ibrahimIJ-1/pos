@@ -802,5 +802,7 @@
     "Select Shelf": "Select Shelf",
     "Quantity": "Quantity",
     "warehouse": "warehouse",
-    "Stock In":"Stock In"
+    "Stock In": "Stock In",
+    "Scan Code": "Scan Code",
+    "Scanner": "Scanner"
 }

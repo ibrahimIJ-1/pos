@@ -65,4 +65,9 @@ export interface POSContextType {
   inputRef: React.RefObject<null>;
   showImage: boolean;
   trans: ReturnType<typeof useTranslations>;
+  openScanner?: boolean;
+  setOpenScanner: Dispatch<SetStateAction<boolean>>;
+  lastResult: string;
+  lastFormat: string;
+  handleCameraScanned: (value: string, format: string) => void;
 }

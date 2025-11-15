@@ -49,6 +49,7 @@
     "@types/bcrypt": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.9",
     "@upstash/redis": "^1.35.3",
+    "@yudiel/react-qr-scanner": "^2.4.1",
     "axios": "^1.8.3",
     "bcrypt": "^5.1.1",
     "bwip-js": "^4.6.0",
