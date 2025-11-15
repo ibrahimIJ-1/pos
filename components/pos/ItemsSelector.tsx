@@ -1,6 +1,6 @@
 "use client";
 
-import { Barcode, Search } from "lucide-react";
+import { Barcode, Camera, Search } from "lucide-react";
 import React from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -19,6 +19,7 @@ function ItemsSelector() {
     inputRef,
     showImage,
     trans,
+    setOpenScanner
   } = usePOS();
 
   const { storeCurrency } = useSystem();
@@ -50,6 +51,14 @@ function ItemsSelector() {
         >
           <Barcode className="h-5 w-5 sm:mr-2" />
           <span className="hidden sm:inline">{trans("Scan")}</span>
+        </Button>
+        <Button
+          variant="outline"
+          className="neon-border h-11 w-full sm:w-auto px-4"
+          onClick={()=>setOpenScanner(true)}
+        >
+          <Camera className="h-5 w-5 sm:mr-2" />
+          <span className="hidden sm:inline">{trans("Scanner")}</span>
         </Button>
       </div>
 

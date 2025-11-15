@@ -37,7 +37,7 @@ export const getAllUsers = async () => {
               branches: {
                 some: {
                   id: {
-                    in: userBranches.branches.map((branch) => branch.id),
+                    in: [...userBranches.branches.map((branch) => branch.id),],
                   },
                 },
               },
@@ -46,7 +46,12 @@ export const getAllUsers = async () => {
       orderBy: { name: "asc" },
     });
 
-    return users;
+    const usersWithBranchAndWarehouse = users.map((user) => ({
+      ...user,
+      branches: user.branches.filter((b) => !b.isWarehouse),
+    }));
+
+    return usersWithBranchAndWarehouse;
   } catch (error) {
     console.error("Error fetching users:", error);
     throw new Error("Failed to fetch users");

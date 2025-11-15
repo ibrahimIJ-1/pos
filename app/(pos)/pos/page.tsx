@@ -2,6 +2,7 @@ import InvoicePrintDialog from "@/components/pos/InvoicePrintDialog";
 import PaymentDialog from "@/components/pos/PaymentDialog";
 import ItemsSelector from "@/components/pos/ItemsSelector";
 import FullCart from "@/components/pos/FullCart";
+import QrScannerModal from "@/components/qr-scanner-modal/QrScannerModal";
 
 function POS() {
   return (
@@ -16,6 +17,7 @@ function POS() {
       </div>
       <PaymentDialog />
       <InvoicePrintDialog />
+      <QrScannerModal />
     </div>
   );
 }

@@ -20,14 +20,14 @@ import { DiscountDialog } from "@/components/discount/DiscountDialog";
 import { DiscountDataTable } from "@/components/discount/DiscountDataTable";
 import { Branch } from "@prisma/client";
 import { useDiscounts } from "@/lib/discounts-service";
-import { useBranches } from "@/lib/branches-service";
+import { useBranches, useSelectableUserBranches, useUserBranches } from "@/lib/branches-service";
 import { useTranslations } from "next-intl";
 
 export default function Discounts() {
   const t = useTranslations();
   const { toast } = useToast();
   const { data: discounts = [], isLoading, refetch } = useDiscounts();
-  const { data: branches = [], isLoading: isBranchLoading } = useBranches();
+  const { data: branches = [], isLoading: isBranchLoading } = useSelectableUserBranches();
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 

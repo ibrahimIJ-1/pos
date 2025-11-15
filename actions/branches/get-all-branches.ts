@@ -3,13 +3,21 @@
 import { checkUserPermissions } from "@/actions/users/check-permissions";
 import { rolePermissions, UserRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
-78
+import { getAllUserBranches } from "./get-user-all-branches";
+import { checkUserRoles } from "../users/check-role";
+78;
 export const getAllBranches = async () => {
+  const permission = await checkUserRoles([UserRole.OWNER]);
+  if (!permission) return [];
   try {
-    await checkUserPermissions(rolePermissions[UserRole.OWNER]);
-
+    const allBranches = await getAllUserBranches();
     const branches = await prisma.branch.findMany({
-      where:{isWarehouse: false },
+      where: {
+        isWarehouse: false,
+        id: {
+          in: allBranches.branches.map((branch) => branch.id),
+        },
+      },
       orderBy: { created_at: "desc" },
     });
 

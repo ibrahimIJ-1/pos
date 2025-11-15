@@ -9,7 +9,8 @@ interface DecodedToken {
   roles: string[];
   iat: number;
   exp: number;
-  macAddress:string
+  macAddress:string;
+  currentBranchId?: string;
 }
 import { decode } from "jsonwebtoken";
 

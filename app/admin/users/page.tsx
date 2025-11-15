@@ -68,7 +68,7 @@ import { createNewUser } from "@/actions/users/create-new-user";
 import { updateUser, updateUserPassword } from "@/actions/users/update-user";
 import { deleteUserById } from "@/actions/users/delete-user";
 import { Branch } from "@prisma/client";
-import { useBranches, useSelectableUserBranches } from "@/lib/branches-service";
+import {  useSelectableUserBranches } from "@/lib/branches-service";
 import { useTranslations } from "next-intl";
 
 // Define the shape of our user
@@ -144,7 +144,6 @@ export default function UsersPage() {
   const [activeTab, setActiveTab] = useState("all");
   const { roles } = useRolesPermissions();
   const { data: branches } = useSelectableUserBranches();
-
   // Form for adding new users
   const addForm = useForm<z.infer<typeof userFormSchema>>({
     resolver: zodResolver(userFormSchema),
@@ -212,7 +211,7 @@ export default function UsersPage() {
         values.password ?? "12345678",
         values.roles,
         true,
-        values.branches
+        values.branches,
       );
 
       setData([...data, response]);
@@ -298,7 +297,9 @@ export default function UsersPage() {
 
       toast({
         title: t("Password updated"),
-        description: `${t("Password for")} ${selectedUser.name} ${t("was successfully updated")}.`,
+        description: `${t("Password for")} ${selectedUser.name} ${t(
+          "was successfully updated"
+        )}.`,
       });
 
       setOpenPasswordDialog(false);
@@ -338,7 +339,7 @@ export default function UsersPage() {
       toast({
         title: `${t("User")} ${newStatus ? t("activated") : t("deactivated")}`,
         description: `${t("User")} ${user.name} ${t("was successfully")} ${
-newStatus ? t("activated") : t("deactivated")
+          newStatus ? t("activated") : t("deactivated")
         }.`,
       });
     } catch (error) {
@@ -531,7 +532,9 @@ newStatus ? t("activated") : t("deactivated")
                       </AlertDialogTitle>
                       <AlertDialogDescription className="rtl:text-start">
                         {t("This action cannot be undone")}.{" "}
-                        {t("This will permanently delete the user and remove their data from our servers")}
+                        {t(
+                          "This will permanently delete the user and remove their data from our servers"
+                        )}
                         .
                       </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -572,7 +575,10 @@ newStatus ? t("activated") : t("deactivated")
                   {t("Add New User")}
                 </DialogTitle>
                 <DialogDescription className="rtl:text-start">
-                  {t("Create a new user account to give someone access to the system")}.
+                  {t(
+                    "Create a new user account to give someone access to the system"
+                  )}
+                  .
                 </DialogDescription>
               </DialogHeader>
               <Form {...addForm}>
@@ -660,6 +666,7 @@ newStatus ? t("activated") : t("deactivated")
                       </FormItem>
                     )}
                   />
+                  
                   <FormField
                     control={addForm.control}
                     name="roles"
@@ -755,7 +762,9 @@ newStatus ? t("activated") : t("deactivated")
       <Dialog open={openEditDialog} onOpenChange={setOpenEditDialog}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle className="rtl:text-start">{t("Edit User")}</DialogTitle>
+            <DialogTitle className="rtl:text-start">
+              {t("Edit User")}
+            </DialogTitle>
             <DialogDescription className="rtl:text-start">
               {t("Update user details and roles")}.
             </DialogDescription>
@@ -839,7 +848,9 @@ newStatus ? t("activated") : t("deactivated")
                           {t("User Status")}
                         </FormLabel>
                         <FormDescription>
-                          {field.value ? t("User is active") : t("User is inactive")}
+                          {field.value
+                            ? t("User is active")
+                            : t("User is inactive")}
                         </FormDescription>
                       </div>
                       <FormControl>

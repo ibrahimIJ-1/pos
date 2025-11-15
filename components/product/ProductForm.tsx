@@ -46,6 +46,8 @@ export function ProductForm({
                                 mode,
                                 branches,
                             }: ProductFormProps) {
+                                console.log(product?.category);
+                                
     const {storeCurrency} = useSystem();
     const t = useTranslations();
     const productFormSchema = z.object({

@@ -10,6 +10,7 @@ import React, {
   SetStateAction,
   useCallback,
   useRef,
+  useMemo,
 } from "react";
 import { UseMutationResult, useQueryClient } from "@tanstack/react-query";
 import {
@@ -61,6 +62,12 @@ export function POSProvider({ children }: { children: ReactNode }) {
   const [isCartsPopoverOpen, setIsCartsPopoverOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [showImage, setShowImage] = useState(false);
+
+  //camera scanner
+  const [openScanner, setOpenScanner] = useState(false);
+  const [lastResult, setLastResult] = useState<string>("");
+  const [lastFormat, setLastFormat] = useState<string>("");
+  //end of camera scanner
 
   const scannedData = useRef("");
   const inputRef = useRef(null);
@@ -262,59 +269,145 @@ export function POSProvider({ children }: { children: ReactNode }) {
       }
     });
   }, []);
+  //handle the camera scanner
+  const handleCameraScanned = (value: string, format: string) => {
+    const scannedValue = value.trim();
+
+    // Try to find the product
+    const prod = products.find((p) => p.barcode === scannedValue);
+
+    if (prod) {
+      addItemToCart(prod);
+
+      toast.success("Product added to cart", {
+        description: `Barcode: ${scannedValue}`,
+        duration: 1800,
+      });
+    } else {
+      toast.error("Product not found!", {
+        description: `Scanned: ${scannedValue}`,
+        duration: 1800,
+      });
+    }
+
+    // Focus input
+    if (inputRef.current) {
+      (inputRef.current as HTMLInputElement).focus();
+    }
+
+    // Reset
+    scannedData.current = "";
+    setSearchTerm("");
+  };
 
   const { macAddress, macLoading } = useAuth();
-  console.log(macAddress);
+  const contextValue = useMemo(
+    () => ({
+      isInvoiceOpen,
+      setIsInvoiceOpen,
+      lastCompletedSale,
+      setLastCompletedSale,
+      isDiscountDialogOpen,
+      setIsDiscountDialogOpen,
+      cart,
+      handleApplyDiscount,
+      handleRemoveDiscount,
+      isCustomerDialogOpen,
+      setIsCustomerDialogOpen,
+      removeCustomer,
+      customers,
+      handleCustomerSelect,
+      isPaymentDialogOpen,
+      setIsPaymentDialogOpen,
+      paymentMethod,
+      setPaymentMethod,
+      cashReceived,
+      setCashReceived,
+      calculateChange,
+      createSaleMutation,
+      handleCompleteSale,
+      isCartsPopoverOpen,
+      setIsCartsPopoverOpen,
+      multiCart,
+      getShortCartId,
+      handleSwitchCart,
+      multiCartOps,
+      getCartItemCount,
+      handleDuplicateCart,
+      handleRemoveCart,
+      handleAddCart,
+      clearCart,
+      cartOps,
+      handleCheckout,
+      updateCartItemQuantity,
+      searchTerm,
+      setSearchTerm,
+      products,
+      addItemToCart,
+      inputRef,
+      showImage,
+      trans,
+      openScanner,
+      setOpenScanner,
+      lastResult,
+      lastFormat,
+      handleCameraScanned,
+    }),
+    [
+      isInvoiceOpen,
+      setIsInvoiceOpen,
+      lastCompletedSale,
+      setLastCompletedSale,
+      isDiscountDialogOpen,
+      setIsDiscountDialogOpen,
+      cart,
+      handleApplyDiscount,
+      handleRemoveDiscount,
+      isCustomerDialogOpen,
+      setIsCustomerDialogOpen,
+      removeCustomer,
+      customers,
+      handleCustomerSelect,
+      isPaymentDialogOpen,
+      setIsPaymentDialogOpen,
+      paymentMethod,
+      setPaymentMethod,
+      cashReceived,
+      setCashReceived,
+      calculateChange,
+      createSaleMutation,
+      handleCompleteSale,
+      isCartsPopoverOpen,
+      setIsCartsPopoverOpen,
+      multiCart,
+      getShortCartId,
+      handleSwitchCart,
+      multiCartOps,
+      getCartItemCount,
+      handleDuplicateCart,
+      handleRemoveCart,
+      handleAddCart,
+      clearCart,
+      cartOps,
+      handleCheckout,
+      updateCartItemQuantity,
+      searchTerm,
+      setSearchTerm,
+      products,
+      addItemToCart,
+      inputRef,
+      showImage,
+      trans,
+      openScanner,
+      setOpenScanner,
+      lastResult,
+      lastFormat,
+      handleCameraScanned,
+    ]
+  );
 
   return (
-    <POSContext.Provider
-      value={{
-        isInvoiceOpen,
-        setIsInvoiceOpen,
-        lastCompletedSale,
-        setLastCompletedSale,
-        isDiscountDialogOpen,
-        setIsDiscountDialogOpen,
-        cart,
-        handleApplyDiscount,
-        handleRemoveDiscount,
-        isCustomerDialogOpen,
-        setIsCustomerDialogOpen,
-        removeCustomer,
-        customers,
-        handleCustomerSelect,
-        isPaymentDialogOpen,
-        setIsPaymentDialogOpen,
-        paymentMethod,
-        setPaymentMethod,
-        cashReceived,
-        setCashReceived,
-        calculateChange,
-        createSaleMutation,
-        handleCompleteSale,
-        isCartsPopoverOpen,
-        setIsCartsPopoverOpen,
-        multiCart,
-        getShortCartId,
-        handleSwitchCart,
-        multiCartOps,
-        getCartItemCount,
-        handleDuplicateCart,
-        handleRemoveCart,
-        handleAddCart,
-        clearCart,
-        cartOps,
-        handleCheckout,
-        updateCartItemQuantity,
-        searchTerm,
-        setSearchTerm,
-        products,
-        addItemToCart,
-        inputRef,
-        showImage,
-        trans,
-      }}
-    >
+    <POSContext.Provider value={contextValue}>
       {macLoading ? <Loading /> : !macAddress ? <MacNotFound /> : children}
     </POSContext.Provider>
   );
