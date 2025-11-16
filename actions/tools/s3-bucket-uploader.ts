@@ -56,12 +56,10 @@ export async function uploadFile(
 ): Promise<string> {
   let fileBuffer: ArrayBuffer | Buffer | null = null;
   const fileSizeMB = file.size / (1024 * 1024);
-  console.log(fileSizeMB);
   
   if (canCompressImage == true) {
     if (fileSizeMB > 1) fileBuffer = await compressImage(file);
     else fileBuffer = await file.arrayBuffer();
-    console.log(fileBuffer.byteLength);
     
   } else {
     fileBuffer = await file.arrayBuffer();

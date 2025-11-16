@@ -137,7 +137,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       setUser(user);
       setPermissions(user.permissions || []);
-      console.log("User logged in:", user.permissions || []);
 
       toast.success(t("Successfully logged in"));
     } catch (error: any) {

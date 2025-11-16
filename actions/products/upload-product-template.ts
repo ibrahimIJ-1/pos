@@ -44,7 +44,6 @@ export async function uploadProductsFromExcel(formData: FormData) {
           // Extract product data
           const barcode = row.getCell(4).value?.toString() || undefined;
           const branchName = row.getCell(6).value?.toString();
-          // console.log("@BARCODE",row.getCell(2).value?.toString());
 
           if (!branchName) {
             errors.push(`Row ${rowNumber}: Branch name is required`);

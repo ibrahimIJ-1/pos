@@ -89,7 +89,6 @@ export function AdvancedReports() {
 
     // Define children as a React Node (required by the chart components)
     const chartChildren: ReactNode = <React.Fragment />;
-    console.log(data.chartData);
 
     switch (chartType) {
       case "bar":

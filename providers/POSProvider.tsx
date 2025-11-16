@@ -263,8 +263,6 @@ export function POSProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     getStoreSettings().then((data) => {
       if (data && data.productImages === "true") {
-        console.log(data.productImages);
-
         setShowImage(true);
       }
     });

@@ -164,7 +164,6 @@ export async function middleware(request: NextRequest) {
       await verifyAuth(token);
       return NextResponse.next();
     } catch (error) {
-      console.log("@ERROR: ", error);
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
   }

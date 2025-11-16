@@ -120,7 +120,6 @@ export const getInventoryReport = async ({
       })),
       inventoryByCategory: inventoryByCategoryArray,
     };
-    console.log(reportData);
     return reportData;
   } catch (error: any) {
     throw new Error("Failed to fetch inventory report");

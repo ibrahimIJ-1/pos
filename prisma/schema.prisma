@@ -72,22 +72,22 @@ model UserPermission {
 }
 
 model Product {
-  id                    String                  @id @default(uuid())
-  name                  String
-  description           String                  @db.Text
-  sku                   String                  @unique
-  barcode               String?                 @unique
-  category              String
-  image_url             String?                 @map("image_url") @db.Text
-  created_at            DateTime                @default(now()) @map("created_at")
-  updated_at            DateTime                @updatedAt @map("updated_at")
-  saleItems             SaleItem[]
-  discountProducts      Discount[]              @relation("DiscountProducts")
-  cartItem              CartItem[]
+  id               String          @id @default(uuid())
+  name             String
+  description      String          @db.Text
+  sku              String          @unique
+  barcode          String?         @unique
+  category         String
+  image_url        String?         @map("image_url") @db.Text
+  created_at       DateTime        @default(now()) @map("created_at")
+  updated_at       DateTime        @updatedAt @map("updated_at")
+  saleItems        SaleItem[]
+  discountProducts Discount[]      @relation("DiscountProducts")
+  cartItem         CartItem[]
   // Optional: if you frequently filter active products
   // @@index([active])
-  BranchProduct         BranchProduct[]
-  RefundItem            RefundItem[]            @relation("ProductRefunds")
+  BranchProduct    BranchProduct[]
+  RefundItem       RefundItem[]    @relation("ProductRefunds")
 
   @@index([category])
   @@map("products")
@@ -145,7 +145,7 @@ model Sale {
 
 model SaleItem {
   id               String       @id @default(uuid())
-  refundedQuantity Int          @default(0)
+  refundedQuantity Int          @default(0) @map("refunded_quantity")
   saleId           String       @map("sale_id")
   sale             Sale         @relation(fields: [saleId], references: [id], onDelete: Cascade)
   productId        String       @map("product_id")
@@ -294,23 +294,23 @@ model CartItem {
 }
 
 model Branch {
-  id                    String                  @id @default(uuid())
-  name                  String
-  address               String?
-  isActive              Boolean                 @default(true) @map("is_active")
-  isWarehouse           Boolean                 @default(false) @map("is_warehouse")
-  created_at            DateTime                @default(now()) @map("created_at")
-  updated_at            DateTime                @updatedAt @map("updated_at")
-  Register              Register[]
-  RegisterTransaction   RegisterTransaction[]
-  Sale                  Sale[]
-  BranchProduct         BranchProduct[]
-  discountBranches      Discount[]              @relation("DiscountBranches")
-  Cart                  Cart[]
-  mainBranchUsers       User[]                  @relation("MainBranch")
-  users                 User[]                  @relation("UserBranches")
-  Refund                Refund[]
-  Shelf                 Shelf[]
+  id                  String                @id @default(uuid())
+  name                String
+  address             String?
+  isActive            Boolean               @default(true) @map("is_active")
+  isWarehouse         Boolean               @default(false) @map("is_warehouse")
+  created_at          DateTime              @default(now()) @map("created_at")
+  updated_at          DateTime              @updatedAt @map("updated_at")
+  Register            Register[]
+  RegisterTransaction RegisterTransaction[]
+  Sale                Sale[]
+  BranchProduct       BranchProduct[]
+  discountBranches    Discount[]            @relation("DiscountBranches")
+  Cart                Cart[]
+  mainBranchUsers     User[]                @relation("MainBranch")
+  users               User[]                @relation("UserBranches")
+  Refund              Refund[]
+  Shelf               Shelf[]
 
   @@map("branches")
 }
@@ -401,13 +401,13 @@ model RefundDiscount {
 }
 
 model Shelf {
-  id                    String                  @id @default(uuid())
-  name                  String                  @map("name")
-  location              String?                 @map("location")
-  warehouse             Branch                  @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
-  warehouseId           String                  @map("warehouse_id")
-  created_at            DateTime                @default(now()) @map("created_at")
-  updated_at            DateTime                @updatedAt @map("updated_at")
+  id          String   @id @default(uuid())
+  name        String   @map("name")
+  location    String?  @map("location")
+  warehouse   Branch   @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  warehouseId String   @map("warehouse_id")
+  created_at  DateTime @default(now()) @map("created_at")
+  updated_at  DateTime @updatedAt @map("updated_at")
 
   @@map("shelves")
 }
