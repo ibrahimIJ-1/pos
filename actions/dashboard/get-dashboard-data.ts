@@ -105,32 +105,32 @@ export async function getDashboardData(
     }),
 
     // Monthly Revenue
-    // prisma.$queryRaw<{ month: string; revenue: number }[]>`
-    //     SELECT DATE_FORMAT(created_at, '%Y-%m') as month,
-    //      COALESCE(SUM(CASE WHEN type = ${TransactionType.SALE}   THEN amount ELSE 0 END),0)
-    //     - COALESCE(SUM(CASE WHEN type = ${TransactionType.REFUND} THEN amount ELSE 0 END),0)
-    //         AS revenue
-    //     FROM register_transactions
-    //     WHERE branch_id = ${userBranchId}
-    //       AND created_at >= ${startDate}
-    //       AND type in (${TransactionType.SALE},${TransactionType.REFUND})
-    //     GROUP BY DATE_FORMAT(created_at, '%Y-%m')
-    //     ORDER BY month ASC
-    // `,
-
     prisma.$queryRaw<{ month: string; revenue: number }[]>`
-    SELECT 
-        TO_CHAR(created_at, 'YYYY-MM') AS month,
-        COALESCE(SUM(CASE WHEN type = ${TransactionType.SALE}::"TransactionType"   THEN amount ELSE 0 END), 0)
-      - COALESCE(SUM(CASE WHEN type = ${TransactionType.REFUND}::"TransactionType" THEN amount ELSE 0 END), 0)
-        AS revenue
-    FROM register_transactions
-    WHERE branch_id = ${userBranchId}
-      AND created_at >= ${startDate}
-      AND type IN (${TransactionType.SALE}::"TransactionType", ${TransactionType.REFUND}::"TransactionType")
-    GROUP BY TO_CHAR(created_at, 'YYYY-MM')
-    ORDER BY month ASC
-`,
+        SELECT DATE_FORMAT(created_at, '%Y-%m') as month,
+         COALESCE(SUM(CASE WHEN type = ${TransactionType.SALE}   THEN amount ELSE 0 END),0)
+        - COALESCE(SUM(CASE WHEN type = ${TransactionType.REFUND} THEN amount ELSE 0 END),0)
+            AS revenue
+        FROM register_transactions
+        WHERE branch_id = ${userBranchId}
+          AND created_at >= ${startDate}
+          AND type in (${TransactionType.SALE},${TransactionType.REFUND})
+        GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+        ORDER BY month ASC
+    `,
+
+//     prisma.$queryRaw<{ month: string; revenue: number }[]>`
+//     SELECT 
+//         TO_CHAR(created_at, 'YYYY-MM') AS month,
+//         COALESCE(SUM(CASE WHEN type = ${TransactionType.SALE}::"TransactionType"   THEN amount ELSE 0 END), 0)
+//       - COALESCE(SUM(CASE WHEN type = ${TransactionType.REFUND}::"TransactionType" THEN amount ELSE 0 END), 0)
+//         AS revenue
+//     FROM register_transactions
+//     WHERE branch_id = ${userBranchId}
+//       AND created_at >= ${startDate}
+//       AND type IN (${TransactionType.SALE}::"TransactionType", ${TransactionType.REFUND}::"TransactionType")
+//     GROUP BY TO_CHAR(created_at, 'YYYY-MM')
+//     ORDER BY month ASC
+// `,
 
     // Sales by Category
     prisma.$queryRaw<{ id: string; value: number }[]>`

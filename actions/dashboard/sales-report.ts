@@ -125,29 +125,30 @@ export async function getSalesReport(fromDate: Date, toDate: Date) {
           sales: number;
           transactions: number;
         }>
-      >//   SELECT // `
-      //     DATE_FORMAT(created_at, '%h%p') as hour,
-      //     HOUR(created_at) as hour_24,
-      //     SUM(total_amount) as sales,
-      //     COUNT(id) as transactions
-      //   FROM sales
-      //   WHERE branch_id = ${branchId}
-      //     AND created_at BETWEEN ${fromDate} AND ${toDate}
-      //   GROUP BY hour_24, hour
-      //   ORDER BY hour_24
-      // `,
-      `
-      SELECT
-    TO_CHAR(created_at, 'HH12AM') AS hour,
-    EXTRACT(HOUR FROM created_at) AS hour_24,
-    SUM(total_amount) AS sales,
-    COUNT(id) AS transactions
-  FROM sales
-  WHERE branch_id = ${branchId}
-    AND created_at BETWEEN ${fromDate} AND ${toDate}
-  GROUP BY hour_24, hour
-  ORDER BY hour_24;
+      >`
+         SELECT
+          DATE_FORMAT(created_at, '%h%p') as hour,
+          HOUR(created_at) as hour_24,
+          SUM(total_amount) as sales,
+          COUNT(id) as transactions
+        FROM sales
+        WHERE branch_id = ${branchId}
+          AND created_at BETWEEN ${fromDate} AND ${toDate}
+        GROUP BY hour_24, hour
+        ORDER BY hour_24
       `,
+      //     `
+      //     SELECT
+      //   TO_CHAR(created_at, 'HH12AM') AS hour,
+      //   EXTRACT(HOUR FROM created_at) AS hour_24,
+      //   SUM(total_amount) AS sales,
+      //   COUNT(id) AS transactions
+      // FROM sales
+      // WHERE branch_id = ${branchId}
+      //   AND created_at BETWEEN ${fromDate} AND ${toDate}
+      // GROUP BY hour_24, hour
+      // ORDER BY hour_24;
+      //     `,
       // Sales by employee
       prisma.sale.groupBy({
         by: ["cashierId"],
