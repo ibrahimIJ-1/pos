@@ -6,54 +6,55 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 export const useCustomers = () => {
-    return useQuery({
-      queryKey: ["customers"],
-      queryFn: getAllCustomers,
-    });
-  };
-  
-  export const useCustomer = (id: string) => {
-    return useQuery({
-      queryKey: ["customers", id],
-      queryFn: () => getCustomerById(id),
-      enabled: !!id,
-    });
-  };
-  
-  export const useCreateCustomer = () => {
-    const queryClient = useQueryClient();
-  
-    return useMutation({
-      mutationFn: createNewCustomer,
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["customers"] });
-        toast.success("Customer created successfully");
-      },
-      onError: (error) => {
-        toast.error(
-          `Failed to create customer: ${
-            error instanceof Error ? error.message : "Unknown error"
-          }`
-        );
-      },
-    });
-  };
-  
-  export const useUpdateCustomer = () => {
-    const queryClient = useQueryClient();
-  
-    return useMutation({
-      mutationFn: updateCustomer,
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["customers"] });
-        toast.success("Customer updated successfully");
-      },
-      onError: (error) => {
-        toast.error(
-          `Failed to update customer: ${
-            error instanceof Error ? error.message : "Unknown error"
-          }`
-        );
-      },
-    });
-  };
+  return useQuery({
+    queryKey: ["customers"],
+    queryFn: getAllCustomers,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+};
+
+export const useCustomer = (id: string) => {
+  return useQuery({
+    queryKey: ["customers", id],
+    queryFn: () => getCustomerById(id),
+    enabled: !!id,
+  });
+};
+
+export const useCreateCustomer = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createNewCustomer,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+      toast.success("Customer created successfully");
+    },
+    onError: (error) => {
+      toast.error(
+        `Failed to create customer: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
+      );
+    },
+  });
+};
+
+export const useUpdateCustomer = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateCustomer,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+      toast.success("Customer updated successfully");
+    },
+    onError: (error) => {
+      toast.error(
+        `Failed to update customer: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
+      );
+    },
+  });
+};

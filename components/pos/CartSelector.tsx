@@ -27,7 +27,7 @@ function CartSelector() {
     handleRemoveCart,
     handleAddCart,
     clearCart,
-    trans
+    trans,
   } = usePOS();
   return (
     <div className="flex gap-1 items-center">
@@ -51,7 +51,10 @@ function CartSelector() {
           </div>
 
           {multiCart && (
-            <ScrollArea className="max-h-64" dir={trans("dir") as "rtl" | "ltr"}>
+            <ScrollArea
+              className="max-h-64"
+              dir={trans("dir") as "rtl" | "ltr"}
+            >
               <div className="p-1">
                 {Object.keys(multiCart.carts).map((cartId) => (
                   <div
@@ -72,7 +75,8 @@ function CartSelector() {
                           {trans("Cart")} #{getShortCartId(cartId)}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          {getCartItemCount(cartId)} {trans("items")} | {storeCurrency}
+                          {getCartItemCount(cartId)} {trans("items")} |{" "}
+                          {storeCurrency}
                           {/* {multiCart?.carts[cartId]?.items.toFixed(
                                           2
                                         )} */}
@@ -129,7 +133,6 @@ function CartSelector() {
         disabled={(cart?.items as CartItem[])?.length === 0}
       >
         <Trash2 className="h-4 w-4 mr-1" />
-        {trans("")}
         {/* {trans("Clear")} */}
       </Button>
     </div>

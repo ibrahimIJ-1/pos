@@ -8,7 +8,18 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "./ThemeProvider";
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            // optimized for data-heavy apps
+            staleTime: 60 * 1000, // 1 minute
+            refetchOnWindowFocus: false,
+          },
+        },
+      }),
+  );
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>

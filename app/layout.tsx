@@ -6,6 +6,7 @@ import { Toaster } from "sonner";
 import { getMessages, getLocale } from "next-intl/server";
 import LocaleProvider from "@/providers/locale-provider";
 import { NextIntlClientProvider } from "next-intl";
+import NetworkStatus from "@/components/NetworkStatus";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,6 +46,7 @@ export default async function RootLayout({
           <AppProviders>
             <div className="dark:bg-black">{children}</div>
           </AppProviders>
+          <NetworkStatus />
           <Toaster richColors />
         </NextIntlClientProvider>
       </body>

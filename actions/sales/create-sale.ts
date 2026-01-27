@@ -22,7 +22,7 @@ export const createNewSale = async (
     registerId,
     cashierId,
   }: Sale,
-  items: SaleItem[]
+  items: SaleItem[],
 ) => {
   try {
     await checkUserPermissions([...rolePermissions[UserRole.CASHIER]]);
@@ -107,7 +107,7 @@ export const createNewSale = async (
         },
       });
 
-      items.forEach(async (item) => {
+      for (const item of items) {
         await prisma.branchProduct.update({
           where: {
             productId_branchId: {
@@ -121,7 +121,7 @@ export const createNewSale = async (
             },
           },
         });
-      });
+      }
 
       // If this sale is linked to a register, add a transaction record
       if (user.macAddress) {
@@ -141,12 +141,12 @@ export const createNewSale = async (
       }
       return sale;
     });
-    const storeName = await getSettingByName("storeName",true);
+    const storeName = await getSettingByName("storeName", true);
     const storeLogo = await getSettingByName("logo", true);
     return {
       ...(decimalToNumber(result) as Object),
-      storeName: storeName ? storeName.value ?? "Flash Pro" : "Flash Pro",
-      logo: storeLogo ? storeLogo.value ?? null : null,
+      storeName: storeName ? (storeName.value ?? "Flash Pro") : "Flash Pro",
+      logo: storeLogo ? (storeLogo.value ?? null) : null,
     };
   } catch (error) {
     console.error("Error creating sale:", error);

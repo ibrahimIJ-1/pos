@@ -14,11 +14,11 @@ import React, {
 } from "react";
 import { UseMutationResult, useQueryClient } from "@tanstack/react-query";
 import {
-  useCart,
-  useCartOperations,
-  useMultiCart,
-  useMultiCartOperations,
-} from "@/lib/pos-service";
+  useLocalCart,
+  useLocalCartOperations,
+  useLocalCreateSale,
+} from "@/lib/local-pos-service";
+import { useMultiCart, useMultiCartOperations } from "@/lib/pos-service";
 import {
   Cart,
   CartItem,
@@ -37,20 +37,25 @@ import { getPOSSettings, getStoreSettings } from "@/lib/settings-service";
 import { useCustomers } from "@/lib/customers-service";
 import { useCreateSale } from "@/lib/sales-service";
 import { usePOSProducts } from "@/lib/products-service";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db, OfflineProduct } from "@/lib/db";
 import { useTranslations } from "next-intl";
+import { ProductPOS } from "@/lib/product-branch-mapper";
+import { syncPush } from "@/lib/sync-engine";
 
 export const POSContext = createContext<POSContextType | undefined>(undefined);
 
 export function POSProvider({ children }: { children: ReactNode }) {
   const trans = useTranslations();
   const queryClient = useQueryClient();
-  const { data: cart } = useCart();
-  const cartOps = useCartOperations();
+  const { data: cart } = useLocalCart() as { data: any };
+  const cartOps = useLocalCartOperations();
   const { data: customers = [] } = useCustomers();
-  const createSaleMutation = useCreateSale();
+  const createSaleMutation = useLocalCreateSale();
   const { data: multiCart } = useMultiCart();
   const multiCartOps = useMultiCartOperations();
-  const { data: products = [] } = usePOSProducts();
+  const products = (useLiveQuery(() => db.products.toArray()) ||
+    []) as unknown as ProductPOS[];
 
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
   const [lastCompletedSale, setLastCompletedSale] = useState<any>(null);
@@ -114,33 +119,30 @@ export function POSProvider({ children }: { children: ReactNode }) {
   const handleCompleteSale = () => {
     const saleDate = new Date().toISOString();
 
-    const saleItems: SaleItem[] = (cart?.items as CartItem[]).map(
-      (item: CartItem) =>
-        ({
-          id: `item-${Date.now()}-${item.productId}`,
-          saleId: "", // This will be assigned by the backend
-          productId: item.productId,
-          productName: item.name,
-          quantity: item.quantity,
-          unitPrice: item.price,
-          discountAmount: cart?.discountTotal
-            ? cart.discountTotal / (cart?.items as CartItem[]).length
-            : 0, // Simple proration of discount
-          taxAmount:
-            (item.price ? Number(item.price) : 0) *
-            (item.quantity ?? 0) *
-            (item.taxRate ? Number(item.taxRate) : 0),
-          subtotal: (item.price ? Number(item.price) : 0) * item.quantity,
-        } as unknown as SaleItem)
-    );
+    const saleItems: any[] = (cart?.items as any[]).map((item: any) => ({
+      id: `item-${Date.now()}-${item.productId}`,
+      saleId: "", // This will be assigned by the backend
+      productId: item.productId,
+      productName: item.name,
+      quantity: item.quantity,
+      unitPrice: item.price,
+      discountAmount: cart?.discountAmount
+        ? cart.discountAmount / (cart?.items as any[]).length
+        : 0, // Simple proration of discount
+      taxAmount:
+        (item.price ? Number(item.price) : 0) *
+        (item.quantity ?? 0) *
+        (item.taxRate ? Number(item.taxRate) : 0),
+      subtotal: (item.price ? Number(item.price) : 0) * item.quantity,
+    }));
 
     const newSale: any = {
       //   id: invoiceId,
       date: saleDate,
-      customerId: cart ? cart.customer?.id ?? null : null,
+      customerId: cart ? (cart.customerId ?? null) : null,
       subtotal: cart ? cart.subtotal : 0,
       taxTotal: cart ? cart.taxTotal : 0,
-      discountTotal: cart ? cart.discountTotal : 0,
+      discountTotal: cart ? cart.discountAmount : 0, // Mapped from discountAmount
       totalAmount: cart ? cart.totalAmount : 0,
       paymentMethod: paymentMethod,
       paymentStatus: "paid" as const,
@@ -152,13 +154,26 @@ export function POSProvider({ children }: { children: ReactNode }) {
     createSaleMutation.mutate(
       { newSale, items: saleItems },
       {
-        onSuccess: (data: any) => {
+        onSuccess: async (data: any) => {
           setIsPaymentDialogOpen(false);
           setLastCompletedSale({ ...newSale, ...data });
           setIsInvoiceOpen(true);
+          // Save sale to offline DB for background sync (or immediate if online)
+          // For now, let's assume createSaleMutation handles the API call.
+          // In simpler Offline First, we should probably save to `db.sales` first then sync.
+          // But to minimize changes, we can keep the mutation if the mutation itself is offline-aware?
+          // Actually, useCreateSale calls server action. We need to intercept this or change `createSaleMutation`.
+
+          // Let's rely on the sync-engine logic in `createSaleMutation` REPLACEMENT later?
+          // No, let's use the local db clearing here.
           if (cart) cartOps.clearCart.mutate({ cartId: cart.id });
+
+          // Trigger sync immediately
+          if (navigator.onLine) {
+            syncPush();
+          }
         },
-      }
+      },
     );
   };
 
@@ -179,7 +194,7 @@ export function POSProvider({ children }: { children: ReactNode }) {
     if (!multiCart || !multiCart.carts[cartId]) return 0;
     return (multiCart.carts[cartId] as any).items.reduce(
       (sum: number, item: CartItem) => sum + item.quantity,
-      0
+      0,
     );
   };
 
@@ -231,10 +246,10 @@ export function POSProvider({ children }: { children: ReactNode }) {
           { product, cartId: cart.id },
           {
             onSettled: (data: any) => {},
-          }
+          },
         );
     },
-    [cart, cartOps.addItem] // Dependencies for useCallback
+    [cart, cartOps.addItem], // Dependencies for useCallback
   );
 
   useEffect(() => {
@@ -401,7 +416,7 @@ export function POSProvider({ children }: { children: ReactNode }) {
       lastResult,
       lastFormat,
       handleCameraScanned,
-    ]
+    ],
   );
 
   return (

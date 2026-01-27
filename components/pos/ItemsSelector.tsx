@@ -19,8 +19,18 @@ function ItemsSelector() {
     inputRef,
     showImage,
     trans,
-    setOpenScanner
+    setOpenScanner,
+    cart, // Add cart to usePOS destructuring
   } = usePOS();
+
+  const getAvailableStock = (product: any) => {
+    if (!cart || !cart.items) return product.stock;
+    const cartItem = cart.items.find(
+      (item: any) => item.productId === product.id,
+    );
+    const qtyInCart = cartItem ? cartItem.quantity : 0;
+    return product.stock - qtyInCart;
+  };
 
   const { storeCurrency } = useSystem();
 
@@ -28,7 +38,7 @@ function ItemsSelector() {
     (product) =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (product.barcode && product.barcode.includes(searchTerm))
+      (product.barcode && product.barcode.includes(searchTerm)),
   );
 
   return (
@@ -55,7 +65,7 @@ function ItemsSelector() {
         <Button
           variant="outline"
           className="neon-border h-11 w-full sm:w-auto px-4"
-          onClick={()=>setOpenScanner(true)}
+          onClick={() => setOpenScanner(true)}
         >
           <Camera className="h-5 w-5 sm:mr-2" />
           <span className="hidden sm:inline">{trans("Scanner")}</span>
@@ -65,48 +75,50 @@ function ItemsSelector() {
       {/* Products Grid */}
       <ScrollArea className="flex-1 max-sm:hidden">
         <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(160px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] xl:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2 p-1">
-          {filteredProducts.map((product) => (
-            <Card
-              key={product.id}
-              className={cn(
-                "group relative overflow-hidden transition-all hover:shadow-md cursor-pointer neon-card neon-border",
-                showImage ? "aspect-[0.75]" : ""
-              )}
-              onClick={() => addItemToCart(product)}
-            >
-              {/* Image Container */}
-              {showImage === true && (
-                <div className="aspect-square relative bg-muted/40">
-                  <img
-                    src={product.image_url || "/placeholder.svg"}
-                    alt={product.name}
-                    className="object-cover w-full h-full transition-transform group-hover:scale-105"
-                  />
-                  {product.stock <= (product.low_stock_threshold || 0) && (
-                    <div className="absolute top-1 right-1 bg-destructive/90 text-destructive-foreground text-[0.6rem] px-2 py-1 rounded-sm sm:text-xs sm:top-2 sm:right-2">
-                      {trans("Low Stock")}
-                    </div>
-                  )}
-                </div>
-              )}
+          {filteredProducts.map((product) => {
+            const availableStock = getAvailableStock(product);
+            return (
+              <Card
+                key={product.id}
+                className={cn(
+                  "group relative overflow-hidden transition-all hover:shadow-md cursor-pointer neon-card neon-border",
+                  showImage ? "aspect-[0.75]" : "",
+                )}
+                onClick={() => addItemToCart(product)}
+              >
+                {/* Image Container */}
+                {showImage === true && (
+                  <div className="aspect-square relative bg-muted/40">
+                    <img
+                      src={product.image_url || "/placeholder.svg"}
+                      alt={product.name}
+                      className="object-cover w-full h-full transition-transform group-hover:scale-105"
+                    />
+                    {availableStock <= (product.low_stock_threshold || 0) && (
+                      <div className="bg-destructive/90 text-destructive-foreground absolute right-1 top-1 rounded-sm px-2 py-1 text-[0.6rem] sm:right-2 sm:top-2 sm:text-xs">
+                        {trans("Low Stock")}
+                      </div>
+                    )}
+                  </div>
+                )}
 
-              {/* Product Info */}
-              <CardContent className="p-2 space-y-1 sm:p-3 sm:space-y-2">
-                <h3 className="font-medium text-xs sm:text-sm leading-tight line-clamp-2">
-                  {product.name}
-                </h3>
-                <div className="flex justify-between items-center gap-2">
-                  <span className="text-sm sm:text-base font-bold truncate">
-                    {storeCurrency}{" "}
-                    {product.price.toFixed(2)}
-                  </span>
-                  <span className="text-xs text-muted-foreground shrink-0">
-                    {product.stock} {trans("in stock")}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                {/* Product Info */}
+                <CardContent className="space-y-1 p-2 sm:p-3 sm:space-y-2">
+                  <h3 className="line-clamp-2 text-xs font-medium leading-tight sm:text-sm">
+                    {product.name}
+                  </h3>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate text-sm font-bold sm:text-base">
+                      {storeCurrency} {product.price.toFixed(2)}
+                    </span>
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {availableStock} {trans("in stock")}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
           {filteredProducts.length === 0 && (
             <div className="col-span-full flex flex-col items-center justify-center h-40 text-muted-foreground">
               <Search className="h-10 w-10 mb-2" />

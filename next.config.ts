@@ -13,5 +13,17 @@ const nextConfig: NextConfig = {
 };
 const withNextIntl = createNextIntlPlugin();
 
-export default withNextIntl(nextConfig);
+const withPWA = require("@ducanh2912/next-pwa").default({
+  dest: "public",
+  cacheOnFrontEndNav: true,
+  aggressiveFrontEndNavCaching: true,
+  reloadOnOnline: true,
+  swcMinify: true,
+  disable: process.env.NODE_ENV === "development",
+  workboxOptions: {
+    disableDevLogs: true,
+  },
+});
+
+export default withPWA(withNextIntl(nextConfig));
 nextConfig;

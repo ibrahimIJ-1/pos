@@ -13,6 +13,7 @@ export const useProducts = () => {
   return useQuery({
     queryKey: ["products"],
     queryFn: getAllProducts,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
 
@@ -33,6 +34,7 @@ export const usePOSProducts = () => {
   return useQuery({
     queryKey: ["pos-products"],
     queryFn: getAllPOSProducts,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
 
@@ -52,7 +54,7 @@ export const useCreateProduct = () => {
       toast.error(
         `Failed to create product: ${
           error instanceof Error ? error.message : "Unknown error"
-        }`
+        }`,
       );
     },
   });
@@ -112,7 +114,7 @@ export const useUpdateProduct = () => {
       toast.error(
         `Failed to update product: ${
           error instanceof Error ? error.message : "Unknown error"
-        }`
+        }`,
       );
     },
   });
@@ -131,7 +133,7 @@ export const useDeleteProduct = () => {
       toast.error(
         `Failed to delete product: ${
           error instanceof Error ? error.message : "Unknown error"
-        }`
+        }`,
       );
     },
   });
@@ -145,7 +147,7 @@ export function useDownloadBarcodePdf() {
       const a = document.createElement("a");
       a.href = s3Url;
       a.download = "barcodes.pdf";
-      a.target = "_blank"
+      a.target = "_blank";
       a.click();
     },
   });
