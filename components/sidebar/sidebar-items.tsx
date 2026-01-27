@@ -30,6 +30,7 @@ export const SidebarAdminItems: SidebarItemType[] = [
     neededPermissions: [],
   },
   {
+    icon: <Package className="h-4 w-4" />,
     label: "Products",
     href: "/admin/products",
     neededPermissions: rolePermissions[UserRole.MANAGER],
