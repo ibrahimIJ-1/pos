@@ -86,11 +86,28 @@ model Product {
   cartItem         CartItem[]
   // Optional: if you frequently filter active products
   // @@index([active])
+  categoryId       String?         @map("category_id")
+  categoryRel      Category?       @relation(fields: [categoryId], references: [id]) /* Named categoryRel to avoid conflict with existing string field */
+  
   BranchProduct    BranchProduct[]
   RefundItem       RefundItem[]    @relation("ProductRefunds")
 
   @@index([category])
+  @@index([categoryId])
   @@map("products")
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  imageUrl  String?   @map("image_url") @db.Text
+  color     String?
+  sortOrder Int       @default(0) @map("sort_order")
+  products  Product[]
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@map("categories")
 }
 
 model Customer {

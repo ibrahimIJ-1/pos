@@ -30,6 +30,10 @@ import { useCreateProduct, useUpdateProduct } from "@/lib/products-service";
 import { useTranslations } from "next-intl";
 import { useSystem } from "@/providers/SystemProvider";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { getAllCategories } from "@/actions/categories/get-all-categories";
+import { createCategory } from "@/actions/categories/create-category";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Check, X } from "lucide-react";
 
 interface ProductFormProps {
   product?: Product & {
@@ -60,7 +64,7 @@ export function ProductForm({
       .optional()
       .refine(
         (file) => file?.size ?? 0 < 0.15 * 1024 * 1024,
-        t("File size must be under 150KB")
+        t("File size must be under 150KB"),
       ),
     branches: z
       .array(
@@ -81,15 +85,42 @@ export function ProductForm({
             .int()
             .min(0, t("Threshold cannot be negative") + "."),
           isActive: z.boolean().default(true),
-        })
+        }),
       )
       .min(1, t("At least one branch product is required") + ""),
   });
 
   type ProductFormValues = z.infer<typeof productFormSchema>;
   const [imagePreview, setImagePreview] = useState<string | null>(
-    product?.image_url || null
+    product?.image_url || null,
   );
+
+  // Dynamic Categories Logic
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const queryClient = useQueryClient();
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: getAllCategories,
+  });
+
+  const createCategoryMutation = useMutation({
+    mutationFn: createCategory,
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      setIsCreatingCategory(false);
+      setNewCategoryName("");
+      if (data.success) {
+        form.setValue("category", data.data.name);
+      }
+    },
+  });
+
+  const handleCreateCategory = () => {
+    if (!newCategoryName.trim()) return;
+    createCategoryMutation.mutate({ name: newCategoryName });
+  };
 
   const createProductMutation = useCreateProduct();
   const updateProductMutation = useUpdateProduct();
@@ -161,26 +192,12 @@ export function ProductForm({
     } else if (mode === "edit" && product) {
       updateProductMutation.mutate(
         { id: product.id, ...formattedData },
-        { onSuccess }
+        { onSuccess },
       );
     }
   };
 
-  const categoryOptions = [
-    "Beverages",
-    "Bakery",
-    "Meat & Seafood",
-    "Produce",
-    "Dairy & Alternatives",
-    "Snacks",
-    "Canned Goods",
-    "Frozen Foods",
-    "Electronics",
-    "Clothing",
-    "Health & Beauty",
-    "Home & Kitchen",
-    "Other",
-  ];
+  // Removed hardcoded categoryOptions
 
   return (
     <Form {...{ control, handleSubmit, formState, watch, ...form }}>
@@ -313,12 +330,12 @@ export function ProductForm({
             {fields.map((field, index) => {
               const currentBranchId = watch(`branches.${index}.branchId`);
               const selectedBranches = watch("branches").map(
-                (bp) => bp.branchId
+                (bp) => bp.branchId,
               );
               const availableBranches = branches.filter(
                 (branch) =>
                   branch.id === currentBranchId ||
-                  !selectedBranches.includes(branch.id)
+                  !selectedBranches.includes(branch.id),
               );
 
               return (
@@ -499,24 +516,67 @@ export function ProductForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("Category")}</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  dir={t("dir") as "rtl" | "ltr"}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder={t("Select category")} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {categoryOptions.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-2">
+                  {isCreatingCategory ? (
+                    <div className="flex items-center gap-2 flex-1">
+                      <Input
+                        value={newCategoryName}
+                        onChange={(e) => setNewCategoryName(e.target.value)}
+                        placeholder={t("New Category Name")}
+                        className="h-10"
+                      />
+                      <Button
+                        type="button"
+                        size="icon"
+                        onClick={handleCreateCategory}
+                        disabled={createCategoryMutation.isPending}
+                        className="h-10 w-10 shrink-0"
+                      >
+                        <Check className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setIsCreatingCategory(false)}
+                        className="h-10 w-10 shrink-0"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 flex-1">
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        dir={t("dir") as "rtl" | "ltr"}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={t("Select category")} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {categories.map((category: any) => (
+                            <SelectItem key={category.id} value={category.name}>
+                              {category.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setIsCreatingCategory(true)}
+                        className="h-10 w-10 shrink-0"
+                        title={t("Create New Category")}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
                 <FormMessage />
               </FormItem>
             )}

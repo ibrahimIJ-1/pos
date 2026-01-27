@@ -1,5 +1,6 @@
 import { useCartOperations, useMultiCartOperations } from "@/lib/pos-service";
 import { ProductPOS } from "@/lib/product-branch-mapper";
+import { OfflineCategory } from "@/lib/db";
 import {
   Cart,
   CartItem,
@@ -70,4 +71,5 @@ export interface POSContextType {
   lastResult: string;
   lastFormat: string;
   handleCameraScanned: (value: string, format: string) => void;
+  categories: OfflineCategory[];
 }

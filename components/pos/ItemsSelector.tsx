@@ -21,7 +21,12 @@ function ItemsSelector() {
     trans,
     setOpenScanner,
     cart, // Add cart to usePOS destructuring
+    categories,
   } = usePOS();
+
+  const [selectedCategory, setSelectedCategory] = React.useState<string | null>(
+    null,
+  );
 
   const getAvailableStock = (product: any) => {
     if (!cart || !cart.items) return product.stock;
@@ -34,12 +39,18 @@ function ItemsSelector() {
 
   const { storeCurrency } = useSystem();
 
-  const filteredProducts = products.filter(
-    (product) =>
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch =
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (product.barcode && product.barcode.includes(searchTerm)),
-  );
+      (product.barcode && product.barcode.includes(searchTerm));
+
+    const matchesCategory = selectedCategory
+      ? product.category === selectedCategory
+      : true;
+
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div className="lg:col-span-2 space-y-4 h-[-webkit-fill-available] flex flex-col">
@@ -71,6 +82,33 @@ function ItemsSelector() {
           <span className="hidden sm:inline">{trans("Scanner")}</span>
         </Button>
       </div>
+
+      {/* Category Slider */}
+      <ScrollArea className="w-full whitespace-nowrap pb-2">
+        <div className="flex w-max space-x-2 p-1">
+          <Button
+            variant={selectedCategory === null ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSelectedCategory(null)}
+            className="rounded-full neon-border"
+          >
+            {trans("All")}
+          </Button>
+          {categories.map((category) => (
+            <Button
+              key={category.id}
+              variant={
+                selectedCategory === category.name ? "default" : "outline"
+              }
+              size="sm"
+              onClick={() => setSelectedCategory(category.name)}
+              className="rounded-full neon-border"
+            >
+              {category.name}
+            </Button>
+          ))}
+        </div>
+      </ScrollArea>
 
       {/* Products Grid */}
       <ScrollArea className="flex-1 max-sm:hidden">

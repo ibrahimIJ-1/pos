@@ -1,6 +1,7 @@
 import { db, OfflineSale, OfflineProduct, OfflineCustomer } from "./db";
 import { getAllPOSProducts } from "@/actions/products/get-all-pos-products";
 import { getAllCustomers } from "@/actions/customers/get-all-customers";
+import { getAllCategories } from "@/actions/categories/get-all-categories";
 import { syncSale } from "@/actions/sales/sync-sale";
 import { toast } from "sonner";
 import { Sale, SaleItem } from "@prisma/client";
@@ -8,50 +9,73 @@ import { Sale, SaleItem } from "@prisma/client";
 export const syncPull = async () => {
   try {
     console.log("Starting Sync Pull...");
-    const [productsResult, customersResult] = await Promise.all([
-      getAllPOSProducts(),
-      getAllCustomers(),
-    ]);
+    const [productsResult, customersResult, categoriesResult] =
+      await Promise.all([
+        getAllPOSProducts(),
+        getAllCustomers(),
+        getAllCategories(),
+      ]);
 
-    await db.transaction("rw", db.products, db.customers, async () => {
-      // Sync Products
-      if (productsResult) {
-        // Transform prisma product to offline product if needed or just store raw if compatible
-        // We'll map to ensure type safety based on our Dexie schema
-        const products: OfflineProduct[] = productsResult.map((p: any) => ({
-          id: p.id,
-          name: p.name,
-          description: p.description,
-          sku: p.sku,
-          barcode: p.barcode,
-          category: p.category,
-          image_url: p.image_url,
-          price: typeof p.price === "object" ? p.price.toNumber() : p.price,
-          cost: typeof p.cost === "object" ? p.cost.toNumber() : p.cost,
-          taxRate:
-            typeof p.taxRate === "object" ? p.taxRate.toNumber() : p.taxRate,
-          stock: p.stock,
-          low_stock_threshold: p.low_stock_threshold,
-          isActive: p.isActive ?? true,
-          created_at: p.created_at ? new Date(p.created_at) : new Date(),
-          updated_at: p.updated_at ? new Date(p.updated_at) : new Date(),
-        }));
-        await db.products.clear();
-        await db.products.bulkPut(products);
-      }
+    await db.transaction(
+      "rw",
+      db.products,
+      db.customers,
+      db.categories,
+      async () => {
+        // Sync Products
+        if (productsResult) {
+          // Transform prisma product to offline product if needed or just store raw if compatible
+          // We'll map to ensure type safety based on our Dexie schema
+          const products: OfflineProduct[] = productsResult.map((p: any) => ({
+            id: p.id,
+            name: p.name,
+            description: p.description,
+            sku: p.sku,
+            barcode: p.barcode,
+            category: p.category,
+            image_url: p.image_url,
+            price: typeof p.price === "object" ? p.price.toNumber() : p.price,
+            cost: typeof p.cost === "object" ? p.cost.toNumber() : p.cost,
+            taxRate:
+              typeof p.taxRate === "object" ? p.taxRate.toNumber() : p.taxRate,
+            stock: p.stock,
+            low_stock_threshold: p.low_stock_threshold,
+            isActive: p.isActive ?? true,
+            created_at: p.created_at ? new Date(p.created_at) : new Date(),
+            updated_at: p.updated_at ? new Date(p.updated_at) : new Date(),
+          }));
+          await db.products.clear();
+          await db.products.bulkPut(products);
+        }
 
-      // Sync Customers
-      if (customersResult) {
-        const customers: OfflineCustomer[] = customersResult.map((c: any) => ({
-          id: c.id,
-          name: c.name,
-          phone: c.phone,
-          email: c.email,
-        }));
-        await db.customers.clear();
-        await db.customers.bulkPut(customers);
-      }
-    });
+        // Sync Customers
+        if (customersResult) {
+          const customers: OfflineCustomer[] = customersResult.map(
+            (c: any) => ({
+              id: c.id,
+              name: c.name,
+              phone: c.phone,
+              email: c.email,
+            }),
+          );
+          await db.customers.clear();
+          await db.customers.bulkPut(customers);
+        }
+
+        // Sync Categories
+        if (categoriesResult) {
+          const categories = categoriesResult.map((c: any) => ({
+            id: c.id,
+            name: c.name,
+            image_url: c.imageUrl,
+            color: c.color,
+            sortOrder: c.sortOrder,
+          }));
+          await db.categories.clear();
+          await db.categories.bulkPut(categories);
+        }
+      },
+    );
     console.log("Sync Pull Completed");
     return true;
   } catch (error) {

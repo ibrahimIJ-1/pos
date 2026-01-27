@@ -56,6 +56,8 @@ export function POSProvider({ children }: { children: ReactNode }) {
   const multiCartOps = useMultiCartOperations();
   const products = (useLiveQuery(() => db.products.toArray()) ||
     []) as unknown as ProductPOS[];
+  const categories =
+    useLiveQuery(() => db.categories.orderBy("sortOrder").toArray()) || [];
 
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
   const [lastCompletedSale, setLastCompletedSale] = useState<any>(null);
@@ -365,6 +367,7 @@ export function POSProvider({ children }: { children: ReactNode }) {
       lastResult,
       lastFormat,
       handleCameraScanned,
+      categories,
     }),
     [
       isInvoiceOpen,
@@ -416,6 +419,7 @@ export function POSProvider({ children }: { children: ReactNode }) {
       lastResult,
       lastFormat,
       handleCameraScanned,
+      categories,
     ],
   );
 

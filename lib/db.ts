@@ -73,10 +73,19 @@ export interface LocalCartItem {
   updatedAt?: Date;
 }
 
+export interface OfflineCategory {
+  id: string;
+  name: string;
+  image_url?: string;
+  color?: string;
+  sortOrder: number;
+}
+
 export class POSDatabase extends Dexie {
   sales!: Table<OfflineSale>;
   products!: Table<OfflineProduct>;
   customers!: Table<OfflineCustomer>;
+  categories!: Table<OfflineCategory>;
   settings!: Table<any>;
   initialSync!: Table<OfflineStart>;
   cart!: Table<LocalCart>;
@@ -88,6 +97,7 @@ export class POSDatabase extends Dexie {
       sales: "++id, tempId, timestamp, synced, customerId",
       products: "id, name, sku, barcode, categoryId",
       customers: "id, name, phone, email",
+      categories: "id, name, sortOrder",
       settings: "key",
       initialSync: "++id",
       cart: "id, status", // id 1 for active cart
