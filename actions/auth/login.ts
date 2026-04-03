@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 export default async function login(
   email: string,
   password: string,
-  mac: string
+  mac: string,
 ) {
   try {
     if (!email || !password) {
@@ -31,6 +31,7 @@ export default async function login(
 
     // Compare the provided password with the stored hash
     const passwordMatch = await bcrypt.compare(password, user.password);
+    console.log("@PASSWORD MATCH", passwordMatch);
 
     if (!passwordMatch) {
       throw new Error("Invalid credentials");
@@ -64,7 +65,7 @@ export default async function login(
         currentBranchId: user.branchId,
       },
       process.env.AUTH_SECRET || "your-secret-key-here",
-      { expiresIn: "8h" }
+      { expiresIn: "8h" },
     );
 
     const permissions = await getAllUserPermissions({
