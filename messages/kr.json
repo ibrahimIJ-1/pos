@@ -802,7 +802,10 @@
     "Select Shelf": "Select Shelf",
     "Quantity": "Quantity",
     "warehouse": "warehouse",
-    "Stock In":"Stock In",
-    "Scan Code":"امسح الكود",
-    "Scanner":"Scanner"
+    "Stock In": "Stock In",
+    "Scan Code": "امسح الكود",
+    "Scanner": "Scanner",
+    "Create New Category": "دروستکردنی پۆلێکی نوێ",
+    "New Category Name": "ناوی پۆل",
+    "Category name required": "ناوی پۆل پێویستە"
 }
